@@ -1,16 +1,22 @@
 class DrawComponent {
-    constructor(canvasID, width, height) {
-        this.canvas = document.getElementById(canvasID);
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.ctx = this.canvas.getContext("2d");
+    constructor(simCanvasConf, infoCanvasConf) {
+        this.simCanvas = document.getElementById(simCanvasConf.id);
+        this.simCanvas.width = simCanvasConf.width;
+        this.simCanvas.height = simCanvasConf.height;
+        this.simCtx = this.simCanvas.getContext("2d");
+
+        this.infoCanvas = document.getElementById(infoCanvasConf.id);
+        this.infoCanvas.width = infoCanvasConf.width;
+        this.infoCanvas.height = infoCanvasConf.height;
+        this.infoCtx = this.infoCanvas.getContext("2d");
+        this.infoPoints = [];
     }
     drawBoard() {
-        console.log("TODO - drawBoard")
+        console.log("TODO - drawBoard");
     }
     clearDisplay() {
-        this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.simCtx.fillStyle = "rgb(50, 60, 70)";
+        this.simCtx.fillRect(0, 0, this.simCanvas.width, this.simCanvas.height);
     }
     sync(state) {
         this.clearDisplay();
@@ -24,11 +30,19 @@ class DrawComponent {
         });
     }
     drawOrganism(organism) {
-        this.ctx.beginPath();
-        this.ctx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
-        this.ctx.closePath();
-        this.ctx.fillStyle = organism.color;
-        this.ctx.fill();
+        this.simCtx.beginPath();
+        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
+        this.simCtx.closePath();
+        this.simCtx.fillStyle = organism.color;
+        this.simCtx.fill();
+    }
+    drawChart(organismGroups) {
+        let newPopSizeInfo = [];
+        organismGroups.forEach(orgGroup => {
+
+            let groupInfo = {}
+            groupInfo[orgGroup.type] = orgGroup.popSize;
+        });
     }
 }
 
@@ -63,11 +77,11 @@ class Organism {
     }
     update(state, time) {
         let rndMove = true;
-        if (this.pos.x >= state.display.canvas.width - 30 || this.pos.x <= 30) {
+        if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
             this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
             rndMove = false;
         }
-        if (this.pos.y >= state.display.canvas.height - 30 || this.pos.y <= 30) {
+        if (this.pos.y >= state.display.simCanvas.height - 30 || this.pos.y <= 30) {
             this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
             rndMove = false;
         }
@@ -171,17 +185,23 @@ const runAnimation = (animation) => {
     requestAnimationFrame(frame);
 }
 
-const drawComponent = new DrawComponent("game-canvas", 1000, 1000);
 
-const ant01_conf = {
-    type: 'insect',
-    pos: new Vector(20, 20),
-    velocity: new Vector(2, 2),
-    size: 10,
-    color: "black"
-}
-const ant01 = new Organism(ant01_conf);
-let organisms = [ant01];
+const simCanvasConf = {
+    id: "simulation-canvas",
+    width: 1000,
+    height: 1000,
+
+
+};
+
+const infoCanvasConf = {
+    id: "information-canvas",
+    width: 500,
+    height: 500,
+
+};
+
+const drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
 
 let organismGourp_Insects = new OrganismGroup("insect", 3, 0.1, 0.1, 0.1, 10, "black", new Vector(100, 100), new Vector(2, 2));
 let organismGroups = [organismGourp_Insects];
