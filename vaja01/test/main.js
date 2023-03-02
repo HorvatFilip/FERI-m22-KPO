@@ -14,13 +14,22 @@ class DrawComponent {
     drawBoard() {
         console.log("TODO - drawBoard");
     }
-    clearDisplay() {
+    clearSimCanvas() {
         this.simCtx.fillStyle = "rgb(50, 60, 70)";
         this.simCtx.fillRect(0, 0, this.simCanvas.width, this.simCanvas.height);
     }
+    clearChartCanvas() {
+        this.infoCtx.fillStyle = "rgb(50, 60, 70)";
+        this.infoCtx.fillRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
+    }
+
     sync(state) {
-        this.clearDisplay();
+        this.clearSimCanvas();
         this.drawAllOrganisms(state.organismGroups);
+        if (Math.floor(state.timePassed) % 5 == 0) {
+            this.clearChartCanvas();
+            this.drawChart(state.organismGroups);
+        }
     }
     drawAllOrganisms(organismGroups) {
         organismGroups.forEach(orgGroup => {
@@ -39,10 +48,43 @@ class DrawComponent {
     drawChart(organismGroups) {
         let newPopSizeInfo = [];
         organismGroups.forEach(orgGroup => {
-
             let groupInfo = {}
             groupInfo[orgGroup.type] = orgGroup.popSize;
+            newPopSizeInfo.push(groupInfo);
         });
+
+        this.infoPoints.push(newPopSizeInfo);
+        if (this.infoPoints.length != 1) {
+            if (this.infoPoints.length > 500) {
+                this.infoPoints.shift();
+            }
+
+            let timeInterval = 0;
+
+            console.log(this.infoPoints);
+            for (let i = 0; i < this.infoPoints.length - 1; i++) {
+                for (let j = 0; j < this.infoPoints[i].length; j++) {
+                    this.infoCtx.beginPath();
+
+                    let orgType = Object.keys(this.infoPoints[i][j])[0];
+                    if (orgType == "insect") {
+                        this.infoCtx.strokeStyle = "green";
+                    } else if (orgType == "bird") {
+                        this.infoCtx.strokeStyle = "blue";
+                    } else if (orgType == "cat") {
+                        this.infoCtx.strokeStyle = "black";
+                    }
+                    console.log(this.infoCanvas.height - Object.values(this.infoPoints[i][j])[0]);
+                    console.log(this.infoCanvas.height - Object.values(this.infoPoints[i + 1][j])[0]);
+
+
+                    this.infoCtx.moveTo(timeInterval, this.infoCanvas.height - Object.values(this.infoPoints[i][j])[0]);
+                    timeInterval += 1;
+                    this.infoCtx.lineTo(timeInterval, this.infoCanvas.height - Object.values(this.infoPoints[i + 1][j])[0]);
+                    this.infoCtx.stroke();
+                }
+            }
+        }
     }
 }
 
@@ -75,7 +117,7 @@ class Organism {
     constructor(orgNewPos) {
         Object.assign(this, orgNewPos);
     }
-    update(state, time) {
+    updatePosition(state, time) {
         let rndMove = true;
         if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
             this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
@@ -138,34 +180,64 @@ class OrganismGroup {
             );
         }
     }
-    updatePopulation(newPopulation) {
-        this.population = newPopulation;
-        return this;
+    removeOrganisms(count) {
+        this.population.splice(0, count);
+        this.popSize -= count;
     }
-    update(state, time) {
+    updatePopulation() {
+        // let delta_rp = (this.rp - this.sp) * this.popSize;
+        // let delta_sp = (this.rp - this.sp - this.k * this.popSize) * this.popSize;
+        // this.rp += delta_rp % 1;
+        // this.sp += delta_sp % 1;
+        // this.rp = Math.max(delta_rp % 1, 0);
+        // this.sp = Math.max(delta_sp % 1, 0);
+        // console.log("delta_rp: " + delta_rp)
+        // console.log("delta_sp: " + delta_sp)
+        // console.log("rp: " + this.rp)
+        // console.log("sp: " + this.sp)
+
+        let populationChange = 0;
+        for (let i = 0; i < this.popSize; i++) {
+            if (Math.random() < this.rp) {
+                populationChange++;
+            }
+            let deathChance = Math.random();
+            if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
+                populationChange--;
+            }
+        }
+        if (populationChange > 0) {
+            this.addOrganisms(populationChange);
+        }
+        else {
+            this.removeOrganisms(Math.abs(populationChange));
+        }
+    }
+    updatePosition(state, time) {
         this.population = this.population.map(organism => {
-            return organism.update(state, time);
+            return organism.updatePosition(state, time);
         });
-        //this.population = [];
-        //newPopulation.forEach(newPop => {
-        //    this.population.push(newPop)
-        //});
-        //this.population = newPopulation;
         return this;
     }
 }
 
 
 class State {
-    constructor(display, organismGroups) {
+    constructor(display, organismGroups, timePassed) {
         this.display = display;
         this.organismGroups = organismGroups;
+        this.timePassed = timePassed;
     }
     update(time) {
+        this.timePassed += 0.1;
+
         let organismGroups = this.organismGroups.map(orgGroup => {
-            return orgGroup.update(this, time);
+            if (Math.floor(this.timePassed) % 10 == 0) {
+                orgGroup.updatePopulation();
+            }
+            return orgGroup.updatePosition(this, time);
         });
-        return new State(this.display, organismGroups);
+        return new State(this.display, organismGroups, this.timePassed);
     }
 }
 
@@ -189,26 +261,35 @@ const runAnimation = (animation) => {
 const simCanvasConf = {
     id: "simulation-canvas",
     width: 1000,
-    height: 1000,
-
-
+    height: 1000
 };
 
 const infoCanvasConf = {
     id: "information-canvas",
     width: 500,
-    height: 500,
-
+    height: 500
 };
 
 const drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
 
-let organismGourp_Insects = new OrganismGroup("insect", 3, 0.1, 0.1, 0.1, 10, "black", new Vector(100, 100), new Vector(2, 2));
-let organismGroups = [organismGourp_Insects];
+let organismGourp_Insects = new OrganismGroup("insect", 10, 0.1, 0.05, 0.0005, 2, "green", new Vector(500, 500), new Vector(3, 3));
+let organismGourp_Birds = new OrganismGroup("bird", 8, 0.1, 0.05, 0.0005, 4, "blue", new Vector(500, 500), new Vector(2, 2));
+let organismGourp_Cats = new OrganismGroup("cat", 2, 0.1, 0.05, 0.0005, 8, "black", new Vector(500, 500), new Vector(1, 1));
 
-let state = new State(drawComponent, organismGroups);
+let organismGroups = [organismGourp_Insects, organismGourp_Birds, organismGourp_Cats];
+//let organismGroups = [organismGourp_Insects]
+
+let state = new State(drawComponent, organismGroups, 0);
+
+let run = true;
+document.getElementById("toggle-sim-btn").addEventListener("click", () => {
+    run = !run;
+});
+
 runAnimation(time => {
-    state = state.update(time);
-    drawComponent.sync(state);
+    if (run) {
+        state = state.update(time);
+        drawComponent.sync(state);
+    }
 })
 //drawComponent.drawOrganism(ant01);
