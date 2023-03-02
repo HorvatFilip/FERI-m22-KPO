@@ -9,7 +9,7 @@ class DrawComponent {
         this.infoCanvas.width = infoCanvasConf.width;
         this.infoCanvas.height = infoCanvasConf.height;
         this.infoCtx = this.infoCanvas.getContext("2d");
-        this.infoPoints = [];
+        this.infoPoints = {};
     }
     drawBoard() {
         console.log("TODO - drawBoard");
@@ -26,9 +26,10 @@ class DrawComponent {
     sync(state) {
         this.clearSimCanvas();
         this.drawAllOrganisms(state.organismGroups);
-        if (Math.floor(state.timePassed) % 5 == 0) {
+        this.updateChartPoints(state.organismGroups);
+        if (Math.floor(state.timePassed) % 1 == 0) {
             this.clearChartCanvas();
-            this.drawChart(state.organismGroups);
+            this.drawChart();
         }
     }
     drawAllOrganisms(organismGroups) {
@@ -45,15 +46,39 @@ class DrawComponent {
         this.simCtx.fillStyle = organism.color;
         this.simCtx.fill();
     }
-    drawChart(organismGroups) {
-        let newPopSizeInfo = [];
+    updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
-            let groupInfo = {}
-            groupInfo[orgGroup.type] = orgGroup.popSize;
-            newPopSizeInfo.push(groupInfo);
+            if (this.infoPoints[orgGroup.type] === undefined) {
+                this.infoPoints[orgGroup.type] = [orgGroup.popSize];
+            } else {
+                this.infoPoints[orgGroup.type].push(orgGroup.popSize);
+                if (this.infoPoints[orgGroup.type].length > this.infoCanvas.width) {
+                    this.infoPoints[orgGroup.type].shift();
+                }
+            }
         });
+    }
+    drawChart() {
+        let organismTypes = Object.keys(this.infoPoints);
+        organismTypes.forEach(orgType => {
+            if (orgType == "insect") {
+                this.infoCtx.strokeStyle = "green";
+            } else if (orgType == "bird") {
+                this.infoCtx.strokeStyle = "blue";
+            } else if (orgType == "cat") {
+                this.infoCtx.strokeStyle = "black";
+            }
 
-        this.infoPoints.push(newPopSizeInfo);
+            let timeInterval = 0;
+            this.infoCtx.beginPath();
+            for (let i = 0; i < this.infoPoints[orgType].length - 1; i++) {
+                this.infoCtx.moveTo(timeInterval, this.infoCanvas.height - this.infoPoints[orgType][i]);
+                timeInterval += 1;
+                this.infoCtx.lineTo(timeInterval, this.infoCanvas.height - this.infoPoints[orgType][i + 1]);
+            }
+            this.infoCtx.stroke();
+        });
+        return;
         if (this.infoPoints.length != 1) {
             if (this.infoPoints.length > 500) {
                 this.infoPoints.shift();
@@ -232,7 +257,7 @@ class State {
         this.timePassed += 0.1;
 
         let organismGroups = this.organismGroups.map(orgGroup => {
-            if (Math.floor(this.timePassed) % 10 == 0) {
+            if (Math.floor(this.timePassed) % 5 == 0) {
                 orgGroup.updatePopulation();
             }
             return orgGroup.updatePosition(this, time);
@@ -272,12 +297,19 @@ const infoCanvasConf = {
 
 const drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
 
-let organismGourp_Insects = new OrganismGroup("insect", 10, 0.1, 0.05, 0.0005, 2, "green", new Vector(500, 500), new Vector(3, 3));
-let organismGourp_Birds = new OrganismGroup("bird", 8, 0.1, 0.05, 0.0005, 4, "blue", new Vector(500, 500), new Vector(2, 2));
-let organismGourp_Cats = new OrganismGroup("cat", 2, 0.1, 0.05, 0.0005, 8, "black", new Vector(500, 500), new Vector(1, 1));
+let spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+let spawnPoint = new Vector(Math.random() * 900 + 100, Math.random() * 900 + 100);
+let organismGroup_Insects = new OrganismGroup("insect", 10, 0.2, 0.1, 0.0005, 2, "green", spawnPoint, spawnVelocity);
 
-let organismGroups = [organismGourp_Insects, organismGourp_Birds, organismGourp_Cats];
-//let organismGroups = [organismGourp_Insects]
+spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+spawnPoint = new Vector(Math.random() * 900 + 100, Math.random() * 900 + 100);
+let organismGroup_Birds = new OrganismGroup("bird", 8, 0.1, 0.04, 0.0007, 4, "blue", spawnPoint, spawnVelocity);
+
+spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+spawnPoint = new Vector(Math.random() * 900 + 100, Math.random() * 900 + 100);
+let organismGroup_Cats = new OrganismGroup("cat", 2, 0.05, 0.02, 0.001, 8, "black", spawnPoint, spawnVelocity);
+
+let organismGroups = [organismGroup_Insects, organismGroup_Birds, organismGroup_Cats];
 
 let state = new State(drawComponent, organismGroups, 0);
 
