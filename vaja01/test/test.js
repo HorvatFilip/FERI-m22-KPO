@@ -7,6 +7,13 @@ const testFun = () => {
     let organismGourp_Cats = new OrganismGroup("cat", 2, 0.1, 0.05, 0.0005, 8, "black", new Vector(500, 500), new Vector(1, 1));
     let organismGroups = [organismGourp_Insects, organismGourp_Birds, organismGourp_Cats];
 
+
+    let removeType = "insect";
+    organismGroups = organismGroups.filter(orgGroup => orgGroup.type != removeType)
+
+    console.log(organismGroups);
+    return;
+
     organismGroups.forEach(orgGroup => {
 
         if (infoPoints[orgGroup.type] === undefined) {
@@ -19,9 +26,9 @@ const testFun = () => {
 }
 
 testFun();
-testFun();
-
-let keys = Object.keys(infoPoints);
-keys.forEach(key => {
-    console.log(infoPoints[key]);
-})
+//testFun();
+//
+//let keys = Object.keys(infoPoints);
+//keys.forEach(key => {
+//    console.log(infoPoints[key]);
+//})
