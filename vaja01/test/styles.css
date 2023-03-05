@@ -35,14 +35,36 @@ canvas {
     background-color: rgb(59, 74, 88);
 }
 
-#add-elements-menu{
+#eco-elements-menu{
     height: 100%;
     width: 0;
     position: fixed;
     z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #111;
+    background-color:  rgb(59, 74, 88);
+    border: black 1px solid;
     overflow-x: hidden;
     transition: 0.5s;
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+#eco-elements-groups-list {
+    margin: 1em;
+    background-color: rgb(33, 37, 41);
+    padding: 0.5em;
+}
+
+.eco-elem {
+    min-width: 250px;
+    min-height: 20px;
+    background-color:  rgb(59, 74, 88);
+    border: black 1px solid;
+    margin-bottom: 1px;
+    padding-left: 10px;
+}
+
+.eco-elem:hover {
+    cursor: pointer;
 }

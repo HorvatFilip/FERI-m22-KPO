@@ -1,21 +1,3 @@
-const runAnimation = (animation) => {
-    let lastTime = null;
-    const frame = (time) => {
-        if (lastTime != null) {
-            const timeStep = Math.min(100, time - lastTime) / 1000;
-
-            if (animation(timeStep) === false) {
-                return;
-            }
-        }
-        lastTime = time;
-        requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-}
-
-
-
 const simCanvasConf = {
     id: "simulation-canvas",
     width: 1000,
@@ -44,11 +26,36 @@ let organismGroup_Cats = new OrganismGroup("cat", 2, 0.05, 0.02, 0.001, 8, "blac
 
 let organismGroups = [organismGroup_Insects, organismGroup_Birds, organismGroup_Cats];
 
+const dateTimeTracker = new DateTimeTracker();
+
+let ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
+ecoSystem.addOrganismGroup(organismGroup_Insects);
+ecoSystem.addOrganismGroup(organismGroup_Birds);
+ecoSystem.addOrganismGroup(organismGroup_Cats);
+
 let state = new State(drawComponent, organismGroups, 0);
 
 var run = true;
 const gui = new GuiLogic(organismGroups);
 gui.addEventListeners();
+gui.addEcoSystemToGui(ecoSystem);
+
+const runAnimation = (animation) => {
+    let lastTime = null;
+    const frame = (time) => {
+        if (lastTime != null) {
+            const timeStep = Math.min(100, time - lastTime) / 1000;
+
+            if (animation(timeStep) === false) {
+                return;
+            }
+        }
+        lastTime = time;
+        requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+}
+
 
 runAnimation(time => {
     if (run) {

@@ -119,26 +119,40 @@ class DateTimeTracker {
     }
     addMonths(count) {
         this.date["month"] += count;
+        fixOverflow();
     }
     addDays(count) {
         this.date["day"] += count;
+        fixOverflow();
     }
     addHours(count) {
         this.date["hour"] += count;
+        fixOverflow();
+    }
+    fixOverflow() {
+        if (this.date["hour"] > 24) {
+            this.date["day"]++;
+            this.date["hour"] = this.date["hour"] - 24;
+        }
+        if (this.date["day"] > 30){
+            this.date["month"]++;
+            this.date["day"] = this.date["day"] - 30;
+        }
+        if (this.date["month"] > 12){
+            this.date["year"]++;
+            this.date["month"] = this.date["month"] - 12;
+        }
     }
     getCurrentDateTime() {
         return { year: this.year, month: this.month, day: this.day, hour: this.day };
     }
 }
 
-const dayNightCycle = new DayNightCycle();
-console.log(dayNightCycle.getCurrentDateTime());
-
 class EcoSystem {
-    constructor(id, type, date) {
+    constructor(id, type, dateTimeTracker) {
         this.id = id;
         this.type = type;
-        this.date = date;
+        this.dateTime = dateTimeTracker;
         this.organismGroups = [];
     }
     addOrganismGroup(organismGroup) {
