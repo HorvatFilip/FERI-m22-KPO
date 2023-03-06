@@ -15,6 +15,24 @@ body {
     /*border-radius: 10px;*/
 }
 
+.controller-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.simulation-run-controls {
+    margin-bottom: 10px;
+}
+
+.controller-container div.btn {
+    padding: 10px;
+}
+
+i {
+    font-size: 25px; 
+}
+
 canvas {
     /*width: 100%;*/
     border: black 1px solid;
@@ -37,8 +55,8 @@ canvas {
 
 #eco-elements-menu{
     height: 100%;
-    width: 0;
     position: fixed;
+    width: 0px;
     z-index: 1;
     background-color:  rgb(59, 74, 88);
     border: black 1px solid;
@@ -47,13 +65,27 @@ canvas {
 
     display: flex;
     flex-direction: column;
-
 }
 
-#eco-elements-groups-list {
+.eco-elements-groups-stats {
+    display: flex;
+    flex-direction: column;
     margin: 1em;
     background-color: rgb(33, 37, 41);
     padding: 0.5em;
+   
+}
+#eco-elements-groups-add{
+    align-self: center;
+    background-color: green;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 6px 25px;
+    margin-top: 5px;
+}
+
+#eco-elements-groups-list {
+     height: 100%;
 }
 
 .eco-elem {
@@ -62,9 +94,47 @@ canvas {
     background-color:  rgb(59, 74, 88);
     border: black 1px solid;
     margin-bottom: 1px;
-    padding-left: 10px;
+    padding: 0 10px;
 }
 
-.eco-elem:hover {
+.eco-elem-header {
+    font-size: 18px;
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    align-items: baseline;
+}
+
+.eco-elem-display-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 25px;
+    margin-right: 5px;
+}
+
+.eco-elem-header:hover {
     cursor: pointer;
+}
+
+.eco-elem-body {
+    display: none;
+    flex-direction: column;
+    padding: 5px;
+}
+
+.eco-elem-row {
+    display: flex;
+    flex-direction: row;
+    max-width: 500px;
+}
+
+.eco-elem-row > input {
+    max-width: 100px;
+    background-color: rgb(44, 49, 54);
+    outline: 0 !important;
+    color: gray;
+}
+
+.eco-elem-body > button {
+    margin-top: 5px;
 }

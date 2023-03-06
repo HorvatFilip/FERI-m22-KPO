@@ -21,23 +21,28 @@
   <body>
     <div id="eco-elements-menu">
       <button id="close-eco-elements-menu">X</button>
-      <div id="eco-elements-groups-list">
-      </div>
-      <div id="eco-elements-groups-add">
+      <div class="eco-elements-groups-stats">
+        <div id="eco-elements-groups-list"></div>
+        <div id="eco-elements-groups-add">
+          <i class="fa-solid fa-plus"></i>
+        </div>
       </div>
     </div>
 
     <div class="app-container">
       <div class="controller-container card">
-        <div class="">
-          <label for="pop-size-display">Number of pops</label>
-          <input id="pop-size-display" class="display-info" />
+        <div class="simulation-run-controls">
+          <div id="start-stop-control" class="btn btn-outline-secondary">
+            <i class="fa-regular fa-circle-right"></i>
+          </div>
+          <div id="reset-control" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+          </div>
         </div>
-        <div>
-          <button id="toggle-sim-btn">Run/Stop</button>
-        </div>
-        <div>
-          <button id="open-eco-elements-menu">Add</button>
+        <div class="simulaion-organisms-controls">
+          <div id="open-eco-elements-menu" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-dna"></i>
+          </div>
         </div>
       </div>
 

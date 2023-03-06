@@ -4,6 +4,9 @@ class State {
         this.organismGroups = organismGroups;
         this.timePassed = 0;
     }
+    updateOrganismGroups(updatedOrganismGroups) {
+        this.organismGroups = updatedOrganismGroups;
+    }
     update() {
         this.timePassed += 0.1;
 

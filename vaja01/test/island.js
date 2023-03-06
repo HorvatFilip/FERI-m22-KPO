@@ -52,6 +52,15 @@ class OrganismGroup {
         this.population = [];
         this.addOrganisms(initialPopSize);
     }
+    changeSpecifications(config) {
+        this.type = config["type"];
+        this.rp = config["rp"];
+        this.sp = config["sp"];
+        this.k = config["k"];
+        this.orgSize = config["orgSize"];
+        this.orgColor = config["orgColor"];
+        this.spawnPoint = new Vector(config["spawnPoint"][0], config["spawnPoint"][1]);
+    }
     addOrganisms(count) {
         for (let i = 0; i < count; i++) {
             this.popSize++;
@@ -134,11 +143,11 @@ class DateTimeTracker {
             this.date["day"]++;
             this.date["hour"] = this.date["hour"] - 24;
         }
-        if (this.date["day"] > 30){
+        if (this.date["day"] > 30) {
             this.date["month"]++;
             this.date["day"] = this.date["day"] - 30;
         }
-        if (this.date["month"] > 12){
+        if (this.date["month"] > 12) {
             this.date["year"]++;
             this.date["month"] = this.date["month"] - 12;
         }
@@ -157,6 +166,13 @@ class EcoSystem {
     }
     addOrganismGroup(organismGroup) {
         this.organismGroups.push(organismGroup);
+    }
+    changeOrganismGroupSpecs(type, config) {
+        for (let i = 0; i < this.organismGroups.length; i++) {
+            if (this.organismGroups[i].type == type) {
+                this.organismGroups[i].changeSpecifications(config);
+            }
+        }
     }
     removeOrganismGroupByType(type) {
         this.organismGroups = this.organismGroups.organismGroups.filter(orgGroup => orgGroup.type != type);
