@@ -1,37 +1,34 @@
 class GuiLogic {
     constructor() {
-        this.toggleSim_btn = document.getElementById("toggle-sim-btn");
+        this.toggleSim_btn = document.getElementById("start-stop-control");
+        this.resetSim_btn = document.getElementById("reset-control");
         this.openEcoElems_btn = document.getElementById("open-eco-elements-menu");
         this.closeEcoElems_btn = document.getElementById("close-eco-elements-menu");
         this.ecoElems_menu = document.getElementById("eco-elements-menu");
         this.ecoElems_list = document.getElementById("eco-elements-groups-list");
         this.ecoElemsAdd_btn = document.getElementById("eco-elements-groups-add");
-        const simCanvasConf = {
-            id: "simulation-canvas",
-            width: 1000,
-            height: 1000
-        };
-        const infoCanvasConf = {
-            id: "information-canvas",
-            width: 500,
-            height: 500
-        };
-        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
-        this.run = true;
     }
     addEventListeners() {
-        //this.toggleSim_btn.addEventListener("click", () => {
-        //    run = !run;
-        //});
         this.openEcoElems_btn.addEventListener("click", () => {
-            this.refreshOrganismGroupList();
-            this.ecoElems_menu.style.width = "375px";
+            if (this.ecoElems_menu.style.width == "0px" || this.ecoElems_menu.style.width == "") {
+                this.refreshOrganismGroupList();
+                this.ecoElems_menu.style.width = "375px";
+            } else {
+                this.ecoElems_menu.style.width = "0px";
+            }
+
         });
         this.closeEcoElems_btn.addEventListener("click", () => {
             this.ecoElems_menu.style.width = "0px";
         });
         this.ecoElemsAdd_btn.addEventListener("click", () => {
             this.addNewOrganismGroupUI();
+        });
+        this.toggleSim_btn.addEventListener("click", () => {
+            this.run = !this.run;
+        });
+        this.resetSim_btn.addEventListener("click", () => {
+            this.loadScenario01();
         });
 
     }
@@ -40,20 +37,23 @@ class GuiLogic {
     }
     refreshOrganismGroupList() {
         this.ecoSystem.organismGroups.forEach(orgGroup => {
-            if (this.ecoElems_list.querySelectorAll("#" + orgGroup.type).length === 0) {
+            if (this.ecoElems_list.querySelectorAll("#" + orgGroup.type + "-eco-elem").length === 0) {
                 const newEcoElem = document.createElement("div");
                 const header = document.createElement("div");
                 const headerDisplayColor = document.createElement("div");
                 const headerText = document.createElement("span");
+                const headerDisplayPopSize = document.createElement("span");
                 const body = document.createElement("div");
                 const saveBtn = document.createElement("button");
 
 
                 headerDisplayColor.style.backgroundColor = orgGroup.orgColor;
                 headerText.innerHTML = orgGroup.type;
+                headerDisplayPopSize.innerHTML = orgGroup.popSize;
                 saveBtn.innerHTML = "Save";
 
-                newEcoElem.setAttribute("id", orgGroup.type);
+                newEcoElem.setAttribute("id", orgGroup.type + "-eco-elem");
+                headerDisplayPopSize.setAttribute("id", orgGroup.type + "-popsize");
                 newEcoElem.setAttribute("class", "eco-elem");
                 header.setAttribute("class", "eco-elem-header");
                 headerDisplayColor.setAttribute("class", "eco-elem-display-color");
@@ -127,6 +127,7 @@ class GuiLogic {
 
                 header.appendChild(headerDisplayColor);
                 header.appendChild(headerText);
+                header.appendChild(headerDisplayPopSize);
                 firstRow.appendChild(typeInput);
                 firstRow.appendChild(orgSizeInput);
                 firstRow.appendChild(colorInput);
@@ -147,6 +148,52 @@ class GuiLogic {
     }
     addNewOrganismGroupUI() {
 
+    }
+    loadScenario01() {
+        const simCanvasConf = {
+            id: "simulation-canvas",
+            width: 1000,
+            height: 1000
+        };
+        const infoCanvasConf = {
+            id: "information-canvas",
+            width: 500,
+            height: 500
+        };
+        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
+        this.run = true;
+
+        let spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+        let spawnPoint = new Vector(Math.random() * 900 + 100, Math.random() * 900 + 100);
+        let organismGroup_Insects = new OrganismGroup("insect", 10, 0.2, 0.1, 0.0005, 2, "#4C9900", spawnPoint, spawnVelocity);
+
+        spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+        spawnPoint = new Vector(Math.random() * 800 + 100, Math.random() * 800 + 100);
+        let organismGroup_Birds = new OrganismGroup("bird", 8, 0.1, 0.04, 0.0007, 4, "#004C99", spawnPoint, spawnVelocity);
+
+        spawnVelocity = new Vector(Math.random() * 4, Math.random() * 4);
+        spawnPoint = new Vector(Math.random() * 900 + 100, Math.random() * 900 + 100);
+        let organismGroup_Cats = new OrganismGroup("cat", 2, 0.05, 0.02, 0.001, 8, "#000000", spawnPoint, spawnVelocity);
+
+        let organismGroups = [organismGroup_Insects, organismGroup_Birds, organismGroup_Cats];
+
+        const dateTimeTracker = new DateTimeTracker();
+
+        let ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
+        ecoSystem.addOrganismGroup(organismGroup_Insects);
+        ecoSystem.addOrganismGroup(organismGroup_Birds);
+        ecoSystem.addOrganismGroup(organismGroup_Cats);
+
+        this.addEcoSystemToGui(ecoSystem);
+        this.startAnimation();
+    }
+    updateOrganismPopSizeUI() {
+        this.ecoSystem.organismGroups.forEach(orgGroup => {
+            const ecoElem = document.getElementById(orgGroup.type + "-popsize");
+            if (ecoElem !== null) {
+                ecoElem.innerHTML = orgGroup.popSize;
+            }
+        });
     }
     runAnimation(animation) {
         let lastTime = null;
@@ -169,6 +216,7 @@ class GuiLogic {
             if (this.run) {
                 this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
                 this.state = this.state.update();
+                this.updateOrganismPopSizeUI();
                 this.drawComponent.sync(this.state);
             }
         });

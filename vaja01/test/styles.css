@@ -53,6 +53,11 @@ canvas {
     background-color: rgb(59, 74, 88);
 }
 
+#close-eco-elements-menu {
+    width: 10px;
+    font-size: 10px;
+}
+
 #eco-elements-menu{
     height: 100%;
     position: fixed;
@@ -73,6 +78,7 @@ canvas {
     margin: 1em;
     background-color: rgb(33, 37, 41);
     padding: 0.5em;
+    height: 100%;
    
 }
 #eco-elements-groups-add{
@@ -82,10 +88,6 @@ canvas {
     border-radius: 6px;
     padding: 6px 25px;
     margin-top: 5px;
-}
-
-#eco-elements-groups-list {
-     height: 100%;
 }
 
 .eco-elem {

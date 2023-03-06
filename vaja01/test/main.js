@@ -36,10 +36,9 @@ ecoSystem.addOrganismGroup(organismGroup_Cats);
 let state = new State(drawComponent, organismGroups, 0);
 
 //var run = true;
-const gui = new GuiLogic(organismGroups);
+const gui = new GuiLogic();
 gui.addEventListeners();
-gui.addEcoSystemToGui(ecoSystem);
-gui.startAnimation();
+gui.loadScenario01();
 
 
 /*

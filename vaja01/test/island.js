@@ -64,11 +64,16 @@ class OrganismGroup {
     addOrganisms(count) {
         for (let i = 0; i < count; i++) {
             this.popSize++;
+
+            spawnPoint = new Vector(
+                Math.random() * 20 + this.spawnPoint.x,
+                Math.random() * 20 + this.spawnPoint.y
+            );
             const orgStats =
             {
                 type: this.type,
                 id: this.type + "-" + this.popSize,
-                pos: this.spawnPoint,
+                pos: spawnPoint,
                 velocity: this.spawnVelocity,
                 size: this.orgSize,
                 color: this.orgColor
