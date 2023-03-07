@@ -96,6 +96,7 @@ class GuiLogic {
                 orgSizeInput.setAttribute("type", "number");
                 rpInput.setAttribute("type", "number");
                 spInput.setAttribute("type", "number");
+
                 kInput.setAttribute("type", "number");
                 spawnXInput.setAttribute("type", "number");
                 spawnYInput.setAttribute("type", "number");
