@@ -107,6 +107,11 @@ canvas {
     align-items: baseline;
 }
 
+.eco-elem-header > span:nth-child(3) {
+    flex-grow: 2;
+    text-align: right;
+}
+
 .eco-elem-display-color {
     width: 12px;
     height: 12px;
@@ -132,9 +137,13 @@ canvas {
 
 .eco-elem-row > input {
     max-width: 100px;
-    background-color: rgb(44, 49, 54);
+    background-color: rgb(22 46 70 / 45%);
     outline: 0 !important;
     color: gray;
+    border-radius: 3px;
+    border: black 1px;
+    border-style: dotted;
+    margin: 1px;
 }
 
 .eco-elem-body > button {

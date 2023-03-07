@@ -49,6 +49,7 @@ class OrganismGroup {
         this.spawnPoint = spawnPoint;
         this.spawnVelocity = spawnVelocity;
         this.popSize = 0;
+        this.initialPopSize = initialPopSize;
         this.population = [];
         this.addOrganisms(initialPopSize);
     }
@@ -57,6 +58,7 @@ class OrganismGroup {
         this.rp = config["rp"];
         this.sp = config["sp"];
         this.k = config["k"];
+        this.popSize = config["popSize"];
         this.orgSize = config["orgSize"];
         this.orgColor = config["orgColor"];
         this.spawnPoint = new Vector(config["spawnPoint"][0], config["spawnPoint"][1]);
@@ -99,16 +101,27 @@ class OrganismGroup {
         // console.log("rp: " + this.rp)
         // console.log("sp: " + this.sp)
 
+        let testing = false;
         let populationChange = 0;
-        for (let i = 0; i < this.popSize; i++) {
-            if (Math.random() < this.rp) {
-                populationChange++;
-            }
-            let deathChance = Math.random();
-            if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
-                populationChange--;
+        let addCount;
+        let removeCount;
+        if (testing) {
+            addCount = Math.round((this.rp - this.sp) * this.popSize);
+            removeCount = Math.round((this.rp - this.sp - this.k * this.popSize) * this.popSize);
+            populationChange = addCount - removeCount;
+        } else {
+            populationChange = 0;
+            for (let i = 0; i < this.popSize; i++) {
+                if (Math.random() < this.rp) {
+                    populationChange++;
+                }
+                let deathChance = Math.random();
+                if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
+                    populationChange--;
+                }
             }
         }
+
         if (populationChange > 0) {
             this.addOrganisms(populationChange);
         }
