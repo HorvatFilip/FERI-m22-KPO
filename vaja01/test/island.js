@@ -62,6 +62,8 @@ class OrganismGroup {
         this.orgSize = config["orgSize"];
         this.orgColor = config["orgColor"];
         this.spawnPoint = new Vector(config["spawnPoint"][0], config["spawnPoint"][1]);
+        this.population = [];
+        this.addOrganisms(this.popSize);
     }
     addOrganisms(count) {
         for (let i = 0; i < count; i++) {

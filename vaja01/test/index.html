@@ -20,7 +20,12 @@
   </head>
   <body>
     <div id="eco-elements-menu">
-      <button id="close-eco-elements-menu">X</button>
+      <button
+        id="close-eco-elements-menu"
+        class="btn btn-danger small-close-button"
+      >
+        X
+      </button>
       <div class="eco-elements-groups-stats">
         <div id="eco-elements-groups-list"></div>
         <div id="eco-elements-groups-add">
@@ -28,8 +33,20 @@
         </div>
       </div>
     </div>
+    <div id="chart-display">
+      <button
+        id="close-chart-display"
+        class="btn btn-danger small-close-button"
+      >
+        X
+      </button>
+      <div id="chart-display-list">
+        <canvas id="information-canvas"></canvas>
+      </div>
+    </div>
 
     <div class="app-container">
+      <!--
       <div class="controller-container card">
         <div class="simulation-run-controls">
           <div id="start-stop-control" class="btn btn-outline-secondary">
@@ -38,17 +55,39 @@
           <div id="reset-control" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-rotate-left"></i>
           </div>
-        </div>
-        <div class="simulaion-organisms-controls">
           <div id="open-eco-elements-menu" class="btn btn-outline-secondary">
             <i class="fa-solid fa-dna"></i>
+          </div>
+          <div id="open-chart-display" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+        </div>
+      </div>
+      -->
+
+      <div class="card">
+        <div class="controller-container">
+          <div class="simulation-run-controls">
+            <div id="start-stop-control" class="btn btn-outline-secondary">
+              <i class="fa-regular fa-circle-right"></i>
+            </div>
+            <div id="reset-control" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+            </div>
+          </div>
+          <div class="simulaion-organisms-controls">
+            <div id="open-eco-elements-menu" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-dna"></i>
+            </div>
+            <div id="open-chart-display" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="canvas-container card">
+      <div class="sim-canvas-container card">
         <canvas id="simulation-canvas"></canvas>
-        <canvas id="information-canvas"></canvas>
       </div>
     </div>
 

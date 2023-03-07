@@ -87,6 +87,9 @@ class DrawComponent {
                 this.infoCtx.moveTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i]);
                 timeInterval += 24;
                 this.infoCtx.lineTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i + 1]);
+                if (timeInterval + this.chartOffset > this.infoCanvas.width - this.chartOffset) {
+                    this.infoPoints[orgType]["popSize"].shift();
+                }
             }
             this.infoCtx.stroke();
         });

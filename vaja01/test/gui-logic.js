@@ -7,6 +7,10 @@ class GuiLogic {
         this.ecoElems_menu = document.getElementById("eco-elements-menu");
         this.ecoElems_list = document.getElementById("eco-elements-groups-list");
         this.ecoElemsAdd_btn = document.getElementById("eco-elements-groups-add");
+        this.toggleChartDisplay_btn = document.getElementById("open-chart-display");
+        this.closeChartDisplay_btn = document.getElementById("close-chart-display");
+        this.chartDisplay_menu = document.getElementById("chart-display");
+        this.chartDisplayList = document.getElementById("chart-display-list");
         this.inputs = [];
     }
     addEventListeners() {
@@ -31,6 +35,18 @@ class GuiLogic {
         this.resetSim_btn.addEventListener("click", () => {
             //this.loadScenario01();
             this.loadSimScenarioFromUI();
+        });
+        this.toggleChartDisplay_btn.addEventListener("click", () => {
+            if (this.chartDisplay_menu.style.width == "0px" || this.chartDisplay_menu.style.width == "") {
+                //this.refreshOrganismGroupList();
+                this.chartDisplay_menu.style.width = "500px";
+            } else {
+                this.chartDisplay_menu.style.width = "0px";
+            }
+
+        });
+        this.closeChartDisplay_btn.addEventListener("click", () => {
+            this.chartDisplay_menu.style.width = "0px";
         });
 
     }
