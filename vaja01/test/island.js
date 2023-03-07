@@ -90,38 +90,16 @@ class OrganismGroup {
         this.popSize -= count;
     }
     updatePopulation() {
-        // let delta_rp = (this.rp - this.sp) * this.popSize;
-        // let delta_sp = (this.rp - this.sp - this.k * this.popSize) * this.popSize;
-        // this.rp += delta_rp % 1;
-        // this.sp += delta_sp % 1;
-        // this.rp = Math.max(delta_rp % 1, 0);
-        // this.sp = Math.max(delta_sp % 1, 0);
-        // console.log("delta_rp: " + delta_rp)
-        // console.log("delta_sp: " + delta_sp)
-        // console.log("rp: " + this.rp)
-        // console.log("sp: " + this.sp)
-
-        let testing = false;
         let populationChange = 0;
-        let addCount;
-        let removeCount;
-        if (testing) {
-            addCount = Math.round((this.rp - this.sp) * this.popSize);
-            removeCount = Math.round((this.rp - this.sp - this.k * this.popSize) * this.popSize);
-            populationChange = addCount - removeCount;
-        } else {
-            populationChange = 0;
-            for (let i = 0; i < this.popSize; i++) {
-                if (Math.random() < this.rp) {
-                    populationChange++;
-                }
-                let deathChance = Math.random();
-                if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
-                    populationChange--;
-                }
+        for (let i = 0; i < this.popSize; i++) {
+            if (Math.random() < this.rp) {
+                populationChange++;
+            }
+            let deathChance = Math.random();
+            if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
+                populationChange--;
             }
         }
-
         if (populationChange > 0) {
             this.addOrganisms(populationChange);
         }
@@ -140,21 +118,36 @@ class OrganismGroup {
 class DateTimeTracker {
     constructor(startDate = { year: 0, month: 0, day: 0, hour: 0 }) {
         this.date = startDate;
+        this.interval = setInterval(() => {
+            this.addHours(1);
+        }, 50);
     }
     addYears(count) {
         this.date["year"] += count;
     }
+    getYears() {
+        return this.date["year"];
+    }
     addMonths(count) {
         this.date["month"] += count;
-        fixOverflow();
+        this.fixOverflow();
+    }
+    getMonths() {
+        return this.date["month"];
     }
     addDays(count) {
         this.date["day"] += count;
-        fixOverflow();
+        this.fixOverflow();
+    }
+    getDays() {
+        return this.date["day"];
     }
     addHours(count) {
         this.date["hour"] += count;
-        fixOverflow();
+        this.fixOverflow();
+    }
+    getHours() {
+        return this.date["hour"];
     }
     fixOverflow() {
         if (this.date["hour"] > 24) {

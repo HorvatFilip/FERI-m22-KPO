@@ -12,6 +12,7 @@ class DrawComponent {
         this.infoCtx.font = "10px Arial";
         this.infoPoints = {};
         this.timeStamp = 0;
+        this.chartOffset = 20;
     }
     drawBoard() {
         console.log("TODO - drawBoard");
@@ -24,20 +25,16 @@ class DrawComponent {
         this.infoCtx.fillStyle = "rgb(50, 60, 70)";
         this.infoCtx.fillRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
     }
-
-    sync(state) {
-        this.timeStamp++;
+    updateData(state) {
+        this.updateChartPoints(state.organismGroups);
+    }
+    syncSimData(state) {
         this.clearSimCanvas();
         this.drawAllOrganisms(state.organismGroups);
-        if (this.timeStamp % 20) {
-            this.updateChartPoints(state.organismGroups, true);
-        } else {
-            this.updateChartPoints(state.organismGroups, false);
-        }
-        if (Math.floor(state.timePassed) % 1 == 0) {
-            this.clearChartCanvas();
-            this.drawChart(state.timePassed);
-        }
+    }
+    syncInfoData(state) {
+        this.clearChartCanvas();
+        this.drawChart(state.timePassed);
     }
     drawAllOrganisms(organismGroups) {
         organismGroups.forEach(orgGroup => {
@@ -53,7 +50,7 @@ class DrawComponent {
         this.simCtx.fillStyle = organism.color;
         this.simCtx.fill();
     }
-    updateChartPoints(organismGroups, showTimeStamp) {
+    updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
             if (this.infoPoints[orgGroup.type] === undefined) {
                 this.infoPoints[orgGroup.type] = {
@@ -63,48 +60,33 @@ class DrawComponent {
             } else {
                 if (this.infoPoints[orgGroup.type]["orgColor"] != orgGroup.orgColor) {
                     this.infoPoints[orgGroup.type]["orgColor"] = orgGroup.orgColor;
-                    if (showTimeStamp) {
-                        this.infoPoints[orgGroup.type]["showTimeStamp"] = true;
-                    } else {
-                        this.infoPoints[orgGroup.type]["showTimeStamp"] = false;
-                    }
                 }
                 this.infoPoints[orgGroup.type]["popSize"].push(orgGroup.popSize);
-                if (showTimeStamp) {
-                    this.infoPoints[orgGroup.type]["showTimeStamp"] = true;
-                } else {
-                    this.infoPoints[orgGroup.type]["showTimeStamp"] = false;
-                }
-                if (this.infoPoints[orgGroup.type]["popSize"].length > this.infoCanvas.width) {
+                if (this.infoPoints[orgGroup.type]["popSize"].length > this.infoCanvas.width - this.chartOffset) {
                     this.infoPoints[orgGroup.type]["popSize"].shift();
                 }
             }
         });
     }
-    drawChart(timePassed) {
+    drawChart() {
         this.infoCtx.strokeStyle = "black";
         this.infoCtx.beginPath();
-        this.infoCtx.moveTo(20, this.infoCanvas.height - 20);
-        this.infoCtx.lineTo(20, 0);
+        this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
+        this.infoCtx.lineTo(this.chartOffset, 0);
 
-        this.infoCtx.moveTo(20, this.infoCanvas.height - 20);
-        this.infoCtx.lineTo(this.infoCanvas.width, this.infoCanvas.height - 20);
+        this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
+        this.infoCtx.lineTo(this.infoCanvas.width, this.infoCanvas.height - this.chartOffset);
         this.infoCtx.stroke();
 
         let organismTypes = Object.keys(this.infoPoints);
         organismTypes.forEach(orgType => {
             this.infoCtx.strokeStyle = this.infoPoints[orgType]["orgColor"];
-            let count = 0;
             let timeInterval = 0;
             this.infoCtx.beginPath();
             for (let i = 0; i < this.infoPoints[orgType]["popSize"].length - 1; i++) {
-                this.infoCtx.moveTo(timeInterval + 20, this.infoCanvas.height - 20 - this.infoPoints[orgType]["popSize"][i]);
-                timeInterval += 1;
-                this.infoCtx.lineTo(timeInterval + 20, this.infoCanvas.height - 20 - this.infoPoints[orgType]["popSize"][i + 1]);
-                if (this.infoPoints[orgType]["showTimeStamp"]) {
-                    this.infoCtx.fillText("1", timeInterval + 20, this.infoCanvas.height - 10);
-                }
-                count++;
+                this.infoCtx.moveTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i]);
+                timeInterval += 24;
+                this.infoCtx.lineTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i + 1]);
             }
             this.infoCtx.stroke();
         });

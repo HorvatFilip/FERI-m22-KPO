@@ -256,7 +256,6 @@ class GuiLogic {
         const frame = (time) => {
             if (lastTime != null) {
                 const timeStep = Math.min(100, time - lastTime) / 1000;
-
                 if (animation(timeStep) === false) {
                     return;
                 }
@@ -268,24 +267,24 @@ class GuiLogic {
     }
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups, 0);
+        let prevHour = 0;
+        let prevDay = 0;
         this.runAnimation(time => {
             if (this.run) {
-                this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
-                this.state = this.state.update();
-                this.updateOrganismPopSizeUI();
-                this.drawComponent.sync(this.state);
+                if (prevHour !== this.ecoSystem.dateTime.getHours()) {
+                    prevHour = this.ecoSystem.dateTime.getHours();
+                    this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
+                    this.state = this.state.update();
+
+                    this.drawComponent.syncSimData(this.state);
+                }
+                if (prevDay != this.ecoSystem.dateTime.getDays()) {
+                    prevDay = this.ecoSystem.dateTime.getDays();
+                    this.updateOrganismPopSizeUI();
+                    this.drawComponent.updateChartPoints(this.state.organismGroups);
+                    this.drawComponent.syncInfoData(this.state);
+                }
             }
         });
     }
-
-    // this.type = type;
-    // this.rp = rp;
-    // this.sp = sp;
-    // this.k = k;
-    // this.orgSize = orgSize;
-    // this.orgColor = orgColor;
-    // this.spawnPoint = spawnPoint;
-    // this.spawnVelocity = spawnVelocity;
-    // this.popSize = 0;
-    // this.population = [];
 }
