@@ -1,6 +1,16 @@
 body {
     background-color: rgb(33, 37, 41);
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
 .app-container {
     display: flex;
@@ -23,6 +33,7 @@ body {
     margin: 0 auto;
     justify-content: center;
     column-gap: 20px;
+    margin-bottom: 10px;
 }
 
 .controller-container div.btn {
@@ -48,6 +59,11 @@ canvas {
     padding: 20px;
     width: 100%;
     background-color: rgb(59, 74, 88);
+}
+
+#close-eco-elements-menu {
+    align-self: flex-end;
+    padding: 0 5px;
 }
 
 #eco-elements-menu{
@@ -128,9 +144,27 @@ canvas {
     flex-direction: row;
     max-width: 500px;
 }
+.eco-elem-row > label {
+    min-width: 127px;
+} 
 
+.eco-elem-row:nth-child(1) > input{
+    max-width: 35px;
+}
+
+.date-time-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    justify-content: center;
+    column-gap: 20px;
+}
+
+.date-time-container input,
 .eco-elem-row > input {
-    max-width: 100px;
+    max-width: 123px;
     background-color: rgb(22 46 70 / 45%);
     outline: 0 !important;
     color: gray;
@@ -138,6 +172,41 @@ canvas {
     border: black 1px;
     border-style: dotted;
     margin: 1px;
+}
+
+.date-time-container input {
+    max-width: 30px;
+    font-size: 20px;
+    text-align: right;
+}
+
+.time-controller-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.time-controller-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.time-controller-buttons > div {
+    cursor: pointer;
+}
+
+#time-controller-display {
+    background-color: rgb(50, 60, 70);
+    border: black 1px;
+    border-style: dotted;
+    min-width: 100px;
+    min-height: 10px;
+    padding: 5px;
+}
+
+#time-controller-display-progress {
+    background-color: rgb(42, 50, 60);
+    height: 10px;
 }
 
 .eco-elem-body > button {

@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="styles.css" />
 
-    <title>Test</title>
+    <title>KPO</title>
   </head>
   <body>
     <div id="eco-elements-menu">
@@ -40,9 +40,7 @@
       >
         X
       </button>
-      <div id="chart-display-list">
-        <canvas id="information-canvas"></canvas>
-      </div>
+      <div id="chart-display-list"></div>
     </div>
 
     <div class="app-container">
@@ -62,6 +60,26 @@
             </div>
             <div id="open-chart-display" class="btn btn-outline-secondary">
               <i class="fa-solid fa-chart-line"></i>
+            </div>
+          </div>
+        </div>
+        <div class="date-time-container">
+          <div class="date-container"></div>
+          <div class="time-container">
+            <input id="time-display-hours" placeholder="00" disabled />:
+            <input id="time-display-minutes" placeholder="00" disabled />
+          </div>
+          <div class="time-controller-container">
+            <div id="time-controller-display">
+              <div id="time-controller-display-progress"></div>
+            </div>
+            <div class="time-controller-buttons">
+              <div id="time-controller-minus">
+                <i class="fa-solid fa-minus"></i>
+              </div>
+              <div id="time-controller-plus">
+                <i class="fa-solid fa-plus"></i>
+              </div>
             </div>
           </div>
         </div>
