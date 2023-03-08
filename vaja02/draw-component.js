@@ -9,9 +9,7 @@ class DrawComponent {
         this.infoCanvas.width = infoCanvasConf.width;
         this.infoCanvas.height = infoCanvasConf.height;
         this.infoCtx = this.infoCanvas.getContext("2d");
-        this.infoCtx.font = "10px Arial";
         this.infoPoints = {};
-        this.timeStamp = 0;
         this.chartOffset = 20;
     }
     drawBoard() {
@@ -45,30 +43,30 @@ class DrawComponent {
     }
     drawOrganism(organism) {
         this.simCtx.beginPath();
-        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
+        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.orgSize, 0, Math.PI * 2);
         this.simCtx.closePath();
-        this.simCtx.fillStyle = organism.color;
+        this.simCtx.fillStyle = organism.orgColor;
         this.simCtx.fill();
     }
     updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
-            if (this.infoPoints[orgGroup.type] === undefined) {
-                this.infoPoints[orgGroup.type] = {
-                    orgColor: orgGroup.orgColor,
+            if (this.infoPoints[orgGroup.id] === undefined) {
+                this.infoPoints[orgGroup.id] = {
+                    orgColor: orgGroup.conf.orgColor,
                     popSize: [orgGroup.popSize]
                 };
             } else {
-                if (this.infoPoints[orgGroup.type]["orgColor"] != orgGroup.orgColor) {
-                    this.infoPoints[orgGroup.type]["orgColor"] = orgGroup.orgColor;
+                if (this.infoPoints[orgGroup.id].orgColor != orgGroup.conf.orgColor) {
+                    this.infoPoints[orgGroup.id].orgColor = orgGroup.conf.orgColor;
                 }
-                this.infoPoints[orgGroup.type]["popSize"].push(orgGroup.popSize);
-                if (this.infoPoints[orgGroup.type]["popSize"].length > this.infoCanvas.width - this.chartOffset) {
-                    this.infoPoints[orgGroup.type]["popSize"].shift();
+                this.infoPoints[orgGroup.type].popSize.push(orgGroup.popSize);
+                if (this.infoPoints[orgGroup.id].popSize.length > this.infoCanvas.width - this.chartOffset) {
+                    this.infoPoints[orgGroup.id].popSize.shift();
                 }
             }
         });
     }
-    drawChart() {
+    drawChartAxis() {
         this.infoCtx.strokeStyle = "black";
         this.infoCtx.beginPath();
         this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
@@ -77,18 +75,29 @@ class DrawComponent {
         this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
         this.infoCtx.lineTo(this.infoCanvas.width, this.infoCanvas.height - this.chartOffset);
         this.infoCtx.stroke();
-
-        let organismTypes = Object.keys(this.infoPoints);
-        organismTypes.forEach(orgType => {
-            this.infoCtx.strokeStyle = this.infoPoints[orgType]["orgColor"];
+    }
+    drawChart(intervalType) {
+        let organismIds = Object.keys(this.infoPoints);
+        let numJump = 0;
+        organismIds.forEach(orgId => {
+            this.infoCtx.strokeStyle = this.infoPoints[orgId].orgColor;
             let timeInterval = 0;
+            if (intervalType == "hour") {
+                numJump = 1;
+            } else if (intervalType == "day") {
+                numJump = 24;
+            } else if (intervalType == "month") {
+                numJump = 24 * 30;
+            } else {
+                numJump = 1;
+            }
             this.infoCtx.beginPath();
-            for (let i = 0; i < this.infoPoints[orgType]["popSize"].length - 1; i++) {
-                this.infoCtx.moveTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i]);
-                timeInterval += 24;
-                this.infoCtx.lineTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgType]["popSize"][i + 1]);
+            for (let i = 0; i < this.infoPoints[orgId].popSize.length - 1; i++) {
+                this.infoCtx.moveTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgId].popSize[i]);
+                timeInterval += numJump;
+                this.infoCtx.lineTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgId].popSize[i + 1]);
                 if (timeInterval + this.chartOffset > this.infoCanvas.width - this.chartOffset) {
-                    this.infoPoints[orgType]["popSize"].shift();
+                    this.infoPoints[orgId].popSize.shift();
                 }
             }
             this.infoCtx.stroke();

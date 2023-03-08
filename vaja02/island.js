@@ -2,6 +2,12 @@ class Organism {
     constructor(orgNewPos) {
         Object.assign(this, orgNewPos);
     }
+    addGoalPos(newGoalPos) {
+        this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
+    }
+    moveToSpawnPoint() {
+        this.goalPos = this.homePos;
+    }
     updatePosition(state) {
         let rndMove = true;
         if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
@@ -13,70 +19,96 @@ class Organism {
             rndMove = false;
         }
         if (rndMove) {
-            let changeVelocity = Math.floor(Math.random() * 4);
-            switch (changeVelocity) {
-                case 0:
-                    this.velocity = new Vector(0, 0);
-                    break;
-                case 1:
-                    this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y);
-                    break;
-                case 2:
-                    this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
-                    break;
-                case 3:
-                    this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y * (-1));
-                    break;
-            }
+            this.makeRandomMove();
         }
-
-
         return new Organism({
             ...this,
             pos: this.pos.add(this.velocity)
         });
     }
+    makeMoveToGoal() {
+        if (this.pos.x != this.goalPos.x) {
+
+        }
+    }
+    makeRandomMove() {
+        let changeVelocity = Math.floor(Math.random() * 9);
+        switch (changeVelocity) {
+            case 0:
+                this.velocity = new Vector(0, 0);
+                break;
+            case 1:
+                this.velocity = new Vector(Math.random() * 3, 0);
+                break;
+            case 2:
+                this.velocity = new Vector(0, Math.random() * 3);
+                break;
+            case 3:
+                this.velocity = new Vector(Math.random() * -3, 0);
+                break;
+            case 4:
+                this.velocity = new Vector(0, Math.random() * -3);
+                break;
+            case 5:
+                this.velocity = new Vector(Math.random() * 3, Math.random() * 3);
+                break;
+            case 6:
+                this.velocity = new Vector(Math.random() * -3, Math.random() * 3);
+                break;
+            case 7:
+                this.velocity = new Vector(Math.random() * 3, Math.random() * -3);
+                break;
+            case 8:
+                this.velocity = new Vector(Math.random() * -3, Math.random() * -3);
+                break;
+        }
+    }
 }
 
 class OrganismGroup {
-    constructor(type, orgColor, initialPopSize, orgSize, maxVelocity, viewRange, spawnPoint, spawnVelocity = new Vector(0, 0)) {
-        this.type = type;
-        this.orgColor = orgColor;
-        this.initialPopSize = initialPopSize;
-        this.orgSize = orgSize;
-        this.orgMaxVelocity = maxVelocity;
-        this.orgViewRange = viewRange;
-
-        this.spawnPoint = spawnPoint;
-        this.spawnVelocity = spawnVelocity;
+    constructor(id, conf) {
+        /*
+        this.id = conf.id;
+        this.type = conf.type;
+        this.orgColor = conf.orgColor;
+        this.orgSize = conf.orgSize;
+        this.orgMaxVelocity = conf.orgMaxVelocity;
+        this.orgViewRange = conf.orgViewRange;
+        this.diet = conf.diet;
+        this.homePos = conf.homePos;
+        this.feedingPos = conf.feedingPos;
+        this.population = [];
         this.popSize = 0;
+        this.initialPopSize = conf.initialPopSize;
+        this.addOrganisms(this.initialPopSize);
+        */
+        this.id = id;
+        this.conf = conf;
         this.population = [];
-        this.addOrganisms(initialPopSize);
+        this.popSize = 0;
+        this.addOrganisms(this.conf.initialPopSize);
     }
-    changeSpecifications(config) {
-        this.type = config["type"];
-        this.rp = config["rp"];
-        this.sp = config["sp"];
-        this.k = config["k"];
-        this.popSize = config["popSize"];
-        this.orgSize = config["orgSize"];
-        this.orgColor = config["orgColor"];
-        this.spawnPoint = new Vector(config["spawnPoint"][0], config["spawnPoint"][1]);
+    changeConfiguration(newConf) {
+        this.conf = Object.assign(this.conf, newConf);
         this.population = [];
-        this.addOrganisms(this.popSize);
+        this.addOrganisms(this.conf.initialPopSize);
     }
     addOrganisms(count) {
         for (let i = 0; i < count; i++) {
             this.popSize++;
             const orgStats =
             {
-                type: this.type,
-                color: this.orgColor,
-                id: this.type + "-" + this.popSize,
-                pos: this.spawnPoint,
-                size: this.orgSize,
-                maxVelocity: this.orgMaxVelocity,
-                velocity: this.spawnVelocity
+                id: this.conf.type + "-" + this.popSize,
+                type: this.conf.type,
+                orgColor: this.conf.orgColor,
+                orgSize: this.conf.orgSize,
+                maxVelocity: this.conf.orgMaxVelocity,
+                viewRange: this.conf.viewRange,
+                diet: this.conf.diet,
+                velocity: new Vector(0, 0),
+                homePos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
+                pos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
+                goalPos: new Vector(this.conf.homePos.x, this.conf.homePos.y)
             }
             this.population.push(
                 new Organism(orgStats)
@@ -87,23 +119,8 @@ class OrganismGroup {
         this.population.splice(0, count);
         this.popSize -= count;
     }
-    updatePopulation() {
-        let populationChange = 0;
-        for (let i = 0; i < this.popSize; i++) {
-            if (Math.random() < this.rp) {
-                populationChange++;
-            }
-            let deathChance = Math.random();
-            if (deathChance < this.sp || deathChance < (this.k * this.popSize)) {
-                populationChange--;
-            }
-        }
-        if (populationChange > 0) {
-            this.addOrganisms(populationChange);
-        }
-        else {
-            this.removeOrganisms(Math.abs(populationChange));
-        }
+    updatePopulationCount() {
+
     }
     updatePosition(state) {
         this.population = this.population.map(organism => {
@@ -173,18 +190,27 @@ class EcoSystem {
         this.dateTime = dateTimeTracker;
         this.organismGroups = [];
     }
-    addOrganismGroup(organismGroup) {
-        this.organismGroups.push(organismGroup);
+    addOrganismGroup(orgGroupConf) {
+        let typeCount = 0;
+        this.organismGroups.forEach(orgGroup => {
+            if (orgGroup.conf.type == orgGroupConf.type) {
+                typeCount++;
+            }
+        });
+        const orgGroupId = orgGroupConf.type + "-" + typeCount;
+        const newOrgGroup = new OrganismGroup(orgGroupId, orgGroupConf);
+        this.organismGroups.push(newOrgGroup);
     }
-    changeOrganismGroupSpecs(type, config) {
+    changeOrganismGroupConfiguration(id, newConfig) {
         for (let i = 0; i < this.organismGroups.length; i++) {
-            if (this.organismGroups[i].type == type) {
-                this.organismGroups[i].changeSpecifications(config);
+            if (this.organismGroups[i].id == id) {
+                this.organismGroups[i].changeConfiguration(newConfig);
+                break;
             }
         }
     }
-    removeOrganismGroupByType(type) {
-        this.organismGroups = this.organismGroups.organismGroups.filter(orgGroup => orgGroup.type != type);
+    removeOrganismGroupById(id) {
+        this.organismGroups = this.organismGroups.organismGroups.filter(orgGroup => orgGroup.id != id);
     }
 
 }
