@@ -12,6 +12,9 @@ class Vector {
     multiply(scalar) {
         return new Vector(this.x * scalar, this.y * scalar);
     }
+    divide(scalar) {
+        return new Vector(this.x / scalar, this.y / scalar);
+    }
     dotProduct(vector02) {
         return this.x * vector02.x + this.y * vector02.y;
     }
@@ -20,5 +23,12 @@ class Vector {
     }
     getDirection() {
         return Math.atan2(this.x, this.y);
+    }
+    equals(vector02) {
+        if (this.x == vector02.x && this.y == vector02.y) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

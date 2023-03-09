@@ -9,17 +9,26 @@ class Organism {
         this.goalPos = this.homePos;
     }
     updatePosition(state) {
-        let rndMove = true;
+        let moveScenario = 0;
+        if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
+            this.goalPos = null;
+            moveScenario = 1;
+        } else {
+            moveScenario = 2;
+        }
+
         if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
             this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
-            rndMove = false;
+            moveScenario = 0;
         }
         if (this.pos.y >= state.display.simCanvas.height - 30 || this.pos.y <= 30) {
             this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
-            rndMove = false;
+            moveScenario = 0;
         }
-        if (rndMove) {
+        if (this.goalPos === null) {
             this.makeRandomMove();
+        } else if (moveScenario == 2) {
+            this.makeMoveToGoal();
         }
         return new Organism({
             ...this,
@@ -27,9 +36,23 @@ class Organism {
         });
     }
     makeMoveToGoal() {
-        if (this.pos.x != this.goalPos.x) {
-
+        let x = (this.goalPos.x - this.pos.x) / this.maxVelocity;
+        if (x >= 1) {
+            x = this.maxVelocity;
+        } else if (x <= -1) {
+            x = -this.maxVelocity;
+        } else {
+            x = this.goalPos.x - this.pos.x;
         }
+        let y = (this.goalPos.y - this.pos.y) / this.maxVelocity;
+        if (y >= 1) {
+            y = this.maxVelocity;
+        } else if (y <= -1) {
+            y = -this.maxVelocity;
+        } else {
+            y = this.goalPos.y - this.pos.y;
+        }
+        this.velocity = new Vector(x, y);
     }
     makeRandomMove() {
         let changeVelocity = Math.floor(Math.random() * 9);
@@ -108,7 +131,7 @@ class OrganismGroup {
                 velocity: new Vector(0, 0),
                 homePos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
                 pos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
-                goalPos: new Vector(this.conf.homePos.x, this.conf.homePos.y)
+                goalPos: new Vector(this.conf.feedingPos.x, this.conf.feedingPos.y)
             }
             this.population.push(
                 new Organism(orgStats)
@@ -128,13 +151,24 @@ class OrganismGroup {
         });
         return this;
     }
+    changeStage(stage) {
+        if (stage == "feeding") {
+            this.population.forEach(org => {
+                org.addGoalPos(this.conf.feedingPos);
+            });
+        } else if (stage == "resting") {
+            this.population.forEach(org => {
+                org.addGoalPos(this.conf.homePos);
+            });
+        }
+    }
 }
 
 class DateTimeTracker {
     constructor(startDate = { year: 0, month: 0, day: 0, hour: 0 }) {
         this.date = startDate;
         this.interval = setInterval(() => {
-            this.addHours(1);
+            this.addHours(0.1);
         }, 50);
     }
     addYears(count) {

@@ -267,8 +267,6 @@ class GuiLogic {
             console.log(newOrgGroup);
             ecoSystem.addOrganismGroup(newOrgGroup);
         });
-        console.log(defaultOrgs);
-
 
         this.addEcoSystemToGui(ecoSystem);
         this.startAnimation();
@@ -299,6 +297,7 @@ class GuiLogic {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
         let prevHour = 0;
         let prevDay = 0;
+        let currStage = "resting";
         this.runAnimation(time => {
             if (this.run) {
                 if (prevHour !== this.ecoSystem.dateTime.getHours()) {
@@ -309,6 +308,13 @@ class GuiLogic {
                 }
                 if (prevDay != this.ecoSystem.dateTime.getDays()) {
                     prevDay = this.ecoSystem.dateTime.getDays();
+                    if (currStage == "resting") {
+                        this.state.startFeedingStage();
+                        currStage = "feeding";
+                    } else if (currStage == "feeding") {
+                        this.state.startRestingStage();
+                        currStage = "resting";
+                    }
                     //this.updateOrganismPopSizeUI();
                     //this.drawComponent.updateChartPoints(this.state.organismGroups);
                     //this.drawComponent.syncInfoData(this.state);

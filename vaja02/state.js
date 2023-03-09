@@ -6,6 +6,16 @@ class State {
     updateOrganismGroups(updatedOrganismGroups) {
         this.organismGroups = updatedOrganismGroups;
     }
+    startFeedingStage() {
+        this.organismGroups.forEach(orgGroup => {
+            orgGroup.changeStage("feeding");
+        });
+    }
+    startRestingStage() {
+        this.organismGroups.forEach(orgGroup => {
+            orgGroup.changeStage("resting");
+        });
+    }
     update() {
         let organismGroups = this.organismGroups.map(orgGroup => {
             //orgGroup.updatePopulation();
