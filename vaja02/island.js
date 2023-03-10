@@ -2,7 +2,7 @@ class Organism {
     constructor(orgNewPos) {
         Object.assign(this, orgNewPos);
     }
-    addGoalPos(newGoalPos) {
+    setGoalPos(newGoalPos) {
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
     }
     moveToSpawnPoint() {
@@ -86,6 +86,18 @@ class Organism {
                 break;
         }
     }
+    inRangeOfInteraction(org2) {
+        let d = Math.sqrt(
+            Math.pow(this.pos.x - org2.pos.x, 2) + Math.pow(this.pos.y - org2.pos.y, 2)
+        );
+        if (d <= this.orgSize) {
+            return 1;
+        } else if (d <= this.detectRadius) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
 }
 
 class OrganismGroup {
@@ -117,8 +129,26 @@ class OrganismGroup {
         this.addOrganisms(this.conf.initialPopSize);
     }
     addOrganisms(count) {
+        let R = 1;
+        let r = null;
+        let theta = null;
+        let x = null, y = null;
+        let homePos = null, goalPos = null;
         for (let i = 0; i < count; i++) {
             this.popSize++;
+
+            r = R * Math.sqrt(Math.random());
+            theta = Math.random() * 2 * Math.PI;
+            x = this.conf.homePos.x + r * Math.cos(theta);
+            y = this.conf.homePos.y + r * Math.sin(theta);
+            homePos = new Vector(x, y);
+
+            r = R * Math.sqrt(Math.random());
+            theta = Math.random() * 2 * Math.PI;
+            x = this.conf.feedingPos.x + r * Math.cos(theta);
+            y = this.conf.feedingPos.y + r * Math.sin(theta);
+            goalPos = new Vector(x, y);
+
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popSize,
@@ -126,12 +156,12 @@ class OrganismGroup {
                 orgColor: this.conf.orgColor,
                 orgSize: this.conf.orgSize,
                 maxVelocity: this.conf.orgMaxVelocity,
-                viewRange: this.conf.viewRange,
+                detectRadius: this.conf.detectRadius,
                 diet: this.conf.diet,
                 velocity: new Vector(0, 0),
-                homePos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
+                homePos: homePos,
                 pos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
-                goalPos: new Vector(this.conf.feedingPos.x, this.conf.feedingPos.y)
+                goalPos: goalPos
             }
             this.population.push(
                 new Organism(orgStats)
@@ -141,6 +171,9 @@ class OrganismGroup {
     removeOrganisms(count) {
         this.population.splice(0, count);
         this.popSize -= count;
+    }
+    removeById(id) {
+        this.population = this.population.filter(org => org.id != id);
     }
     updatePopulationCount() {
 
@@ -154,11 +187,11 @@ class OrganismGroup {
     changeStage(stage) {
         if (stage == "feeding") {
             this.population.forEach(org => {
-                org.addGoalPos(this.conf.feedingPos);
+                org.setGoalPos(this.conf.feedingPos);
             });
         } else if (stage == "resting") {
             this.population.forEach(org => {
-                org.addGoalPos(this.conf.homePos);
+                org.setGoalPos(this.conf.homePos);
             });
         }
     }
@@ -244,7 +277,7 @@ class EcoSystem {
         }
     }
     removeOrganismGroupById(id) {
-        this.organismGroups = this.organismGroups.organismGroups.filter(orgGroup => orgGroup.id != id);
+        this.organismGroups = this.organismGroups.filter(orgGroup => orgGroup.id != id);
     }
 
 }

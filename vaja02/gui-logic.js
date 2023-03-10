@@ -199,30 +199,30 @@ class GuiLogic {
             orgColor: "#4C9900",
             orgSize: 2,
             orgMaxVelocity: 3,
-            viewRange: 2,
+            detectRadius: 20,
             diet: "plant",
             homePos: {
-                x: 200, y: 200
+                x: 300, y: 300
             },
             feedingPos: {
-                x: 500, y: 500
+                x: 450, y: 450
             },
-            initialPopSize: 10
+            initialPopSize: 50
         };
         const orgGroup02Conf = {
             type: "bird",
             orgColor: "#004C99",
             orgSize: 4,
-            orgMaxVelocity: 5,
-            viewRange: 5,
+            orgMaxVelocity: 4,
+            detectRadius: 40,
             diet: "insect",
             homePos: {
-                x: 800, y: 800
+                x: 700, y: 700
             },
             feedingPos: {
                 x: 500, y: 500
             },
-            initialPopSize: 3
+            initialPopSize: 5
         };
 
         const dateTimeTracker = new DateTimeTracker();
@@ -295,14 +295,18 @@ class GuiLogic {
     }
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
-        let prevHour = 0;
-        let prevDay = 0;
+        let prevHour = this.ecoSystem.dateTime.getHours();
+        let prevDay = this.ecoSystem.dateTime.getDays();
         let currStage = "resting";
         this.runAnimation(time => {
             if (this.run) {
                 if (prevHour !== this.ecoSystem.dateTime.getHours()) {
                     prevHour = this.ecoSystem.dateTime.getHours();
                     this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
+                    if (currStage == "feeding") {
+                        this.state.searchForFood();
+                        //this.state.checkForPredators();
+                    }
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                 }

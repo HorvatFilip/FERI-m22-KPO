@@ -9,6 +9,9 @@ class Vector {
     subtract(vector02) {
         return new Vector(this.x - vector02.x, this.y - vector02.y);
     }
+    addScalar(scalar) {
+        return new Vector(this.x + scalar, this.y + scalar);
+    }
     multiply(scalar) {
         return new Vector(this.x * scalar, this.y * scalar);
     }

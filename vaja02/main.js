@@ -33,7 +33,7 @@ ecoSystem.addOrganismGroup(organismGroup_Insects);
 ecoSystem.addOrganismGroup(organismGroup_Birds);
 ecoSystem.addOrganismGroup(organismGroup_Cats);
 
-let state = new State(drawComponent, organismGroups, 0);
+let state = new State(drawComponent, organismGroups);
 
 //var run = true;
 const gui = new GuiLogic();
