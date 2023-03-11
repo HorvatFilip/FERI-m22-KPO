@@ -29,24 +29,25 @@ class State {
                             if (range == 1) {
                                 orgGroup2.removeById(org2.id);
                             } else if (range == 2) {
-                                org.setGoalPos(org2.pos);
+                                org.setGoalPos(org2.pos.add(org2.velocity));
                             }
                             range = org2.inRangeOfInteraction(org);
                             if (range == 2) {
-                                let buffer = new Vector(org.velocity.x, org.velocity.y);
+                                //let buffer = new Vector(org.velocity.x, org.velocity.y);
+                                /*
                                 if (buffer.x < 0) {
-                                    buffer.x -= Math.random() * 2;
+                                    buffer.x -= Math.random() * 6;
                                 } else {
-                                    buffer.x += Math.random() * 2;
+                                    buffer.x += Math.random() * 6;
                                 }
                                 if (buffer.y < 0) {
-                                    buffer.y -= Math.random() * 2;
+                                    buffer.y -= Math.random() * 6;
                                 } else {
-                                    buffer.y += Math.random() * 2;
+                                    buffer.y += Math.random() * 6;
                                 }
-
-                                console.log(buffer);
-                                let newGoal = org2.pos.add(buffer);
+                                */
+                                //buffer = buffer.multiply(1.2);
+                                let newGoal = org2.pos.add(org.velocity.multiply(10));
 
                                 //let rnd = new Vector(Math.random() * 3, Math.random() * 3)
                                 //newGoal = newGoal.add(rnd);

@@ -128,27 +128,17 @@ class OrganismGroup {
         this.population = [];
         this.addOrganisms(this.conf.initialPopSize);
     }
+    getRandomPointOnCircle(R, center){
+        let r = R * Math.sqrt(Math.random());
+        let theta = Math.random() * 2 * Math.PI;
+        let x = center.x + r * Math.cos(theta);
+        let y = center.y + r * Math.sin(theta);
+        return new Vector(x, y);
+    }
     addOrganisms(count) {
-        let R = 1;
-        let r = null;
-        let theta = null;
-        let x = null, y = null;
-        let homePos = null, goalPos = null;
         for (let i = 0; i < count; i++) {
             this.popSize++;
-
-            r = R * Math.sqrt(Math.random());
-            theta = Math.random() * 2 * Math.PI;
-            x = this.conf.homePos.x + r * Math.cos(theta);
-            y = this.conf.homePos.y + r * Math.sin(theta);
-            homePos = new Vector(x, y);
-
-            r = R * Math.sqrt(Math.random());
-            theta = Math.random() * 2 * Math.PI;
-            x = this.conf.feedingPos.x + r * Math.cos(theta);
-            y = this.conf.feedingPos.y + r * Math.sin(theta);
-            goalPos = new Vector(x, y);
-
+            let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popSize,
@@ -160,8 +150,8 @@ class OrganismGroup {
                 diet: this.conf.diet,
                 velocity: new Vector(0, 0),
                 homePos: homePos,
-                pos: new Vector(this.conf.homePos.x, this.conf.homePos.y),
-                goalPos: goalPos
+                pos: homePos,
+                goalPos: null
             }
             this.population.push(
                 new Organism(orgStats)
@@ -187,11 +177,13 @@ class OrganismGroup {
     changeStage(stage) {
         if (stage == "feeding") {
             this.population.forEach(org => {
-                org.setGoalPos(this.conf.feedingPos);
+                let feedingPos = this.getRandomPointOnCircle(40, this.conf.feedingPos);
+                org.setGoalPos(feedingPos);
             });
         } else if (stage == "resting") {
             this.population.forEach(org => {
-                org.setGoalPos(this.conf.homePos);
+                let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
+                org.setGoalPos(homePos);
             });
         }
     }

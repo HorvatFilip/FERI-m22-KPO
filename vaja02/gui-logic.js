@@ -264,7 +264,6 @@ class GuiLogic {
             console.log(inputGroup[3].value);
 
             let newOrgGroup = new OrganismGroup(inputGroup[0].value, inputGroup[3].value, inputGroup[4].value, inputGroup[5].value, inputGroup[6].value, inputGroup[2].value, inputGroup[1].value, spawnPoint, spawnVelocity);
-            console.log(newOrgGroup);
             ecoSystem.addOrganismGroup(newOrgGroup);
         });
 
@@ -295,8 +294,8 @@ class GuiLogic {
     }
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
-        let prevHour = this.ecoSystem.dateTime.getHours();
-        let prevDay = this.ecoSystem.dateTime.getDays();
+        let prevHour = this.ecoSystem.dateTime.getHours()-1;
+        let prevDay = this.ecoSystem.dateTime.getDays()-1;
         let currStage = "resting";
         this.runAnimation(time => {
             if (this.run) {
