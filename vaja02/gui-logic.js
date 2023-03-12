@@ -55,7 +55,7 @@ class GuiLogic {
     }
     refreshOrganismGroupList() {
         this.ecoSystem.organismGroups.forEach(orgGroup => {
-            if (this.ecoElems_list.querySelectorAll("#" + orgGroup.type + "-eco-elem").length === 0) {
+            if (this.ecoElems_list.querySelectorAll("#" + orgGroup.id + "-eco-elem").length === 0) {
                 const newEcoElem = document.createElement("div");
                 const header = document.createElement("div");
                 const headerDisplayColor = document.createElement("div");
@@ -66,59 +66,64 @@ class GuiLogic {
 
 
                 headerDisplayColor.style.backgroundColor = orgGroup.orgColor;
-                headerText.innerHTML = orgGroup.type;
+                headerText.innerHTML = orgGroup.conf.type;
                 headerDisplayPopSize.innerHTML = orgGroup.popSize;
                 saveBtn.innerHTML = "Save";
 
-                newEcoElem.setAttribute("id", orgGroup.type + "-eco-elem");
-                headerDisplayPopSize.setAttribute("id", orgGroup.type + "-popsize");
+                newEcoElem.setAttribute("id", orgGroup.id + "-eco-elem");
+                headerDisplayPopSize.setAttribute("id", orgGroup.id + "-popsize");
                 newEcoElem.setAttribute("class", "eco-elem");
                 header.setAttribute("class", "eco-elem-header");
                 headerDisplayColor.setAttribute("class", "eco-elem-display-color");
                 body.setAttribute("class", "eco-elem-body");
                 saveBtn.setAttribute("class", "btn btn-secondary");
 
-                const typeInput = document.createElement("input");
-                const colorInput = document.createElement("input");
-                const orgSizeInput = document.createElement("input");
                 const popSizeInput = document.createElement("input");
-                const rpInput = document.createElement("input");
-                const spInput = document.createElement("input");
-                const kInput = document.createElement("input");
-                const spawnXInput = document.createElement("input");
-                const spawnYInput = document.createElement("input");
                 const spawnInputClick = document.createElement("div");
-                this.inputs.push([typeInput, colorInput, orgSizeInput, popSizeInput, rpInput, spInput, kInput, spawnXInput, spawnYInput]);
+                const spawnInputIcon = document.createElement("i");
+                const homeXInput = document.createElement("input");
+                const homeYInput = document.createElement("input");
+                const orgMaxVelocityInput = document.createElement("input");
+                const orgSizeInput = document.createElement("input");
+                const orgDetectInput = document.createElement("input");
+                const orgBaseEnergyInput = document.createElement("input");
+                const orgMaxVelocityInputLabel = document.createElement("label");
+                const orgSizeInputLabel = document.createElement("label");
+                const orgDetectInputLabel = document.createElement("label");
+                const orgBaseEnergyInputLabel = document.createElement("label");
+                this.inputs.push([popSizeInput, homeXInput, homeYInput, orgMaxVelocityInput, orgSizeInput, orgDetectInput, orgBaseEnergyInput]);
 
-                typeInput.setAttribute("type", "text");
-                colorInput.setAttribute("type", "color");
+                spawnInputIcon.setAttribute("class", "fa-solid fa-house");
+
                 popSizeInput.setAttribute("type", "number");
+                homeXInput.setAttribute("type", "number");
+                homeYInput.setAttribute("type", "number");
+                orgMaxVelocityInput.setAttribute("type", "number");
                 orgSizeInput.setAttribute("type", "number");
-                rpInput.setAttribute("type", "number");
-                spInput.setAttribute("type", "number");
+                orgDetectInput.setAttribute("type", "number");
+                orgBaseEnergyInput.setAttribute("type", "number");
 
-                kInput.setAttribute("type", "number");
-                spawnXInput.setAttribute("type", "number");
-                spawnYInput.setAttribute("type", "number");
+                popSizeInput.setAttribute("placeholder", "Pop size");
+                homeXInput.setAttribute("placeholder", "X");
+                homeYInput.setAttribute("placeholder", "Y");
+                orgMaxVelocityInput.setAttribute("placeholder", "MaxVel");
+                orgSizeInput.setAttribute("placeholder", "Org size");
+                orgDetectInput.setAttribute("placeholder", "Detect");
+                orgBaseEnergyInput.setAttribute("placeholder", "Energy");
 
-                typeInput.setAttribute("placeholder", "Type");
-                popSizeInput.setAttribute("placeholder", "Pop Size")
-                orgSizeInput.setAttribute("placeholder", "Org Size");
-                rpInput.setAttribute("placeholder", "R");
-                spInput.setAttribute("placeholder", "S");
-                kInput.setAttribute("placeholder", "K");
-                spawnXInput.setAttribute("placeholder", "X");
-                spawnYInput.setAttribute("placeholder", "Y");
 
-                typeInput.value = orgGroup.type;
-                colorInput.value = orgGroup.orgColor;
-                popSizeInput.value = orgGroup.initialPopSize;
-                orgSizeInput.value = orgGroup.orgSize;
-                rpInput.value = orgGroup.rp;
-                spInput.value = orgGroup.sp;
-                kInput.value = orgGroup.k;
-                spawnXInput.value = orgGroup.spawnPoint.x;
-                spawnYInput.value = orgGroup.spawnPoint.y;
+                orgMaxVelocityInputLabel.innerHTML = "Max velocity";
+                orgSizeInputLabel.innerHTML = "Org Size";
+                orgDetectInputLabel.innerHTML = "Detect Range";
+                orgBaseEnergyInputLabel.innerHTML = "Base Energy";
+
+                popSizeInput.value = orgGroup.conf.initialPopSize;
+                homeXInput.value = orgGroup.conf.homePos.x;
+                homeYInput.value = orgGroup.conf.homePos.y;
+                orgMaxVelocityInput.value = orgGroup.conf.orgMaxVelocity;
+                orgSizeInput.value = orgGroup.conf.orgSize;
+                orgDetectInput.value = orgGroup.conf.detectRadius;
+                orgBaseEnergyInput.value = orgGroup.conf.baseEnergy;
 
                 header.addEventListener("click", () => {
                     if (body.style.display == "none" || body.style.display == "") {
@@ -132,14 +137,12 @@ class GuiLogic {
                 saveBtn.addEventListener("click", () => {
                     headerDisplayColor.style.backgroundColor = colorInput.value;
                     const config = {
-                        type: typeInput.value,
-                        orgColor: colorInput.value,
-                        popSize: popSizeInput.value,
+                        initialPopSize: popSizeInput.value,
+                        orgMaxVelocity: orgMaxVelocityInput.value,
                         orgSize: orgSizeInput.value,
-                        rp: rpInput.value,
-                        sp: spInput.value,
-                        k: kInput.value,
-                        spawnPoint: [parseInt(spawnXInput.value), parseInt(spawnYInput.value)]
+                        detectRadius: orgDetectInput.value,
+                        baseEnergy: orgBaseEnergyInput.value,
+                        homePos: [parseInt(homeXInput.value), parseInt(homeYInput.value)]
                     };
                     this.ecoSystem.changeOrganismGroupSpecs(orgGroup.type, config);
                 });
@@ -148,28 +151,35 @@ class GuiLogic {
                 const secondRow = document.createElement("div");
                 const thirdRow = document.createElement("div");
                 const forthRow = document.createElement("div");
+                const fifthRow = document.createElement("div");
 
                 firstRow.setAttribute("class", "eco-elem-row");
                 secondRow.setAttribute("class", "eco-elem-row");
                 thirdRow.setAttribute("class", "eco-elem-row");
                 forthRow.setAttribute("class", "eco-elem-row");
+                fifthRow.setAttribute("class", "eco-elem-row");
 
                 header.appendChild(headerDisplayColor);
                 header.appendChild(headerText);
                 header.appendChild(headerDisplayPopSize);
-                firstRow.appendChild(colorInput);
-                secondRow.appendChild(typeInput);
-                secondRow.appendChild(orgSizeInput);
-                secondRow.appendChild(popSizeInput);
-                thirdRow.appendChild(rpInput);
-                thirdRow.appendChild(spInput);
-                thirdRow.appendChild(kInput);
-                forthRow.appendChild(spawnXInput);
-                forthRow.appendChild(spawnYInput);
+                spawnInputClick.appendChild(spawnInputIcon);
+                firstRow.appendChild(popSizeInput);
+                firstRow.appendChild(spawnInputClick);
+                firstRow.appendChild(homeXInput);
+                firstRow.appendChild(homeYInput);
+                secondRow.appendChild(orgMaxVelocityInputLabel);
+                secondRow.appendChild(orgMaxVelocityInput);
+                thirdRow.appendChild(orgSizeInputLabel);
+                thirdRow.appendChild(orgSizeInput);
+                forthRow.appendChild(orgDetectInputLabel);
+                forthRow.appendChild(orgDetectInput);
+                fifthRow.appendChild(orgBaseEnergyInputLabel);
+                fifthRow.appendChild(orgBaseEnergyInput);
                 body.appendChild(firstRow);
                 body.appendChild(secondRow);
                 body.appendChild(thirdRow);
                 body.appendChild(forthRow);
+                body.appendChild(fifthRow);
                 body.appendChild(saveBtn);
                 newEcoElem.appendChild(header);
                 newEcoElem.appendChild(body);
@@ -200,6 +210,7 @@ class GuiLogic {
             orgSize: 2,
             orgMaxVelocity: 3,
             detectRadius: 20,
+            baseEnergy: 50,
             diet: "plant",
             homePos: {
                 x: 300, y: 300
@@ -213,8 +224,9 @@ class GuiLogic {
             type: "bird",
             orgColor: "#004C99",
             orgSize: 4,
-            orgMaxVelocity: 4,
+            orgMaxVelocity: 3.5,
             detectRadius: 40,
+            baseEnergy: 50,
             diet: "insect",
             homePos: {
                 x: 700, y: 700
@@ -294,8 +306,8 @@ class GuiLogic {
     }
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
-        let prevHour = this.ecoSystem.dateTime.getHours()-1;
-        let prevDay = this.ecoSystem.dateTime.getDays()-1;
+        let prevHour = this.ecoSystem.dateTime.getHours() - 1;
+        let prevDay = this.ecoSystem.dateTime.getDays() - 1;
         let currStage = "resting";
         this.runAnimation(time => {
             if (this.run) {

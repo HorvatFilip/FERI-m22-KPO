@@ -1,6 +1,16 @@
 body {
     background-color: rgb(33, 37, 41);
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
 .app-container {
     display: flex;
@@ -128,6 +138,14 @@ canvas {
     flex-direction: row;
     max-width: 500px;
 }
+.eco-elem-row > label {
+    min-width: 110px;
+} 
+
+.eco-elem-row:nth-child(1) > input{
+    max-width: 50px;
+}
+
 
 .eco-elem-row > input {
     max-width: 100px;

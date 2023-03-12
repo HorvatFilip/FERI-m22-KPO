@@ -108,7 +108,7 @@ class OrganismGroup {
         this.orgColor = conf.orgColor;
         this.orgSize = conf.orgSize;
         this.orgMaxVelocity = conf.orgMaxVelocity;
-        this.orgViewRange = conf.orgViewRange;
+        this.detectRadius = conf.detectRadius;
         this.diet = conf.diet;
         this.homePos = conf.homePos;
         this.feedingPos = conf.feedingPos;
@@ -128,7 +128,7 @@ class OrganismGroup {
         this.population = [];
         this.addOrganisms(this.conf.initialPopSize);
     }
-    getRandomPointOnCircle(R, center){
+    getRandomPointOnCircle(R, center) {
         let r = R * Math.sqrt(Math.random());
         let theta = Math.random() * 2 * Math.PI;
         let x = center.x + r * Math.cos(theta);
