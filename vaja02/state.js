@@ -25,35 +25,40 @@ class State {
                 if (orgGroup2.conf.type == diet) {
                     orgGroup.population.forEach(org => {
                         orgGroup2.population.forEach(org2 => {
-                            range = org.inRangeOfInteraction(org2);
-                            if (range == 1) {
-                                orgGroup2.removeById(org2.id);
-                            } else if (range == 2) {
-                                org.setGoalPos(org2.pos.add(org2.velocity));
-                            }
-                            range = org2.inRangeOfInteraction(org);
-                            if (range == 2) {
-                                //let buffer = new Vector(org.velocity.x, org.velocity.y);
-                                /*
-                                if (buffer.x < 0) {
-                                    buffer.x -= Math.random() * 6;
-                                } else {
-                                    buffer.x += Math.random() * 6;
+                            
+                                range = org.inRangeOfInteraction(org2);
+                                if (range == 1) {
+                                    orgGroup2.removeById(org2.id);
+                                } else if (range == 2) {
+                                    org.setGoalPos(org2.pos.add(org2.velocity));
                                 }
-                                if (buffer.y < 0) {
-                                    buffer.y -= Math.random() * 6;
-                                } else {
-                                    buffer.y += Math.random() * 6;
-                                }
-                                */
-                                //buffer = buffer.multiply(1.2);
-                                let newGoal = org2.pos.add(org.velocity.multiply(10));
+                            
+                            if (org2.goalPos === null) {
 
-                                //let rnd = new Vector(Math.random() * 3, Math.random() * 3)
-                                //newGoal = newGoal.add(rnd);
-                                // rnd = new Vector(2, 2)
-                                //newGoal = newGoal.addScalar(2);
-                                org2.setGoalPos(newGoal);
+                                range = org2.inRangeOfInteraction(org);
+                                if (range == 2) {
+                                    //let buffer = new Vector(org.velocity.x, org.velocity.y);
+                                    /*
+                                    if (buffer.x < 0) {
+                                        buffer.x -= Math.random() * 6;
+                                    } else {
+                                        buffer.x += Math.random() * 6;
+                                    }
+                                    if (buffer.y < 0) {
+                                        buffer.y -= Math.random() * 6;
+                                    } else {
+                                        buffer.y += Math.random() * 6;
+                                    }
+                                    */
+                                    //buffer = buffer.multiply(1.2);
+                                    let newGoal = org2.pos.add(org.velocity.multiply(10));
+    
+                                    //let rnd = new Vector(Math.random() * 3, Math.random() * 3)
+                                    //newGoal = newGoal.add(rnd);
+                                    // rnd = new Vector(2, 2)
+                                    //newGoal = newGoal.addScalar(2);
+                                    org2.setGoalPos(newGoal);
+                                }
                             }
                         });
                     });
