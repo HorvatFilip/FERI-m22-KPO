@@ -18,12 +18,12 @@ class Organism {
                 moveScenario = 2;
             }
 
-            if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
+            if (this.pos.x >= state.display.simCanvas.width - 50 || this.pos.x <= 50) {
                 this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
                 this.goalPos = null;
                 moveScenario = 0;
             }
-            if (this.pos.y >= state.display.simCanvas.height - 30 || this.pos.y <= 30) {
+            if (this.pos.y >= state.display.simCanvas.height - 50 || this.pos.y <= 50) {
                 this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
                 this.goalPos = null;
                 moveScenario = 0;
@@ -143,6 +143,7 @@ class OrganismGroup {
         this.conf = conf;
         this.population = [];
         this.popSize = 0;
+        this.popId = 0;
         this.addOrganisms(this.conf.initialPopSize);
     }
     changeConfiguration(newConf) {
@@ -164,10 +165,11 @@ class OrganismGroup {
         }
         for (let i = 0; i < count; i++) {
             this.popSize++;
+            this.popId++;
             let homePos = this.getRandomPointOnCircle(spawnRadius, this.conf.homePos);
             const orgStats =
             {
-                id: this.conf.type + "-" + this.popSize,
+                id: this.conf.type + "-" + this.popId,
                 type: this.conf.type,
                 orgColor: this.conf.orgColor,
                 orgSize: this.conf.orgSize,
@@ -225,7 +227,9 @@ class OrganismGroup {
                         this.removeById(org.id);
                     } else {
                         if (org.eatenFood > 1) {
+
                             this.spawnChild(org);
+
                         }
                         let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
                         org.setGoalPos(homePos);
@@ -234,25 +238,37 @@ class OrganismGroup {
             }
         }
     }
+    isAlive(org) {
+        this.population.forEach(o => {
+            if (o.id == org.id) {
+                return true;
+            }
+        });
+        return false;
+    }
     spawnChild(org, spawnRadius = 40) {
-        this.popSize++;
         let homePos = this.getRandomPointOnCircle(spawnRadius, this.conf.homePos);
-        let orgSize = org.orgSize + Math.random() - 0.5;
-        let maxVelocity = org.maxVelocity + Math.random() - 0.5;
-        let detectRadius = org.detectRadius + Math.random() - 0.5;
+        let orgSize = org.orgSize + Math.random() * 1.5 - 0.1;
+        let maxVelocity = org.maxVelocity + Math.random() * 1.5 - 0.1;
+        let detectRadius = org.detectRadius + Math.random() * 1.5 - 0.1;
+        console.log(orgSize);
+        console.log(maxVelocity);
+        console.log(detectRadius);
         if (orgSize < 0) {
-            orgSize = 0.1;
+            orgSize = 0.2;
         }
         if (maxVelocity < 0) {
-            maxVelocity = 0.1;
+            maxVelocity = 0.2;
         }
         if (detectRadius < 0) {
-            detectRadius = 0.1;
+            detectRadius = 0.2;
         }
 
+        this.popSize++;
+        this.popId++;
         const orgStats =
         {
-            id: this.conf.type + "-" + this.popSize,
+            id: this.conf.type + "-" + this.popId,
             type: this.conf.type,
             orgColor: this.conf.orgColor,
             orgSize: orgSize,
@@ -266,8 +282,6 @@ class OrganismGroup {
             pos: org.pos,
             goalPos: homePos
         }
-
-        console.log(orgStats);
         this.population.push(
             new Organism(orgStats)
         );
@@ -277,6 +291,17 @@ class OrganismGroup {
         this.popSize = 0;
         this.addOrganisms(this.conf.initialPopSize);
         return this;
+    }
+    getChartValues() {
+        let avgOrgSize = 0;
+        let avgMaxVel = 0;
+        let avgDetect = 0;
+        this.population.forEach(org => {
+            avgOrgSize += org.orgSize;
+            avgMaxVel += org.maxVelocity;
+            avgDetect += org.detectRadius;
+        });
+        return [avgOrgSize / this.popSize, avgMaxVel / this.popSize, avgDetect / this.popSize];
     }
 }
 

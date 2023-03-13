@@ -5,34 +5,17 @@ class DrawComponent {
         this.simCanvas.height = simCanvasConf.height;
         this.simCtx = this.simCanvas.getContext("2d");
 
-        this.infoCanvas = document.getElementById(infoCanvasConf.id);
-        this.infoCanvas.width = infoCanvasConf.width;
-        this.infoCanvas.height = infoCanvasConf.height;
-        this.infoCtx = this.infoCanvas.getContext("2d");
+        this.infoCtx = [];
         this.infoPoints = {};
         this.chartOffset = 20;
-    }
-    drawBoard() {
-        console.log("TODO - drawBoard");
     }
     clearSimCanvas() {
         this.simCtx.fillStyle = "rgb(50, 60, 70)";
         this.simCtx.fillRect(0, 0, this.simCanvas.width, this.simCanvas.height);
     }
-    clearChartCanvas() {
-        this.infoCtx.fillStyle = "rgb(50, 60, 70)";
-        this.infoCtx.fillRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
-    }
-    updateData(state) {
-        this.updateChartPoints(state.organismGroups);
-    }
     syncSimData(state) {
         this.clearSimCanvas();
         this.drawAllOrganisms(state.organismGroups);
-    }
-    syncInfoData(state) {
-        this.clearChartCanvas();
-        this.drawChart(state.timePassed);
     }
     drawAllOrganisms(organismGroups) {
         organismGroups.forEach(orgGroup => {
@@ -48,59 +31,88 @@ class DrawComponent {
         this.simCtx.fillStyle = organism.orgColor;
         this.simCtx.fill();
     }
+
+    createNewInfoCanvas(conf, val) {
+        const chartCanvas = document.createElement("canvas");
+        chartCanvas.setAttribute("id", val + "-info-canvas");
+        chartCanvas.width = conf.width;
+        chartCanvas.height = conf.height;
+        this.infoCanvasWidth = conf.width;
+        this.infoCanvasHeight = conf.height;
+        this.infoCtx.push(chartCanvas.getContext("2d"));
+        this.infoCtx[this.infoCtx.length - 1].fillStyle = "rgb(50, 60, 70)";
+        this.infoCtx[this.infoCtx.length - 1].fillRect(0, 0, this.infoCanvasWidth, this.infoCanvasHeight);
+        return chartCanvas;
+    }
+    clearChartCanvas() {
+        this.infoCtx.forEach(valCtx => {
+            valCtx.fillStyle = "rgb(50, 60, 70)";
+            valCtx.fillRect(0, 0, this.infoCanvasWidth, this.infoCanvasHeight);
+        });
+        this.drawChartAxis();
+    }
+    syncInfoData(state) {
+        this.clearChartCanvas();
+        this.updateChartPoints(state.organismGroups);
+        this.drawChart(state.timePassed);
+    }
+    updateData(state) {
+        this.updateChartPoints(state.organismGroups);
+    }
     updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
+            let values = orgGroup.getChartValues();
+            console.log(values)
             if (this.infoPoints[orgGroup.id] === undefined) {
                 this.infoPoints[orgGroup.id] = {
                     orgColor: orgGroup.conf.orgColor,
-                    popSize: [orgGroup.popSize]
+                    0: [values[0]],
+                    1: [values[1]],
+                    2: [values[2]]
                 };
             } else {
-                if (this.infoPoints[orgGroup.id].orgColor != orgGroup.conf.orgColor) {
-                    this.infoPoints[orgGroup.id].orgColor = orgGroup.conf.orgColor;
-                }
-                this.infoPoints[orgGroup.type].popSize.push(orgGroup.popSize);
-                if (this.infoPoints[orgGroup.id].popSize.length > this.infoCanvas.width - this.chartOffset) {
-                    this.infoPoints[orgGroup.id].popSize.shift();
+                this.infoPoints[orgGroup.id][0].push(values[0]);
+                this.infoPoints[orgGroup.id][1].push(values[1]);
+                this.infoPoints[orgGroup.id][2].push(values[2]);
+                if (this.infoPoints[orgGroup.id][0].length > this.infoCanvasWidth - this.chartOffset) {
+                    this.infoPoints[orgGroup.id][0].shift();
+                    this.infoPoints[orgGroup.id][1].shift();
+                    this.infoPoints[orgGroup.id][1].shift();
                 }
             }
         });
     }
     drawChartAxis() {
-        this.infoCtx.strokeStyle = "black";
-        this.infoCtx.beginPath();
-        this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
-        this.infoCtx.lineTo(this.chartOffset, 0);
-
-        this.infoCtx.moveTo(this.chartOffset, this.infoCanvas.height - this.chartOffset);
-        this.infoCtx.lineTo(this.infoCanvas.width, this.infoCanvas.height - this.chartOffset);
-        this.infoCtx.stroke();
+        this.infoCtx.forEach(valCtx => {
+            valCtx.strokeStyle = "black";
+            valCtx.beginPath();
+            valCtx.moveTo(this.chartOffset, this.infoCanvasHeight - this.chartOffset);
+            valCtx.lineTo(this.chartOffset, 0);
+            valCtx.moveTo(this.chartOffset, this.infoCanvasHeight - this.chartOffset);
+            valCtx.lineTo(this.infoCanvasWidth, this.infoCanvasHeight - this.chartOffset);
+            valCtx.stroke();
+        });
     }
     drawChart(intervalType) {
-        let organismIds = Object.keys(this.infoPoints);
-        let numJump = 0;
-        organismIds.forEach(orgId => {
-            this.infoCtx.strokeStyle = this.infoPoints[orgId].orgColor;
-            let timeInterval = 0;
-            if (intervalType == "hour") {
-                numJump = 1;
-            } else if (intervalType == "day") {
-                numJump = 24;
-            } else if (intervalType == "month") {
-                numJump = 24 * 30;
-            } else {
-                numJump = 1;
+        console.log(this.infoPoints);
+        let timeInterval = 0;
+        Object.keys(this.infoPoints).forEach(id => {
+            if (this.infoPoints[id][0].length < 2) {
+                return;
             }
-            this.infoCtx.beginPath();
-            for (let i = 0; i < this.infoPoints[orgId].popSize.length - 1; i++) {
-                this.infoCtx.moveTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgId].popSize[i]);
-                timeInterval += numJump;
-                this.infoCtx.lineTo(timeInterval + this.chartOffset, this.infoCanvas.height - this.chartOffset - this.infoPoints[orgId].popSize[i + 1]);
-                if (timeInterval + this.chartOffset > this.infoCanvas.width - this.chartOffset) {
-                    this.infoPoints[orgId].popSize.shift();
+            for (let j = 0; j < 3; j++) {
+                this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
+                timeInterval = 0;
+                this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
+                this.infoCtx[j].beginPath();
+                for (let i = 0; i < this.infoPoints[id][j].length - 1; i++) {
+                    this.infoCtx[j].moveTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i] * 2);
+                    timeInterval += 24;
+                    this.infoCtx[j].lineTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i + 1] * 2);
                 }
+                this.infoCtx[j].stroke();
+
             }
-            this.infoCtx.stroke();
         });
     }
 }

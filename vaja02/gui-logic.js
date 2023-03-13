@@ -15,6 +15,7 @@ class GuiLogic {
         this.chartDisplayList = document.getElementById("chart-display-list");
         this.simCanvas_canvas = document.getElementById("simulation-canvas");
         this.hourDisplay_display = document.getElementById("time-display-hours");
+        this.chartDisplay_list = document.getElementById("chart-display-list");
         this.frameRef = null;
         this.inputs = {};
     }
@@ -311,16 +312,15 @@ class GuiLogic {
         this.startAnimation();
     }
     loadSimScenarioFromUI() {
+        const infoCanvasConf = {
+            width: 500,
+            height: 500
+        };
         if (this.drawComponent === null) {
             const simCanvasConf = {
                 id: "simulation-canvas",
                 width: 1000,
                 height: 1000
-            };
-            const infoCanvasConf = {
-                id: "information-canvas",
-                width: 500,
-                height: 500
             };
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
@@ -340,7 +340,7 @@ class GuiLogic {
                     x: 500, y: 500
                 },
                 feedingZoneRadius: 200,
-                initialPopSize: 50
+                initialPopSize: 80
             };
             const orgGroup02Conf = {
                 type: "insect",
@@ -366,7 +366,7 @@ class GuiLogic {
                 orgMaxVelocity: 3.5,
                 detectRadius: 40,
                 baseEnergy: 50,
-                diet: "all",
+                diet: "insect",
                 homePos: {
                     x: 700, y: 700
                 },
@@ -374,7 +374,7 @@ class GuiLogic {
                     x: 500, y: 500
                 },
                 feedingZoneRadius: 200,
-                initialPopSize: 5
+                initialPopSize: 3
             };
             const dateTimeTracker = new DateTimeTracker();
             this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
@@ -401,10 +401,23 @@ class GuiLogic {
             };
             this.ecoSystem.changeOrganismGroupConfiguration(id, config);
         });
+
+        this.initCharts(infoCanvasConf);
+
         if (this.frameRef != null) {
             cancelAnimationFrame(this.frameRef);
         }
         this.startAnimation();
+    }
+    initCharts(conf) {
+        ["orgSize", "maxVelocity", "detectRadius"].forEach(val => {
+            if (this.chartDisplay_list.querySelectorAll("#" + val + "-info-canvas").length === 0) {
+                this.chartDisplay_list.appendChild(
+                    this.drawComponent.createNewInfoCanvas(conf, val)
+                );
+            }
+        });
+        this.drawComponent.drawChartAxis();
     }
     updateDisplayUI() {
         this.updateOrganismPopSizeUI();
@@ -444,6 +457,7 @@ class GuiLogic {
         this.runAnimation(time => {
             if (this.run) {
                 let hour = this.ecoSystem.dateTime.getHours();
+                let day = this.ecoSystem.dateTime.getDays();
                 if (prevHour !== hour) {
                     prevHour = hour;
                     this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
@@ -463,7 +477,7 @@ class GuiLogic {
                     else if (hour > 23 && hour < 23.05) {
                         this.state.respawnPlants();
                         this.state.startRestingStage();
-                        currStage = "resting";
+                        this.drawComponent.syncInfoData(this.state);
                     }
                 }
 
