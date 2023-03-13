@@ -8,7 +8,7 @@ class Organism {
     moveToSpawnPoint() {
         this.goalPos = this.homePos;
     }
-    updatePosition(state) {
+    updatePosition(state, stage) {
         if (this.type !== "plant") {
             let moveScenario = 0;
             if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
@@ -29,10 +29,16 @@ class Organism {
                 moveScenario = 0;
             }
 
-            if (this.goalPos === null) {
+            if (this.goalPos === null && moveScenario !== 0) {
                 this.makeRandomMove();
             } else if (moveScenario == 2) {
                 this.makeMoveToGoal();
+            }
+            if (this.stage == "feeding") {
+                this.trueEnergy = this.trueEnergy - this.orgSize - this.maxVelocity - this.detectRadius;
+                if (this.trueEnergy < 0) {
+                    this.setGoalPos(this.homePos);
+                }
             }
         }
         return new Organism({
@@ -176,6 +182,9 @@ class OrganismGroup {
                 eatingSize: this.conf.orgSize * 0.8,
                 maxVelocity: this.conf.orgMaxVelocity,
                 detectRadius: this.conf.detectRadius,
+                baseEnergy: this.conf.baseEnergy,
+                trueEnergy: this.conf.baseEnergy,
+                stage: "resting",
                 diet: this.conf.diet,
                 eatenFood: 0,
                 velocity: new Vector(0, 0),
@@ -196,12 +205,20 @@ class OrganismGroup {
         this.population = this.population.filter(org => org.id != id);
         this.popSize--;
     }
-    updatePopulationCount() {
-
+    killOutOfEnergy() {
+        this.population.forEach(org => {
+            if (org.type == "insect") {
+                console.log(org.trueEnergy);
+            }
+            if (org.trueEnergy < 0) {
+                console.log("rest");
+                org.setGoalPos(org.homePos);
+            }
+        });
     }
-    updatePosition(state) {
+    updatePosition(state, stage) {
         this.population = this.population.map(organism => {
-            return organism.updatePosition(state);
+            return organism.updatePosition(state, stage);
         });
         return this;
     }
@@ -209,6 +226,8 @@ class OrganismGroup {
         this.population.forEach(org => {
             if (resetFood) {
                 org.eatenFood = 0;
+                org.trueEnergy = org.baseEnergy;
+                org.stage = "feeding";
                 let feedingPos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
                 org.setGoalPos(feedingPos);
             } else if (org.eatenFood < 2) {
@@ -226,10 +245,9 @@ class OrganismGroup {
                     if (org.eatenFood < 1) {
                         this.removeById(org.id);
                     } else {
+                        org.stage = "resting";
                         if (org.eatenFood > 1) {
-
                             this.spawnChild(org);
-
                         }
                         let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
                         org.setGoalPos(homePos);
@@ -251,9 +269,7 @@ class OrganismGroup {
         let orgSize = org.orgSize + Math.random() * 1.5 - 0.1;
         let maxVelocity = org.maxVelocity + Math.random() * 1.5 - 0.1;
         let detectRadius = org.detectRadius + Math.random() * 1.5 - 0.1;
-        console.log(orgSize);
-        console.log(maxVelocity);
-        console.log(detectRadius);
+        let baseEnergy = org.baseEnergy + Math.random() * 1.5 - 0.1;
         if (orgSize < 0) {
             orgSize = 0.2;
         }
@@ -275,6 +291,9 @@ class OrganismGroup {
             eatingSize: orgSize * 0.8,
             maxVelocity: maxVelocity,
             detectRadius: detectRadius,
+            baseEnergy: baseEnergy,
+            trueEnergy: baseEnergy,
+            stage: "resting",
             diet: this.conf.diet,
             eatenFood: 0,
             velocity: org.velocity,

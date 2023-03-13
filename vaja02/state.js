@@ -2,17 +2,19 @@ class State {
     constructor(display, organismGroups) {
         this.display = display;
         this.organismGroups = organismGroups;
-        this.stage;
+        this.stage = "resting";
     }
     updateOrganismGroups(updatedOrganismGroups) {
         this.organismGroups = updatedOrganismGroups;
     }
     startFeedingStage() {
+        this.stage = "feeding";
         this.organismGroups.forEach(orgGroup => {
             orgGroup.changeStage("feeding");
         });
     }
     startRestingStage() {
+        this.stage = "resting";
         this.organismGroups.forEach(orgGroup => {
             orgGroup.changeStage("resting");
         });
@@ -31,7 +33,7 @@ class State {
                 if (diet == "all" || orgGroup2.conf.type == diet) {
                     orgGroup.population.forEach(org => {
                         orgGroup2.population.forEach(org2 => {
-                            if (org.eatenFood < 2) {
+                            if (org.eatenFood < 2 && org.trueEnergy > 0) {
                                 range = org.inRangeOfInteraction(org2);
                                 if (range == 1) {
                                     orgGroup2.removeById(org2.id);
@@ -53,10 +55,9 @@ class State {
             });
         });
     }
-    update() {
+    update(stage) {
         let organismGroups = this.organismGroups.map(orgGroup => {
-            //orgGroup.updatePopulation();
-            return orgGroup.updatePosition(this);
+            return orgGroup.updatePosition(this, stage);
         });
         return new State(this.display, organismGroups);
     }

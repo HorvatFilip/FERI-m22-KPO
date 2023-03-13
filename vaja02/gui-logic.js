@@ -71,7 +71,6 @@ class GuiLogic {
                 const body = document.createElement("div");
                 const saveBtn = document.createElement("button");
 
-
                 headerDisplayColor.style.backgroundColor = orgGroup.conf.orgColor;
                 headerText.innerHTML = orgGroup.conf.type;
                 headerDisplayPopSize.innerHTML = orgGroup.popSize;
@@ -84,8 +83,6 @@ class GuiLogic {
                 headerDisplayColor.setAttribute("class", "eco-elem-display-color");
                 body.setAttribute("class", "eco-elem-body");
                 saveBtn.setAttribute("class", "btn btn-secondary");
-
-                // <i class="fa-solid fa-carrot"></i>
 
                 const popSizeInput = document.createElement("input");
                 const homeInputClick = document.createElement("div");
@@ -194,8 +191,6 @@ class GuiLogic {
                         homePos: [parseInt(homeXInput.value), parseInt(homeYInput.value)],
                         diet: dietInput.value
                     };
-                    //console.log(config);
-                    //this.ecoSystem.changeOrganismGroupConfiguration(orgGroup.id, config);
                 });
 
                 const firstRow = document.createElement("div");
@@ -331,7 +326,7 @@ class GuiLogic {
                 orgSize: 2,
                 orgMaxVelocity: 0,
                 detectRadius: 1,
-                baseEnergy: 200,
+                baseEnergy: 10000,
                 diet: "none",
                 homePos: {
                     x: 500, y: 500
@@ -348,7 +343,7 @@ class GuiLogic {
                 orgSize: 3,
                 orgMaxVelocity: 3,
                 detectRadius: 20,
-                baseEnergy: 50,
+                baseEnergy: 5000,
                 diet: "plant",
                 homePos: {
                     x: 300, y: 300
@@ -365,7 +360,7 @@ class GuiLogic {
                 orgSize: 6,
                 orgMaxVelocity: 3.5,
                 detectRadius: 40,
-                baseEnergy: 50,
+                baseEnergy: 10000,
                 diet: "insect",
                 homePos: {
                     x: 700, y: 700
@@ -464,7 +459,7 @@ class GuiLogic {
                     if (currStage == "feeding") {
                         this.state.searchForFood();
                     }
-                    this.state = this.state.update();
+                    this.state = this.state.update(currStage);
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
                     if (hour > 4 && hour < 4.05) {
