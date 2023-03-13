@@ -9,26 +9,31 @@ class Organism {
         this.goalPos = this.homePos;
     }
     updatePosition(state) {
-        let moveScenario = 0;
-        if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
-            this.goalPos = null;
-            moveScenario = 1;
-        } else {
-            moveScenario = 2;
-        }
+        if (this.type !== "plant") {
+            let moveScenario = 0;
+            if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
+                this.goalPos = null;
+                moveScenario = 1;
+            } else {
+                moveScenario = 2;
+            }
 
-        if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
-            this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
-            moveScenario = 0;
-        }
-        if (this.pos.y >= state.display.simCanvas.height - 30 || this.pos.y <= 30) {
-            this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
-            moveScenario = 0;
-        }
-        if (this.goalPos === null) {
-            this.makeRandomMove();
-        } else if (moveScenario == 2) {
-            this.makeMoveToGoal();
+            if (this.pos.x >= state.display.simCanvas.width - 30 || this.pos.x <= 30) {
+                this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
+                this.goalPos = null;
+                moveScenario = 0;
+            }
+            if (this.pos.y >= state.display.simCanvas.height - 30 || this.pos.y <= 30) {
+                this.velocity = new Vector(this.velocity.x, this.velocity.y * (-1));
+                this.goalPos = null;
+                moveScenario = 0;
+            }
+
+            if (this.goalPos === null) {
+                this.makeRandomMove();
+            } else if (moveScenario == 2) {
+                this.makeMoveToGoal();
+            }
         }
         return new Organism({
             ...this,
@@ -90,12 +95,29 @@ class Organism {
         let d = Math.sqrt(
             Math.pow(this.pos.x - org2.pos.x, 2) + Math.pow(this.pos.y - org2.pos.y, 2)
         );
-        if (d <= this.orgSize) {
+        let canEatOrg2 = this.canEat(org2);
+        let canBeEaten = org2.canEat(this);
+        if (d <= this.orgSize && canEatOrg2) {
+            this.eatenFood++;
+            if (this.eatenFood > 1) {
+                this.setGoalPos(this.homePos);
+            }
             return 1;
         } else if (d <= this.detectRadius) {
-            return 2;
+            if (canEatOrg2) {
+                return 2;
+            } else if (canBeEaten) {
+                return 3;
+            }
         } else {
-            return 3;
+            return 4;
+        }
+    }
+    canEat(org2) {
+        if (this.eatingSize >= org2.orgSize) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
@@ -126,6 +148,7 @@ class OrganismGroup {
     changeConfiguration(newConf) {
         this.conf = Object.assign(this.conf, newConf);
         this.population = [];
+        this.popSize = 0;
         this.addOrganisms(this.conf.initialPopSize);
     }
     getRandomPointOnCircle(R, center) {
@@ -135,19 +158,24 @@ class OrganismGroup {
         let y = center.y + r * Math.sin(theta);
         return new Vector(x, y);
     }
-    addOrganisms(count) {
+    addOrganisms(count, spawnRadius = 40) {
+        if (this.conf.type == "plant") {
+            spawnRadius = this.conf.feedingZoneRadius;
+        }
         for (let i = 0; i < count; i++) {
             this.popSize++;
-            let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
+            let homePos = this.getRandomPointOnCircle(spawnRadius, this.conf.homePos);
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popSize,
                 type: this.conf.type,
                 orgColor: this.conf.orgColor,
                 orgSize: this.conf.orgSize,
+                eatingSize: this.conf.orgSize * 0.8,
                 maxVelocity: this.conf.orgMaxVelocity,
                 detectRadius: this.conf.detectRadius,
                 diet: this.conf.diet,
+                eatenFood: 0,
                 velocity: new Vector(0, 0),
                 homePos: homePos,
                 pos: homePos,
@@ -164,6 +192,7 @@ class OrganismGroup {
     }
     removeById(id) {
         this.population = this.population.filter(org => org.id != id);
+        this.popSize--;
     }
     updatePopulationCount() {
 
@@ -174,27 +203,103 @@ class OrganismGroup {
         });
         return this;
     }
-    changeStage(stage) {
-        if (stage == "feeding") {
-            this.population.forEach(org => {
-                let feedingPos = this.getRandomPointOnCircle(40, this.conf.feedingPos);
+    moveToFeedingZone(resetFood = false) {
+        this.population.forEach(org => {
+            if (resetFood) {
+                org.eatenFood = 0;
+                let feedingPos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
                 org.setGoalPos(feedingPos);
-            });
-        } else if (stage == "resting") {
-            this.population.forEach(org => {
-                let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
-                org.setGoalPos(homePos);
-            });
+            } else if (org.eatenFood < 2) {
+                let feedingPos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
+                org.setGoalPos(feedingPos);
+            }
+        });
+    }
+    changeStage(stage) {
+        if (this.conf.type != "plant") {
+            if (stage == "feeding") {
+                this.moveToFeedingZone(true);
+            } else if (stage == "resting") {
+                this.population.forEach(org => {
+                    if (org.eatenFood < 1) {
+                        this.removeById(org.id);
+                    } else {
+                        if (org.eatenFood > 1) {
+                            this.spawnChild(org);
+                        }
+                        let homePos = this.getRandomPointOnCircle(40, this.conf.homePos);
+                        org.setGoalPos(homePos);
+                    }
+                });
+            }
         }
+    }
+    spawnChild(org, spawnRadius = 40) {
+        this.popSize++;
+        let homePos = this.getRandomPointOnCircle(spawnRadius, this.conf.homePos);
+        let orgSize = org.orgSize + Math.random() - 0.5;
+        let maxVelocity = org.maxVelocity + Math.random() - 0.5;
+        let detectRadius = org.detectRadius + Math.random() - 0.5;
+        if (orgSize < 0) {
+            orgSize = 0.1;
+        }
+        if (maxVelocity < 0) {
+            maxVelocity = 0.1;
+        }
+        if (detectRadius < 0) {
+            detectRadius = 0.1;
+        }
+
+        const orgStats =
+        {
+            id: this.conf.type + "-" + this.popSize,
+            type: this.conf.type,
+            orgColor: this.conf.orgColor,
+            orgSize: orgSize,
+            eatingSize: orgSize * 0.8,
+            maxVelocity: maxVelocity,
+            detectRadius: detectRadius,
+            diet: this.conf.diet,
+            eatenFood: 0,
+            velocity: org.velocity,
+            homePos: homePos,
+            pos: org.pos,
+            goalPos: homePos
+        }
+
+        console.log(orgStats);
+        this.population.push(
+            new Organism(orgStats)
+        );
+    }
+    respawn() {
+        this.population = [];
+        this.popSize = 0;
+        this.addOrganisms(this.conf.initialPopSize);
+        return this;
     }
 }
 
 class DateTimeTracker {
     constructor(startDate = { year: 0, month: 0, day: 0, hour: 0 }) {
+        this.startDate = startDate;
         this.date = startDate;
+        this.interval = null;
+        this.run = true;
+    }
+    resetDate() {
+        if (this.interval !== null) {
+            clearInterval(this.interval);
+        }
+        this.date = { year: 0, month: 0, day: 0, hour: 0 };
         this.interval = setInterval(() => {
-            this.addHours(0.1);
+            if (this.run) {
+                this.addHours(0.05);
+            }
         }, 50);
+    }
+    toggleTimePassage(run) {
+        this.run = run;
     }
     addYears(count) {
         this.date["year"] += count;
