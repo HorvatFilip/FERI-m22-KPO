@@ -8,7 +8,7 @@ class Organism {
     moveToSpawnPoint() {
         this.goalPos = this.homePos;
     }
-    updatePosition(state, stage) {
+    updatePosition(state) {
         if (this.type !== "plant") {
             let moveScenario = 0;
             if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
@@ -17,7 +17,6 @@ class Organism {
             } else {
                 moveScenario = 2;
             }
-
             if (this.pos.x >= state.display.simCanvas.width - 50 || this.pos.x <= 50) {
                 this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
                 this.goalPos = null;
@@ -66,36 +65,13 @@ class Organism {
         this.velocity = new Vector(x, y);
     }
     makeRandomMove() {
-        let changeVelocity = Math.floor(Math.random() * 9);
-        switch (changeVelocity) {
-            case 0:
-                this.velocity = new Vector(0, 0);
-                break;
-            case 1:
-                this.velocity = new Vector(Math.random() * 3, 0);
-                break;
-            case 2:
-                this.velocity = new Vector(0, Math.random() * 3);
-                break;
-            case 3:
-                this.velocity = new Vector(Math.random() * -3, 0);
-                break;
-            case 4:
-                this.velocity = new Vector(0, Math.random() * -3);
-                break;
-            case 5:
-                this.velocity = new Vector(Math.random() * 3, Math.random() * 3);
-                break;
-            case 6:
-                this.velocity = new Vector(Math.random() * -3, Math.random() * 3);
-                break;
-            case 7:
-                this.velocity = new Vector(Math.random() * 3, Math.random() * -3);
-                break;
-            case 8:
-                this.velocity = new Vector(Math.random() * -3, Math.random() * -3);
-                break;
-        }
+        let theta = Math.random() * 2 * Math.PI;
+        let vel = new Vector(this.maxVelocity, this.maxVelocity);
+        let center = this.pos.add(vel);
+        let x = center.x + 50 * Math.cos(theta);
+        let y = center.y + 50 * Math.sin(theta);
+        this.setGoalPos({ x: x, y: y });
+
     }
     inRangeOfInteraction(org2) {
         let d = Math.sqrt(
@@ -216,9 +192,9 @@ class OrganismGroup {
             }
         });
     }
-    updatePosition(state, stage) {
+    updatePosition(state) {
         this.population = this.population.map(organism => {
-            return organism.updatePosition(state, stage);
+            return organism.updatePosition(state);
         });
         return this;
     }
@@ -266,10 +242,10 @@ class OrganismGroup {
     }
     spawnChild(org, spawnRadius = 40) {
         let homePos = this.getRandomPointOnCircle(spawnRadius, this.conf.homePos);
-        let orgSize = org.orgSize + Math.random() * 1.5 - 0.1;
-        let maxVelocity = org.maxVelocity + Math.random() * 1.5 - 0.1;
-        let detectRadius = org.detectRadius + Math.random() * 1.5 - 0.1;
-        let baseEnergy = org.baseEnergy + Math.random() * 1.5 - 0.1;
+        let orgSize = org.orgSize + Math.random() * 1.5 - 0.2;
+        let maxVelocity = org.maxVelocity + Math.random() * 1.1 - 0.1;
+        let detectRadius = org.detectRadius + Math.random() * 2 - 0.2;
+        let baseEnergy = org.baseEnergy + Math.random() * 1.5 - 0.2;
         if (orgSize < 0) {
             orgSize = 0.2;
         }
@@ -330,6 +306,16 @@ class DateTimeTracker {
         this.date = startDate;
         this.interval = null;
         this.run = true;
+        this.timeSpeed = 40;
+    }
+    setTimeSpeed(timeSpeed) {
+        this.timeSpeed = 70 - timeSpeed * 10;
+        clearInterval(this.interval);
+        this.interval = setInterval(() => {
+            if (this.run) {
+                this.addHours(0.05);
+            }
+        }, this.timeSpeed);
     }
     resetDate() {
         if (this.interval !== null) {
@@ -340,7 +326,7 @@ class DateTimeTracker {
             if (this.run) {
                 this.addHours(0.05);
             }
-        }, 50);
+        }, this.timeSpeed);
     }
     toggleTimePassage(run) {
         this.run = run;
@@ -419,6 +405,9 @@ class EcoSystem {
     }
     removeOrganismGroupById(id) {
         this.organismGroups = this.organismGroups.filter(orgGroup => orgGroup.id != id);
+    }
+    changeTimePassingSpeed(timeSpeed) {
+        this.dateTime.setTimeSpeed(timeSpeed);
     }
 
 }

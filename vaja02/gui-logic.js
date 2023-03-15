@@ -16,6 +16,12 @@ class GuiLogic {
         this.simCanvas_canvas = document.getElementById("simulation-canvas");
         this.hourDisplay_display = document.getElementById("time-display-hours");
         this.chartDisplay_list = document.getElementById("chart-display-list");
+        this.timeControlMinus_btn = document.getElementById("time-controller-minus")
+        this.timeControlPlus_btn = document.getElementById("time-controller-plus")
+        this.timeControl_display = document.getElementById("time-controller-display-progress");
+        this.timeControl_display.style.width = "20%";
+        this.timeSpeed = 3;
+        this.timeControl_display.style.width = this.timeSpeed * 20 + "%";
         this.frameRef = null;
         this.inputs = {};
     }
@@ -27,7 +33,6 @@ class GuiLogic {
             } else {
                 this.ecoElems_menu.style.width = "0px";
             }
-
         });
         this.closeEcoElems_btn.addEventListener("click", () => {
             this.ecoElems_menu.style.width = "0px";
@@ -40,22 +45,35 @@ class GuiLogic {
             this.ecoSystem.dateTime.toggleTimePassage(this.run);
         });
         this.resetSim_btn.addEventListener("click", () => {
-            //this.loadScenario01();
             this.loadSimScenarioFromUI();
         });
         this.toggleChartDisplay_btn.addEventListener("click", () => {
             if (this.chartDisplay_menu.style.width == "0px" || this.chartDisplay_menu.style.width == "") {
-                //this.refreshOrganismGroupList();
                 this.chartDisplay_menu.style.width = "500px";
             } else {
                 this.chartDisplay_menu.style.width = "0px";
             }
-
         });
         this.closeChartDisplay_btn.addEventListener("click", () => {
             this.chartDisplay_menu.style.width = "0px";
         });
-
+        this.timeControlPlus_btn.addEventListener("click", () => {
+            if (this.timeSpeed < 5) {
+                this.timeSpeed++;
+            }
+            this.setTimeProgressDisplayWidth();
+        });
+        this.timeControlMinus_btn.addEventListener("click", () => {
+            if (this.timeSpeed > 1) {
+                this.timeSpeed--;
+            }
+            this.setTimeProgressDisplayWidth();
+        });
+    }
+    setTimeProgressDisplayWidth() {
+        let progress = this.timeSpeed * 20 + "%";
+        this.timeControl_display.style.width = progress;
+        this.ecoSystem.changeTimePassingSpeed(this.timeSpeed);
     }
     addEcoSystemToGui(ecoSystem) {
         this.ecoSystem = ecoSystem;
@@ -252,8 +270,8 @@ class GuiLogic {
     loadScenario01() {
         const simCanvasConf = {
             id: "simulation-canvas",
-            width: 1000,
-            height: 1000
+            width: 1500,
+            height: 1500
         };
         const infoCanvasConf = {
             id: "information-canvas",
@@ -306,6 +324,70 @@ class GuiLogic {
         this.ecoSystem.dateTime.resetDate();
         this.startAnimation();
     }
+    loadSimScenario02() {
+        const simCanvasConf = {
+            id: "simulation-canvas",
+            width: 1500,
+            height: 1500
+        };
+        const infoCanvasConf = {
+            id: "information-canvas",
+            width: 500,
+            height: 500
+        };
+        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
+        this.run = true;
+
+        const orgGroup01Conf = {
+            type: "insect",
+            orgColor: "#4C9900",
+            orgSize: 3,
+            orgMaxVelocity: 3,
+            detectRadius: 40,
+            baseEnergy: 50000,
+            diet: "plant",
+            homePos: {
+                x: 300, y: 300
+            },
+            feedingPos: {
+                x: 500, y: 500
+            },
+            feedingZoneRadius: 200,
+            initialPopSize: 10
+        };
+        const orgGroup02Conf = {
+            type: "bird",
+            orgColor: "#004C99",
+            orgSize: 6,
+            orgMaxVelocity: 3.5,
+            detectRadius: 40,
+            baseEnergy: 10000,
+            diet: "insect",
+            homePos: {
+                x: 700, y: 700
+            },
+            feedingPos: {
+                x: 500, y: 500
+            },
+            feedingZoneRadius: 200,
+            initialPopSize: 15
+        };
+
+        const dateTimeTracker = new DateTimeTracker();
+
+        let ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
+        ecoSystem.addOrganismGroup(orgGroup01Conf);
+        //ecoSystem.addOrganismGroup(orgGroup02Conf);
+
+        this.addEcoSystemToGui(ecoSystem);
+        this.ecoSystem.dateTime.resetDate();
+
+        this.initCharts(infoCanvasConf);
+        if (this.frameRef != null) {
+            cancelAnimationFrame(this.frameRef);
+        }
+        this.startAnimation();
+    }
     loadSimScenarioFromUI() {
         const infoCanvasConf = {
             width: 500,
@@ -314,8 +396,8 @@ class GuiLogic {
         if (this.drawComponent === null) {
             const simCanvasConf = {
                 id: "simulation-canvas",
-                width: 1000,
-                height: 1000
+                width: 1500,
+                height: 1500
             };
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
@@ -335,14 +417,14 @@ class GuiLogic {
                     x: 500, y: 500
                 },
                 feedingZoneRadius: 200,
-                initialPopSize: 80
+                initialPopSize: 100
             };
             const orgGroup02Conf = {
                 type: "insect",
                 orgColor: "#4C9900",
                 orgSize: 3,
                 orgMaxVelocity: 3,
-                detectRadius: 20,
+                detectRadius: 40,
                 baseEnergy: 5000,
                 diet: "plant",
                 homePos: {
@@ -352,7 +434,7 @@ class GuiLogic {
                     x: 500, y: 500
                 },
                 feedingZoneRadius: 200,
-                initialPopSize: 50
+                initialPopSize: 100
             };
             const orgGroup03Conf = {
                 type: "bird",
@@ -369,7 +451,7 @@ class GuiLogic {
                     x: 500, y: 500
                 },
                 feedingZoneRadius: 200,
-                initialPopSize: 3
+                initialPopSize: 15
             };
             const dateTimeTracker = new DateTimeTracker();
             this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
@@ -445,23 +527,22 @@ class GuiLogic {
     }
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
-        let prevHour = this.ecoSystem.dateTime.getHours() - 1;
-        let prevDay = this.ecoSystem.dateTime.getDays() - 1;
+        let hour = this.ecoSystem.dateTime.getHours() - 1;
+        let prevHour = hour;
         let currStage = "resting";
-
         this.runAnimation(time => {
             if (this.run) {
                 let hour = this.ecoSystem.dateTime.getHours();
-                let day = this.ecoSystem.dateTime.getDays();
                 if (prevHour !== hour) {
                     prevHour = hour;
                     this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
                     if (currStage == "feeding") {
                         this.state.searchForFood();
                     }
-                    this.state = this.state.update(currStage);
+                    this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
+
                     if (hour > 4 && hour < 4.05) {
                         this.state.startFeedingStage();
                         currStage = "feeding";

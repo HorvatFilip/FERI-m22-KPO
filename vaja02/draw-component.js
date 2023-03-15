@@ -32,6 +32,9 @@ class DrawComponent {
         this.simCtx.fill();
     }
 
+    initChartPointVars() {
+        this.infoPoints = {};
+    }
     createNewInfoCanvas(conf, val) {
         const chartCanvas = document.createElement("canvas");
         chartCanvas.setAttribute("id", val + "-info-canvas");

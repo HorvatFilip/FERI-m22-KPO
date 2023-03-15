@@ -40,24 +40,24 @@ class State {
                                 } else if (range == 2) {
                                     org.setGoalPos(org2.pos.add(org2.velocity));
                                 }
-                                range = org2.inRangeOfInteraction(org);
-                                if (range == 3) {
-                                    let diff = org.pos.subtract(org2.pos);
-                                    diff = diff.multiply(-1);
-                                    let newGoal = org2.pos.add(diff);
-                                    org2.setGoalPos(newGoal);
-                                }
                             }
+                            range = org2.inRangeOfInteraction(org);
+                            if (range == 3) {
+                                let diff = org.pos.subtract(org2.pos);
+                                diff = diff.multiply(-4);
+                                let newGoal = org2.pos.add(diff);
 
+                                org2.setGoalPos(newGoal);
+                            }
                         });
                     });
                 }
             });
         });
     }
-    update(stage) {
+    update() {
         let organismGroups = this.organismGroups.map(orgGroup => {
-            return orgGroup.updatePosition(this, stage);
+            return orgGroup.updatePosition(this);
         });
         return new State(this.display, organismGroups);
     }
