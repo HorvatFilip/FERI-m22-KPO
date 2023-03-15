@@ -3,6 +3,9 @@ class Vector {
         this.x = x;
         this.y = y;
     }
+    get() {
+        return new Vector(this.x, this.y);
+    }
     add(vector02) {
         return new Vector(this.x + vector02.x, this.y + vector02.y);
     }
@@ -33,5 +36,16 @@ class Vector {
         } else {
             return false;
         }
+    }
+    normalize() {
+        let mag = this.getMagnitude();
+        if (mag != 0) {
+            return this.divide(mag);
+        }
+    }
+    distance(vector02) {
+        return Math.sqrt(
+            Math.pow(this.x - vector02.x, 2) + Math.pow(this.y - vector02.y, 2)
+        );
     }
 }

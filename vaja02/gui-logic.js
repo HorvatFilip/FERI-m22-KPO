@@ -393,12 +393,12 @@ class GuiLogic {
             width: 500,
             height: 500
         };
+        const simCanvasConf = {
+            id: "simulation-canvas",
+            width: 1500,
+            height: 1500
+        };
         if (this.drawComponent === null) {
-            const simCanvasConf = {
-                id: "simulation-canvas",
-                width: 1500,
-                height: 1500
-            };
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
         if (this.ecoSystem === null) {
@@ -411,12 +411,12 @@ class GuiLogic {
                 baseEnergy: 10000,
                 diet: "none",
                 homePos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
                 feedingPos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 200,
+                feedingZoneRadius: 500,
                 initialPopSize: 100
             };
             const orgGroup02Conf = {
@@ -431,7 +431,7 @@ class GuiLogic {
                     x: 300, y: 300
                 },
                 feedingPos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
                 feedingZoneRadius: 200,
                 initialPopSize: 100
@@ -448,7 +448,7 @@ class GuiLogic {
                     x: 700, y: 700
                 },
                 feedingPos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
                 feedingZoneRadius: 200,
                 initialPopSize: 15
