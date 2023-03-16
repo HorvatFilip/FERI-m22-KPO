@@ -18,9 +18,6 @@ class Organism {
                 moveScenario = 2;
             }
             moveScenario = this.checkBounds(state, moveScenario);
-            //if (this.stage != "feeding") {
-            //    this.followPath(path);
-            //}
 
             if (this.goalPos === null && moveScenario !== 0) {
                 this.makeRandomMove();
@@ -169,15 +166,6 @@ class OrganismGroup {
         this.popSize = 0;
         this.popId = 0;
         this.addOrganisms(this.conf.initialPopSize);
-        this.outsidePath = [];
-    }
-    createOutsidePath(display) {
-        let point01 = new Vector(100, 100);
-        let point02 = new Vector(1500 - 100, 100);
-        let point03 = new Vector(100, 1500 - 100);
-        let point04 = new Vector(1500 - 100, 1500 - 100);
-        let point05 = new Vector(100, 100);
-        this.outsidePath = [point01, point02, point03, point04, point05];
     }
     changeConfiguration(newConf) {
         this.conf = Object.assign(this.conf, newConf);
@@ -209,23 +197,17 @@ class OrganismGroup {
                 homePos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
             }
 
-            let vel = new Vector(
-                Math.random() * this.conf.orgMaxVelocity * 2 - this.conf.orgMaxVelocity,
-                Math.random() * this.conf.orgMaxVelocity * 2 - this.conf.orgMaxVelocity
-            )
+            let rndSize = this.conf.orgSize * 0.7;
+            rndSize = Math.random() * (this.conf.orgSize - minSize) + minSize;
+
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popId,
                 type: this.conf.type,
                 orgColor: this.conf.orgColor,
-                orgSize: this.conf.orgSize,
-                eatingSize: this.conf.orgSize * 0.8,
+                orgSize: rndSize,
                 maxVelocity: this.conf.orgMaxVelocity,
-                detectRadius: this.conf.detectRadius,
-                baseEnergy: this.conf.baseEnergy,
-                trueEnergy: this.conf.baseEnergy,
                 stage: "resting",
-                diet: this.conf.diet,
                 eatenFood: 0,
                 velocity: vel,
                 homePos: homePos,
