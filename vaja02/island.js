@@ -8,35 +8,28 @@ class Organism {
     moveToSpawnPoint() {
         this.goalPos = this.homePos;
     }
-    updatePosition(state, path) {
+    updatePosition(state) {
         if (this.type !== "plant") {
-            let moveScenario = 0;
-            if (this.goalPos !== null && this.pos.equals(this.goalPos)) {
-                this.goalPos = null;
-                moveScenario = 1;
-            } else {
-                moveScenario = 2;
-            }
-            moveScenario = this.checkBounds(state, moveScenario);
-            //if (this.stage != "feeding") {
-            //    this.followPath(path);
-            //}
-
-            if (this.goalPos === null && moveScenario !== 0) {
-                this.makeRandomMove();
-            } else if (moveScenario == 2) {
-                this.makeMoveToGoal();
-            }
             if (this.stage == "feeding") {
                 this.trueEnergy = this.trueEnergy - this.orgSize - this.maxVelocity - this.detectRadius;
-                if (this.trueEnergy < 0) {
-                    this.setGoalPos(this.homePos);
-                }
             }
-            return new Organism({
-                ...this,
-                pos: this.pos.add(this.velocity)
-            });
+            if (this.checkBounds(state) == 0) {
+                return new Organism({
+                    ...this,
+                    pos: this.pos.add(this.velocity)
+                });
+            } else {
+                if (this.goalPos == null || this.pos.equals(this.goalPos)) {
+                    this.goalPos = null;
+                    this.makeRandomMove();
+                } else if (this.goalPos != null) {
+                    this.makeMoveToGoal();
+                }
+                return new Organism({
+                    ...this,
+                    pos: this.pos.add(this.velocity)
+                });
+            }
         }
         return this;
 
@@ -70,7 +63,8 @@ class Organism {
         }
         this.setGoalPos(newTarget);
     }
-    checkBounds(state, moveScenario) {
+    checkBounds(state) {
+        let moveScenario = 1;
         if (this.pos.x >= state.display.simCanvas.width - 50 || this.pos.x <= 50) {
             this.velocity = new Vector(this.velocity.x * (-1), this.velocity.y)
             this.goalPos = null;
@@ -84,36 +78,40 @@ class Organism {
         return moveScenario;
     }
     makeMoveToGoal() {
-        let x = (this.goalPos.x - this.pos.x) / this.maxVelocity;
+        let maxVel = this.maxVelocity;
+        if (this.trueEnergy < 1) {
+            maxVel = maxVel / 2;
+        }
+
+        let x = (this.goalPos.x - this.pos.x) / maxVel;
         if (x >= 1) {
-            x = this.maxVelocity;
+            x = maxVel;
         } else if (x <= -1) {
-            x = -this.maxVelocity;
+            x = -maxVel;
         } else {
             x = this.goalPos.x - this.pos.x;
         }
-        let y = (this.goalPos.y - this.pos.y) / this.maxVelocity;
+        let y = (this.goalPos.y - this.pos.y) / maxVel;
         if (y >= 1) {
-            y = this.maxVelocity;
+            y = maxVel;
         } else if (y <= -1) {
-            y = -this.maxVelocity;
+            y = -maxVel;
         } else {
             y = this.goalPos.y - this.pos.y;
         }
         this.velocity = new Vector(x, y);
-        if (this.trueEnergy < 1) {
-            this.velocity.x = this.velocity.x / 2;
-            this.velocity.y = this.velocity.y / 2;
-        }
     }
     makeRandomMove() {
         let theta = Math.random() * 2 * Math.PI;
-        let vel = new Vector(this.maxVelocity, this.maxVelocity);
+        let maxVel = this.maxVelocity;
+        if (this.trueEnergy < 1) {
+            maxVel = maxVel / 2;
+        }
+        let vel = new Vector(maxVel, maxVel);
         let center = this.pos.add(vel);
         let x = center.x + 50 * Math.cos(theta);
         let y = center.y + 50 * Math.sin(theta);
         this.setGoalPos({ x: x, y: y });
-
     }
     inRangeOfInteraction(org2) {
         let d = Math.sqrt(
@@ -123,9 +121,9 @@ class Organism {
         let canBeEaten = org2.canEat(this);
         if (d <= this.orgSize && canEatOrg2) {
             this.eatenFood++;
-            if (this.eatenFood > 1) {
-                this.setGoalPos(this.homePos);
-            }
+            //if (this.eatenFood > 1) {
+            //    this.setGoalPos(this.homePos);
+            //}
             return 1;
         } else if (d <= this.detectRadius) {
             if (canEatOrg2) {
@@ -200,6 +198,8 @@ class OrganismGroup {
     }
     addOrganisms(count) {
         let homePos;
+        let vel;
+        let rndSize;
         for (let i = 0; i < count; i++) {
             this.popSize++;
             this.popId++;
@@ -208,17 +208,18 @@ class OrganismGroup {
             } else {
                 homePos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
             }
-
-            let vel = new Vector(
+            vel = new Vector(
                 Math.random() * this.conf.orgMaxVelocity * 2 - this.conf.orgMaxVelocity,
                 Math.random() * this.conf.orgMaxVelocity * 2 - this.conf.orgMaxVelocity
             )
+            rndSize = this.conf.orgSize * 0.7;
+            rndSize = Math.random() * (this.conf.orgSize - rndSize) + rndSize;
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popId,
                 type: this.conf.type,
                 orgColor: this.conf.orgColor,
-                orgSize: this.conf.orgSize,
+                orgSize: rndSize,
                 eatingSize: this.conf.orgSize * 0.8,
                 maxVelocity: this.conf.orgMaxVelocity,
                 detectRadius: this.conf.detectRadius,
@@ -257,11 +258,11 @@ class OrganismGroup {
                 org.eatenFood = 0;
                 org.trueEnergy = org.baseEnergy;
                 org.stage = "feeding";
-                let feedingPos = this.getRandomPointInsideCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
-                org.setGoalPos(feedingPos);
+                //let feedingPos = this.getRandomPointInsideCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
+                //org.setGoalPos(feedingPos);
             } else if (org.eatenFood < 2) {
-                let feedingPos = this.getRandomPointInsideCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
-                org.setGoalPos(feedingPos);
+                //let feedingPos = this.getRandomPointInsideCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
+                //org.setGoalPos(feedingPos);
             }
         });
     }
@@ -282,8 +283,8 @@ class OrganismGroup {
                                 this.spawnChild(org, 1);
                             }
                         }
-                        let homePos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
-                        org.setGoalPos(homePos);
+                        //let homePos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
+                        //org.setGoalPos(homePos);
                     }
                 });
             }
@@ -357,7 +358,7 @@ class OrganismGroup {
             avgMaxVel += org.maxVelocity;
             avgDetect += org.detectRadius;
         });
-        return [avgOrgSize / this.popSize, avgMaxVel / this.popSize, avgDetect / this.popSize];
+        return [this.popSize, avgOrgSize / this.popSize, avgMaxVel / this.popSize, avgDetect / this.popSize];
     }
 }
 

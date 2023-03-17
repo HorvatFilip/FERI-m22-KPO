@@ -7,6 +7,7 @@ class DrawComponent {
 
         this.infoCtx = [];
         this.infoPoints = {};
+        this.chartLabels = ["Count", "Size", "MaxVelocity", "DetectRadius"];
         this.chartOffset = 20;
     }
     clearSimCanvas() {
@@ -65,53 +66,58 @@ class DrawComponent {
     updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
             let values = orgGroup.getChartValues();
-            console.log(values)
             if (this.infoPoints[orgGroup.id] === undefined) {
                 this.infoPoints[orgGroup.id] = {
                     orgColor: orgGroup.conf.orgColor,
                     0: [values[0]],
                     1: [values[1]],
-                    2: [values[2]]
+                    2: [values[2]],
+                    3: [values[3]]
                 };
             } else {
                 this.infoPoints[orgGroup.id][0].push(values[0]);
-                this.infoPoints[orgGroup.id][1].push(values[1]);
-                this.infoPoints[orgGroup.id][2].push(values[2]);
-                if (this.infoPoints[orgGroup.id][0].length > this.infoCanvasWidth - this.chartOffset) {
+                this.infoPoints[orgGroup.id][1].push(values[1] * 20);
+                this.infoPoints[orgGroup.id][2].push(values[2] * 20);
+                this.infoPoints[orgGroup.id][3].push(values[3]);
+                if (this.infoPoints[orgGroup.id][0].length * 24 > this.infoCanvasWidth - this.chartOffset) {
                     this.infoPoints[orgGroup.id][0].shift();
                     this.infoPoints[orgGroup.id][1].shift();
-                    this.infoPoints[orgGroup.id][1].shift();
+                    this.infoPoints[orgGroup.id][2].shift();
+                    this.infoPoints[orgGroup.id][3].shift();
                 }
             }
         });
     }
     drawChartAxis() {
+        let labelIndx = 0;
         this.infoCtx.forEach(valCtx => {
-            valCtx.strokeStyle = "black";
+            valCtx.strokeStyle = "#212529";
             valCtx.beginPath();
             valCtx.moveTo(this.chartOffset, this.infoCanvasHeight - this.chartOffset);
             valCtx.lineTo(this.chartOffset, 0);
             valCtx.moveTo(this.chartOffset, this.infoCanvasHeight - this.chartOffset);
             valCtx.lineTo(this.infoCanvasWidth, this.infoCanvasHeight - this.chartOffset);
             valCtx.stroke();
+            valCtx.font = "35px Comic Sans MS";
+            valCtx.fillStyle = "#212529";
+            valCtx.fillText(this.chartLabels[labelIndx++], this.chartOffset + 20, this.chartOffset + 35)
         });
     }
     drawChart(intervalType) {
-        console.log(this.infoPoints);
         let timeInterval = 0;
         Object.keys(this.infoPoints).forEach(id => {
             if (this.infoPoints[id][0].length < 2) {
                 return;
             }
-            for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < 4; j++) {
                 this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
                 timeInterval = 0;
                 this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
                 this.infoCtx[j].beginPath();
                 for (let i = 0; i < this.infoPoints[id][j].length - 1; i++) {
-                    this.infoCtx[j].moveTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i] * 2);
+                    this.infoCtx[j].moveTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i]);
                     timeInterval += 24;
-                    this.infoCtx[j].lineTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i + 1] * 2);
+                    this.infoCtx[j].lineTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i + 1]);
                 }
                 this.infoCtx[j].stroke();
 
