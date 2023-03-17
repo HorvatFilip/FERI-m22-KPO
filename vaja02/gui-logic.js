@@ -45,6 +45,7 @@ class GuiLogic {
             this.ecoSystem.dateTime.toggleTimePassage(this.run);
         });
         this.resetSim_btn.addEventListener("click", () => {
+            this.drawComponent.clearChartCanvas();
             this.loadSimScenarioFromUI();
         });
         this.toggleChartDisplay_btn.addEventListener("click", () => {
@@ -426,7 +427,7 @@ class GuiLogic {
                 orgMaxVelocity: 3,
                 detectRadius: 40,
                 baseEnergy: 5000,
-                diet: "plant",
+                diet: "all",
                 homePos: {
                     x: 300, y: 300
                 },
@@ -487,7 +488,7 @@ class GuiLogic {
         this.startAnimation();
     }
     initCharts(conf) {
-        ["orgSize", "maxVelocity", "detectRadius"].forEach(val => {
+        ["popSize", "orgSize", "maxVelocity", "detectRadius"].forEach(val => {
             if (this.chartDisplay_list.querySelectorAll("#" + val + "-info-canvas").length === 0) {
                 this.chartDisplay_list.appendChild(
                     this.drawComponent.createNewInfoCanvas(conf, val)

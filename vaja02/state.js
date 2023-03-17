@@ -33,21 +33,23 @@ class State {
                 if (diet == "all" || orgGroup2.conf.type == diet) {
                     orgGroup.population.forEach(org => {
                         orgGroup2.population.forEach(org2 => {
-                            if (org.eatenFood < 2 && org.trueEnergy > 0) {
-                                range = org.inRangeOfInteraction(org2);
-                                if (range == 1) {
-                                    orgGroup2.removeById(org2.id);
-                                } else if (range == 2) {
-                                    org.setGoalPos(org2.pos.add(org2.velocity));
+                            if (org.id != org2.id) {
+                                if (org.eatenFood < 2) {
+                                    range = org.inRangeOfInteraction(org2);
+                                    if (range == 1) {
+                                        orgGroup2.removeById(org2.id);
+                                    } else if (range == 2) {
+                                        org.setGoalPos(org2.pos.add(org2.velocity));
+                                    }
                                 }
-                            }
-                            range = org2.inRangeOfInteraction(org);
-                            if (range == 3) {
-                                let diff = org.pos.subtract(org2.pos);
-                                diff = diff.multiply(-4);
-                                let newGoal = org2.pos.add(diff);
+                                range = org2.inRangeOfInteraction(org);
+                                if (range == 3) {
+                                    let diff = org.pos.subtract(org2.pos);
+                                    diff = diff.multiply(-4);
+                                    let newGoal = org2.pos.add(diff);
 
-                                org2.setGoalPos(newGoal);
+                                    org2.setGoalPos(newGoal);
+                                }
                             }
                         });
                     });
