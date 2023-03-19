@@ -61,6 +61,11 @@ canvas {
     background-color: rgb(59, 74, 88);
 }
 
+#close-eco-elements-menu {
+    align-self: flex-end;
+    padding: 0 5px;
+}
+
 #eco-elements-menu{
     height: 100%;
     position: fixed;

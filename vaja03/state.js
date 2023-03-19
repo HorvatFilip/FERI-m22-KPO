@@ -25,35 +25,41 @@ class State {
         });
     }
     searchForFood() {
-        let diet = null;
-        let range = null;
+        let plants = null;
+        let plant;
+        let foodLeft = 0;
+        let foodIndx = -1;
         this.organismGroups.forEach(orgGroup => {
-            diet = orgGroup.conf.diet;
-            this.organismGroups.forEach(orgGroup2 => {
-                if (diet == "all" || orgGroup2.conf.type == diet) {
-                    orgGroup.population.forEach(org => {
-                        orgGroup2.population.forEach(org2 => {
-                            if (org.eatenFood < 2 && org.trueEnergy > 0) {
-                                range = org.inRangeOfInteraction(org2);
-                                if (range == 1) {
-                                    orgGroup2.removeById(org2.id);
-                                } else if (range == 2) {
-                                    org.setGoalPos(org2.pos.add(org2.velocity));
-                                }
-                            }
-                            range = org2.inRangeOfInteraction(org);
-                            if (range == 3) {
-                                let diff = org.pos.subtract(org2.pos);
-                                diff = diff.multiply(-4);
-                                let newGoal = org2.pos.add(diff);
-
-                                org2.setGoalPos(newGoal);
-                            }
-                        });
-                    });
-                }
-            });
+            console.log(orgGroup.conf.type)
+            if (orgGroup.conf.type == "plant") {
+                plants = orgGroup;
+                foodLeft = orgGroup.population.length;
+            }
         });
+        let count = 0;
+        this.organismGroups.forEach(orgGroup =>{
+            if (orgGroup.conf.type != "plant") {
+                orgGroup.population.forEach(org => {
+                    count = 0;
+                    while (org.foodId == null && count < foodLeft){
+                        count++;
+                        foodIndx = Math.floor(Math.random() * plants.population.length);
+                        if (plants.population[foodIndx].eatenBy.length < 2){
+                            plants.population[foodIndx].eatenBy.push(org.id);
+                            org.foodId = plants.population[foodIndx].id;
+                            org.setGoalPos(
+                                orgGroup.getRandomPointOnCircle(10, plants.population[foodIndx].pos)
+                            );
+                            foodLeft--;
+                            if(foodLeft == 0){
+                                return;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
     }
     update() {
         let organismGroups = this.organismGroups.map(orgGroup => {
