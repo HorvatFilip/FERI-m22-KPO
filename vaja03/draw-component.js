@@ -26,11 +26,25 @@ class DrawComponent {
         });
     }
     drawOrganism(organism) {
-        this.simCtx.beginPath();
-        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.orgSize, 0, Math.PI * 2);
-        this.simCtx.closePath();
-        this.simCtx.fillStyle = organism.orgColor;
-        this.simCtx.fill();
+        if (organism.type == "plant") {
+            this.simCtx.beginPath();
+            this.simCtx.arc(organism.homePos[0].x, organism.homePos[0].y, organism.orgSize, 0, Math.PI * 2);
+            this.simCtx.closePath();
+            this.simCtx.fillStyle = organism.orgColor;
+            this.simCtx.fill();
+
+            this.simCtx.beginPath();
+            this.simCtx.arc(organism.homePos[1].x, organism.homePos[1].y, organism.orgSize, 0, Math.PI * 2);
+            this.simCtx.closePath();
+            this.simCtx.fillStyle = organism.orgColor;
+            this.simCtx.fill();
+        } else {
+            this.simCtx.beginPath();
+            this.simCtx.arc(organism.pos.x, organism.pos.y, organism.orgSize, 0, Math.PI * 2);
+            this.simCtx.closePath();
+            this.simCtx.fillStyle = organism.orgColor;
+            this.simCtx.fill();
+        }
     }
 
     initChartPointVars() {
@@ -65,25 +79,16 @@ class DrawComponent {
     }
     updateChartPoints(organismGroups) {
         organismGroups.forEach(orgGroup => {
-            let values = orgGroup.getChartValues();
             if (this.infoPoints[orgGroup.id] === undefined) {
+                console.log(orgGroup.conf.orgColor);
                 this.infoPoints[orgGroup.id] = {
                     orgColor: orgGroup.conf.orgColor,
-                    0: [values[0]],
-                    1: [values[1]],
-                    2: [values[2]],
-                    3: [values[3]]
+                    popSize: [orgGroup.popSize]
                 };
             } else {
-                this.infoPoints[orgGroup.id][0].push(values[0]);
-                this.infoPoints[orgGroup.id][1].push(values[1] * 20);
-                this.infoPoints[orgGroup.id][2].push(values[2] * 20);
-                this.infoPoints[orgGroup.id][3].push(values[3]);
-                if (this.infoPoints[orgGroup.id][0].length * 24 > this.infoCanvasWidth - this.chartOffset) {
-                    this.infoPoints[orgGroup.id][0].shift();
-                    this.infoPoints[orgGroup.id][1].shift();
-                    this.infoPoints[orgGroup.id][2].shift();
-                    this.infoPoints[orgGroup.id][3].shift();
+                this.infoPoints[orgGroup.id]["popSize"].push(orgGroup.popSize);
+                if (this.infoPoints[orgGroup.id]["popSize"].length > this.infoCanvasWidth - this.chartOffset) {
+                    this.infoPoints[orgGroup.id]["popSize"].shift();
                 }
             }
         });
@@ -104,24 +109,20 @@ class DrawComponent {
         });
     }
     drawChart(intervalType) {
-        let timeInterval = 0;
+        console.log(this.infoPoints);
         Object.keys(this.infoPoints).forEach(id => {
-            if (this.infoPoints[id][0].length < 2) {
-                return;
-            }
-            for (let j = 0; j < 4; j++) {
-                this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
-                timeInterval = 0;
-                this.infoCtx[j].strokeStyle = this.infoPoints[id].orgColor;
-                this.infoCtx[j].beginPath();
-                for (let i = 0; i < this.infoPoints[id][j].length - 1; i++) {
-                    this.infoCtx[j].moveTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i]);
-                    timeInterval += 24;
-                    this.infoCtx[j].lineTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id][j][i + 1]);
+            this.infoCtx[0].strokeStyle = this.infoPoints[id]["orgColor"];
+            let timeInterval = 0;
+            this.infoCtx[0].beginPath();
+            for (let i = 0; i < this.infoPoints[id]["popSize"].length - 1; i++) {
+                this.infoCtx[0].moveTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id]["popSize"][i]);
+                timeInterval += 24;
+                this.infoCtx[0].lineTo(timeInterval + this.chartOffset, this.infoCanvasHeight - this.chartOffset - this.infoPoints[id]["popSize"][i + 1]);
+                if (timeInterval + this.chartOffset > this.infoCanvasWidth - this.chartOffset) {
+                    this.infoPoints[id]["popSize"].shift();
                 }
-                this.infoCtx[j].stroke();
-
             }
+            this.infoCtx[0].stroke();
         });
     }
 }

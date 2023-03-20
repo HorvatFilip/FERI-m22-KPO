@@ -2,6 +2,9 @@ class Organism {
     constructor(orgNewPos) {
         Object.assign(this, orgNewPos);
     }
+    setPos(newPos) {
+        this.pos = new Vector(newPos.x, newPos.y);
+    }
     setGoalPos(newGoalPos) {
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
     }
@@ -9,7 +12,7 @@ class Organism {
         this.goalPos = this.homePos;
     }
     updatePosition(state) {
-        if (this.type !== "plant") {
+        if (this.type == "special") {
             if (this.stage == "feeding") {
                 this.trueEnergy = this.trueEnergy - this.orgSize - this.maxVelocity - this.detectRadius;
             }
@@ -21,7 +24,7 @@ class Organism {
             } else {
                 if (this.goalPos == null || this.pos.equals(this.goalPos)) {
                     this.goalPos = null;
-                    this.makeRandomMove();
+                    //this.makeRandomMove();
                 } else if (this.goalPos != null) {
                     this.makeMoveToGoal();
                 }
@@ -159,33 +162,23 @@ class OrganismGroup {
         this.popSize = 0;
         this.addOrganisms(this.conf.initialPopSize);
     }
-    getRandomPointInsideCircle(R, center) {
-        let r = R * Math.sqrt(Math.random());
-        let theta = Math.random() * 2 * Math.PI;
-        let x = center.x + r * Math.cos(theta);
-        let y = center.y + r * Math.sin(theta);
-        return new Vector(x, y);
-    }
-    getRandomPointOnCircle(R, center) {
-        let theta = Math.random() * 2 * Math.PI;
-        let x = center.x + R * Math.cos(theta);
-        let y = center.y + R * Math.sin(theta);
-        return new Vector(x, y);
-    }
     addOrganisms(count) {
         let homePos;
         let eatenBy;
+        let center;
         for (let i = 0; i < count; i++) {
             this.popSize++;
             this.popId++;
             if (this.conf.type == "plant") {
-                homePos = this.getRandomPointInsideCircle(this.conf.spawnRadius, this.conf.homePos);
+                center = getRandomPointInsideCircle(this.conf.spawnRadius, this.conf.homePos);
+                homePos = [getRandomPointOnCircle(1, center), getRandomPointOnCircle(1, center)]
                 eatenBy = [];
             } else {
-                homePos = this.getRandomPointOnCircle(this.conf.spawnRadius, this.conf.homePos);
+                center = getRandomPointOnCircle(this.conf.spawnRadius, this.conf.homePos);
+                homePos = center;
                 eatenBy = null;
             }
-            
+
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popId,
@@ -198,9 +191,9 @@ class OrganismGroup {
                 eatenFood: 0,
                 eatenBy: eatenBy,
                 foodId: null,
-                velocity: new Vector(0,0),
+                velocity: new Vector(0, 0),
                 homePos: homePos,
-                pos: homePos,
+                pos: center,
                 goalPos: null
             }
             this.population.push(
@@ -211,6 +204,9 @@ class OrganismGroup {
     removeOrganisms(count) {
         this.population.splice(0, count);
         this.popSize -= count;
+    }
+    getById(id) {
+        return this.population.find(org => org.id == id);
     }
     removeById(id) {
         this.population = this.population.filter(org => org.id != id);
@@ -224,24 +220,31 @@ class OrganismGroup {
     }
     spawnChild(org, count) {
         let homePos = null;
+        let center = null;
+        let eatenBy = null;
         this.popSize += count;
 
         for (let i = 0; i < count; i++) {
             this.popId++;
-            homePos = this.getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
+            center = getRandomPointOnCircle(this.conf.spawnRadius, this.conf.homePos);
+            homePos = center;
+            eatenBy = null;
             const orgStats =
             {
                 id: this.conf.type + "-" + this.popId,
                 type: this.conf.type,
                 orgColor: this.conf.orgColor,
-                orgSize: orgSize,
-                maxVelocity: maxVelocity,
+                orgSize: this.conf.orgSize,
+                maxVelocity: this.conf.orgMaxVelocity,
+                behavior: this.conf.behavior,
                 stage: "resting",
                 eatenFood: 0,
-                velocity: org.velocity,
+                eatenBy: eatenBy,
+                foodId: null,
+                velocity: new Vector(0, 0),
                 homePos: homePos,
-                pos: org.pos,
-                goalPos: homePos
+                pos: center,
+                goalPos: null
             }
             this.population.push(
                 new Organism(orgStats)
@@ -255,7 +258,7 @@ class OrganismGroup {
         return this;
     }
     getChartValues() {
-        
+
     }
 }
 
@@ -272,7 +275,7 @@ class DateTimeTracker {
         clearInterval(this.interval);
         this.interval = setInterval(() => {
             if (this.run) {
-                this.addHours(0.05);
+                this.addHours(0.2);
             }
         }, this.timeSpeed);
     }
@@ -283,7 +286,7 @@ class DateTimeTracker {
         this.date = { year: 0, month: 0, day: 0, hour: 0 };
         this.interval = setInterval(() => {
             if (this.run) {
-                this.addHours(0.05);
+                this.addHours(0.2);
             }
         }, this.timeSpeed);
     }

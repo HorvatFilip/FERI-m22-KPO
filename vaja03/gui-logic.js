@@ -88,12 +88,10 @@ class GuiLogic {
                 const headerText = document.createElement("span");
                 const headerDisplayPopSize = document.createElement("span");
                 const body = document.createElement("div");
-                const saveBtn = document.createElement("button");
 
                 headerDisplayColor.style.backgroundColor = orgGroup.conf.orgColor;
                 headerText.innerHTML = orgGroup.conf.type;
                 headerDisplayPopSize.innerHTML = orgGroup.popSize;
-                saveBtn.innerHTML = "Save";
 
                 newEcoElem.setAttribute("id", orgGroup.id + "-eco-elem");
                 headerDisplayPopSize.setAttribute("id", orgGroup.id + "-popsize");
@@ -101,7 +99,6 @@ class GuiLogic {
                 header.setAttribute("class", "eco-elem-header");
                 headerDisplayColor.setAttribute("class", "eco-elem-display-color");
                 body.setAttribute("class", "eco-elem-body");
-                saveBtn.setAttribute("class", "btn btn-secondary");
 
                 const popSizeInput = document.createElement("input");
                 const orgSizeInput = document.createElement("input");
@@ -126,7 +123,7 @@ class GuiLogic {
                 popSizeInput.value = orgGroup.conf.initialPopSize;
                 orgSizeInput.value = orgGroup.conf.orgSize;
                 behaviorInput.value = orgGroup.conf.behavior;
-                
+
                 header.addEventListener("click", () => {
                     if (body.style.display == "none" || body.style.display == "") {
                         body.style.display = "flex";
@@ -136,18 +133,10 @@ class GuiLogic {
                     }
                 });
 
-                saveBtn.addEventListener("click", () => {
-                    let config = {
-                        initialPopSize: popSizeInput.value,
-                        orgSize: orgSizeInput.value,
-                        behavior: behaviorInput.value
-                    };
-                });
-
                 const firstRow = document.createElement("div");
                 const secondRow = document.createElement("div");
                 const thirdRow = document.createElement("div");
-                
+
                 firstRow.setAttribute("class", "eco-elem-row");
                 secondRow.setAttribute("class", "eco-elem-row");
                 thirdRow.setAttribute("class", "eco-elem-row");
@@ -164,7 +153,6 @@ class GuiLogic {
                 body.appendChild(firstRow);
                 body.appendChild(secondRow);
                 body.appendChild(thirdRow);
-                body.appendChild(saveBtn);
                 newEcoElem.appendChild(header);
                 newEcoElem.appendChild(body);
                 this.ecoElems_list.appendChild(newEcoElem);
@@ -196,9 +184,9 @@ class GuiLogic {
                 orgMaxVelocity: 5,
                 behavior: "passive",
                 homePos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                spawnRadius: 500 
+                spawnRadius: 500
             };
             const orgGroup02Conf = {
                 type: "bird",
@@ -208,7 +196,7 @@ class GuiLogic {
                 orgMaxVelocity: 5,
                 behavior: "aggressive",
                 homePos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
                 spawnRadius: 500
             };
@@ -218,9 +206,9 @@ class GuiLogic {
                 initialPopSize: 100,
                 orgSize: 2,
                 orgMaxVelocity: 0,
-                behavior: "none",
+                behavior: "food",
                 homePos: {
-                    x: 500, y: 500
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
                 spawnRadius: 500
             };
@@ -256,78 +244,56 @@ class GuiLogic {
         }
         if (this.ecoSystem === null) {
             const orgGroup01Conf = {
-                type: "plant",
-                orgColor: "#000000",
-                orgSize: 2,
-                orgMaxVelocity: 0,
-                detectRadius: 1,
-                baseEnergy: 10000,
-                diet: "none",
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                feedingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                feedingZoneRadius: 500,
-                initialPopSize: 100
-            };
-            const orgGroup02Conf = {
                 type: "insect",
                 orgColor: "#4C9900",
-                orgSize: 3,
-                orgMaxVelocity: 3,
-                detectRadius: 40,
-                baseEnergy: 5000,
-                diet: "all",
+                initialPopSize: 100,
+                orgSize: 2,
+                orgMaxVelocity: 5,
+                behavior: "passive",
                 homePos: {
-                    x: 300, y: 300
-                },
-                feedingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 200,
-                initialPopSize: 100
+                spawnRadius: 500
             };
-            const orgGroup03Conf = {
+            const orgGroup02Conf = {
                 type: "bird",
                 orgColor: "#004C99",
-                orgSize: 6,
-                orgMaxVelocity: 3.5,
-                detectRadius: 40,
-                baseEnergy: 10000,
-                diet: "insect",
+                initialPopSize: 50,
+                orgSize: 3,
+                orgMaxVelocity: 5,
+                behavior: "aggressive",
                 homePos: {
-                    x: 700, y: 700
-                },
-                feedingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 200,
-                initialPopSize: 15
+                spawnRadius: 500
+            };
+            const orgGroup03Conf = {
+                type: "plant",
+                orgColor: "#000000",
+                initialPopSize: 100,
+                orgSize: 2,
+                orgMaxVelocity: 0,
+                behavior: "none",
+                homePos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                spawnRadius: 500
             };
             const dateTimeTracker = new DateTimeTracker();
             this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
             this.ecoSystem.addOrganismGroup(orgGroup01Conf);
             this.ecoSystem.addOrganismGroup(orgGroup02Conf);
             this.ecoSystem.addOrganismGroup(orgGroup03Conf);
-
         }
-        this.run = true;
         this.ecoSystem.dateTime.resetDate();
+        this.run = true;
 
         let ids = Object.keys(this.inputs);
         ids.forEach(id => {
             let config = {
-
                 initialPopSize: parseInt(this.inputs[id][0].value),
-                orgMaxVelocity: parseInt(this.inputs[id][5].value),
-                orgSize: parseInt(this.inputs[id][6].value),
-                detectRadius: parseInt(this.inputs[id][7].value),
-                baseEnergy: parseInt(this.inputs[id][8].value),
-                feedingPos: { x: parseInt(this.inputs[id][3].value), y: parseInt(this.inputs[id][4].value) },
-                homePos: { x: parseInt(this.inputs[id][1].value), y: parseInt(this.inputs[id][2].value) },
-                diet: this.inputs[id][9].value
+                orgSize: parseInt(this.inputs[id][1].value),
+                behavior: this.inputs[id][2].value
             };
             this.ecoSystem.changeOrganismGroupConfiguration(id, config);
         });
@@ -348,6 +314,7 @@ class GuiLogic {
             }
         });
         this.drawComponent.drawChartAxis();
+        this.drawComponent.initChartPointVars();
     }
     updateDisplayUI() {
         this.updateOrganismPopSizeUI();
@@ -389,16 +356,26 @@ class GuiLogic {
                 if (prevHour !== hour) {
                     prevHour = hour;
 
-                    if (hour % 5 == 0) {
+                    if (hour == 0 || hour == 8 || hour == 16) {
                         this.state.respawnPlants();
+                    } else if (hour == 1 || hour == 9 || hour == 17) {
                         this.state.searchForFood();
+                    } else if (hour == 4 || hour == 12 || hour == 20) {
+                        this.state.foodDistribution();
+                    } else if (hour == 5 || hour == 13 || hour == 21) {
+                        this.state.sendHome();
+                    } else if (hour == 6 || hour == 14 || hour == 22) {
+                        this.state.reproductionAndDeath();
+                        this.drawComponent.syncInfoData(this.state);
                     }
+
                     // else if (hour % 6 == 0) {
                     //    this.state.eatFood();
                     //}
                     //if (hour == 24) {
-                    //    this.drawComponent.syncInfoData(this.state);
+                    //    
                     //}
+
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();

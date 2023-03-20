@@ -148,10 +148,6 @@ canvas {
     min-width: 127px;
 } 
 
-.eco-elem-row:nth-child(1) > input{
-    max-width: 35px;
-}
-
 .date-time-container {
     width: 80%;
     display: flex;
