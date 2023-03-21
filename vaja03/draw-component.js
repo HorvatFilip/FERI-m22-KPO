@@ -46,7 +46,6 @@ class DrawComponent {
             this.simCtx.fill();
         }
     }
-
     initChartPointVars() {
         this.infoPoints = {};
     }
