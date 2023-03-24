@@ -1,6 +1,24 @@
 class Organism {
-    constructor(orgNewPos) {
-        Object.assign(this, orgNewPos);
+    constructor(orgNewPos, orgConf = null) {
+        if (orgConf == null) {
+            Object.assign(this, orgNewPos);
+        } else {
+            this.id = orgConf.id;
+            this.type = orgConf.type;
+            this.maxVelocity = orgConf.maxVelocity;
+            this.size = orgConf.size;
+            this.detectRadius = orgConf.detectRadius;
+            this.energyBase = orgConf.energyBase;
+            this.gender = orgConf.gender;
+            this.hunger = 100;
+            this.hydration = 100;
+            this.matingInterval = 100;
+            this.stage = "r";
+            this.pos = orgNewPos;
+            this.velocity = new Vector(0, 0);
+            this.goalPos = null;
+            this.path = [];
+        }
     }
     setGoalPos(newGoalPos) {
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
@@ -182,37 +200,62 @@ class Organism {
 }
 
 class OrganismGroup {
-    constructor(id, conf) {
-        /*
-        this.id = conf.id;
-        this.type = conf.type;
-        this.orgColor = conf.orgColor;
-        this.orgSize = conf.orgSize;
-        this.orgMaxVelocity = conf.orgMaxVelocity;
-        this.detectRadius = conf.detectRadius;
-        this.diet = conf.diet;
-        this.homePos = conf.homePos;
-        this.feedingPos = conf.feedingPos;
-        this.population = [];
-        this.popSize = 0;
-        this.initialPopSize = conf.initialPopSize;
-        this.addOrganisms(this.initialPopSize);
-        */
+    constructor(id, conf, initialPopSize = 0) {
         this.id = id;
-        this.conf = conf;
+        this.name = conf.name;
+        this.type = conf.type;
+        this.color = conf.color;
+        this.maxVelocity = conf.maxVelocity;
+        this.size = conf.size;
+        this.detectRadius = conf.detectRadius;
+        this.energyBase = conf.energyBase;
+        this.homePos = conf.homePos;
+        this.homeRadius = conf.homeRadius;
+        this.huntingPos = conf.huntingPos;
+        this.huntingRadius = conf.huntingRadius;
+        this.diet = conf.diet;
         this.population = [];
         this.popSize = 0;
         this.popId = 0;
-        this.addOrganisms(this.conf.initialPopSize);
-        this.outsidePath = [];
+        if (initialPopSize != 0) {
+            this.createInitialPopulation(initialPopSize);
+        }
     }
-    createOutsidePath(display) {
-        let point01 = new Vector(100, 100);
-        let point02 = new Vector(1500 - 100, 100);
-        let point03 = new Vector(100, 1500 - 100);
-        let point04 = new Vector(1500 - 100, 1500 - 100);
-        let point05 = new Vector(100, 100);
-        this.outsidePath = [point01, point02, point03, point04, point05];
+    createInitialPopulation(initialPopSize) {
+        let orgId;
+        let maxVelocity;
+        let size;
+        let detectRadius;
+        let gender;
+        let energyBase;
+        let spawnPos;
+        let orgConf = {};
+        console.log(this.energyBase);
+        for (let i = 0; i < initialPopSize; i++) {
+            orgId = this.type + "-" + this.popId;
+            maxVelocity = randomNumberRange(this.maxVelocity * 0.9, this.maxVelocity);
+            size = randomNumberRange(this.size * 0.9, this.size);
+            detectRadius = randomNumberRange(this.detectRadius * 0.9, this.detectRadius);
+            energyBase = randomNumberRange(this.energyBase * 0.9, this.energyBase);
+            spawnPos = getRandomPointInsideCircle(this.homeRadius, this.homePos);
+            if (Math.random() > 0.5) {
+                gender = "m";
+            } else {
+                gender = "f"
+            }
+            orgConf = {
+                id: orgId,
+                type: this.type,
+                maxVelocity: maxVelocity,
+                size: size,
+                detectRadius: detectRadius,
+                energyBase: energyBase,
+                gender: gender
+            }
+            this.population.push(new Organism(spawnPos, orgConf));
+            this.popId++;
+            this.popSize++;
+        }
     }
     changeConfiguration(newConf) {
         this.conf = Object.assign(this.conf, newConf);
@@ -470,16 +513,15 @@ class EcoSystem {
         this.dateTime = dateTimeTracker;
         this.organismGroups = [];
     }
-    addOrganismGroup(orgGroupConf) {
+    addOrganismGroup(orgGroupConf, initialPopSize) {
         let typeCount = 0;
         this.organismGroups.forEach(orgGroup => {
-            if (orgGroup.conf.type == orgGroupConf.type) {
+            if (orgGroup.type == orgGroupConf.type) {
                 typeCount++;
             }
         });
         const orgGroupId = orgGroupConf.type + "-" + typeCount;
-        const newOrgGroup = new OrganismGroup(orgGroupId, orgGroupConf);
-        newOrgGroup.createOutsidePath();
+        const newOrgGroup = new OrganismGroup(orgGroupId, orgGroupConf, initialPopSize);
         this.organismGroups.push(newOrgGroup);
     }
     changeOrganismGroupConfiguration(id, newConfig) {

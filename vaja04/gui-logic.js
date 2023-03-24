@@ -269,60 +269,52 @@ class GuiLogic {
 
     }
     loadScenario01() {
+        const infoCanvasConf = {
+            width: 500,
+            height: 500
+        };
         const simCanvasConf = {
             id: "simulation-canvas",
             width: 1700,
             height: 1700
         };
-        const infoCanvasConf = {
-            id: "information-canvas",
-            width: 500,
-            height: 500
-        };
-        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
-        this.run = true;
+        if (this.drawComponent === null) {
+            this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
+        }
+        if (this.ecoSystem === null) {
 
-        const orgGroup01Conf = {
-            type: "insect",
-            orgColor: "#4C9900",
-            orgSize: 2,
-            orgMaxVelocity: 3,
-            detectRadius: 20,
-            baseEnergy: 50,
-            diet: "plant",
-            homePos: {
-                x: 300, y: 300
-            },
-            feedingPos: {
-                x: 450, y: 450
-            },
-            initialPopSize: 50
-        };
-        const orgGroup02Conf = {
-            type: "bird",
-            orgColor: "#004C99",
-            orgSize: 4,
-            orgMaxVelocity: 3.5,
-            detectRadius: 40,
-            baseEnergy: 50,
-            diet: "insect",
-            homePos: {
-                x: 700, y: 700
-            },
-            feedingPos: {
-                x: 500, y: 500
-            },
-            initialPopSize: 5
-        };
+            const orgGroup01Conf = {
+                name: "insect01",
+                type: "insect",
+                color: "#4C9900",
+                maxVelocity: 3,
+                size: 3,
+                detectRadius: 40,
+                energyBase: 5000,
+                homePos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                homeRadius: 40,
+                huntingPos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                huntingRadius: 500,
+                diet: "plants"
+            };
 
-        const dateTimeTracker = new DateTimeTracker();
+            const dateTimeTracker = new DateTimeTracker();
+            this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
+            this.ecoSystem.addOrganismGroup(orgGroup01Conf, 50);
 
-        let ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
-        ecoSystem.addOrganismGroup(orgGroup01Conf);
-        ecoSystem.addOrganismGroup(orgGroup02Conf);
-
-        this.addEcoSystemToGui(ecoSystem);
+        }
+        this.run = false;
         this.ecoSystem.dateTime.resetDate();
+
+        this.initCharts(infoCanvasConf);
+
+        if (this.frameRef != null) {
+            cancelAnimationFrame(this.frameRef);
+        }
         this.startAnimation();
     }
     loadSimScenario02() {
@@ -403,6 +395,7 @@ class GuiLogic {
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
         if (this.ecoSystem === null) {
+
             const orgGroup01Conf = {
                 type: "plant",
                 orgColor: "#000000",

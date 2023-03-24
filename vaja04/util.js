@@ -11,3 +11,6 @@ const getRandomPointOnCircle = (R, center) => {
     let y = center.y + R * Math.sin(theta);
     return new Vector(x, y);
 }
+const randomNumberRange = (min, max) => {
+    return Math.random() * (max - min) + min;
+}
