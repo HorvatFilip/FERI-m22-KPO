@@ -200,7 +200,7 @@ class Organism {
 }
 
 class OrganismGroup {
-    constructor(id, conf, initialPopSize = 0) {
+    constructor(id, conf) {
         this.id = id;
         this.name = conf.name;
         this.type = conf.type;
@@ -209,16 +209,17 @@ class OrganismGroup {
         this.size = conf.size;
         this.detectRadius = conf.detectRadius;
         this.energyBase = conf.energyBase;
+        this.diet = conf.diet;
+        this.initialPopSize = conf.initialPopSize;
         this.homePos = conf.homePos;
         this.homeRadius = conf.homeRadius;
         this.huntingPos = conf.huntingPos;
         this.huntingRadius = conf.huntingRadius;
-        this.diet = conf.diet;
         this.population = [];
         this.popSize = 0;
         this.popId = 0;
-        if (initialPopSize != 0) {
-            this.createInitialPopulation(initialPopSize);
+        if (this.initialPopSize != 0) {
+            this.createInitialPopulation(this.initialPopSize);
         }
     }
     createInitialPopulation(initialPopSize) {
@@ -230,7 +231,6 @@ class OrganismGroup {
         let energyBase;
         let spawnPos;
         let orgConf = {};
-        console.log(this.energyBase);
         for (let i = 0; i < initialPopSize; i++) {
             orgId = this.type + "-" + this.popId;
             maxVelocity = randomNumberRange(this.maxVelocity * 0.9, this.maxVelocity);
@@ -246,6 +246,7 @@ class OrganismGroup {
             orgConf = {
                 id: orgId,
                 type: this.type,
+                color: this.color,
                 maxVelocity: maxVelocity,
                 size: size,
                 detectRadius: detectRadius,
@@ -334,7 +335,7 @@ class OrganismGroup {
         });
     }
     changeStage(stage) {
-        if (this.conf.type != "plant") {
+        if (this.type != "plant") {
             if (stage == "feeding") {
                 this.moveToFeedingZone(true);
             } else if (stage == "resting") {
@@ -344,7 +345,7 @@ class OrganismGroup {
                     } else {
                         org.stage = "resting";
                         if (org.eatenFood > 1) {
-                            if (this.conf.type == "insect") {
+                            if (this.type == "insect") {
                                 this.spawnChild(org, 2);
                             } else {
                                 this.spawnChild(org, 1);

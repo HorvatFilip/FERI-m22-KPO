@@ -90,8 +90,8 @@ class GuiLogic {
                 const body = document.createElement("div");
                 const saveBtn = document.createElement("button");
 
-                headerDisplayColor.style.backgroundColor = orgGroup.conf.orgColor;
-                headerText.innerHTML = orgGroup.conf.type;
+                headerDisplayColor.style.backgroundColor = orgGroup.color;
+                headerText.innerHTML = orgGroup.type;
                 headerDisplayPopSize.innerHTML = orgGroup.popSize;
                 saveBtn.innerHTML = "Save";
 
@@ -103,71 +103,97 @@ class GuiLogic {
                 body.setAttribute("class", "eco-elem-body");
                 saveBtn.setAttribute("class", "btn btn-secondary");
 
-                const popSizeInput = document.createElement("input");
                 const homeInputClick = document.createElement("div");
                 const homeInputIcon = document.createElement("i");
                 const homeXInput = document.createElement("input");
                 const homeYInput = document.createElement("input");
-                const feedingInputClick = document.createElement("div");
-                const feedingInputIcon = document.createElement("i");
-                const feedingXInput = document.createElement("input");
-                const feedingYInput = document.createElement("input");
-                const orgMaxVelocityInput = document.createElement("input");
-                const orgSizeInput = document.createElement("input");
-                const orgDetectInput = document.createElement("input");
-                const orgBaseEnergyInput = document.createElement("input");
+                const huntingInputClick = document.createElement("div");
+                const huntingInputIcon = document.createElement("i");
+                const huntingXInput = document.createElement("input");
+                const huntingYInput = document.createElement("input");
+                const colorInput = document.createElement("input");
+                const nameInput = document.createElement("input");
+                const typeInput = document.createElement("input");
                 const dietInput = document.createElement("input");
-                const dietInputLabel = document.createElement("label");
-                const popSizeInputLabel = document.createElement("label");
-                const orgMaxVelocityInputLabel = document.createElement("label");
-                const orgSizeInputLabel = document.createElement("label");
-                const orgDetectInputLabel = document.createElement("label");
-                const orgBaseEnergyInputLabel = document.createElement("label");
-                this.inputs[orgGroup.id] = [popSizeInput, homeXInput, homeYInput, feedingXInput, feedingYInput, orgMaxVelocityInput, orgSizeInput, orgDetectInput, orgBaseEnergyInput, dietInput];
+                const popSizeInput = document.createElement("input");
+                const maxVelocityInput = document.createElement("input");
+                const sizeInput = document.createElement("input");
+                const detectRadiusInput = document.createElement("input");
+                const energyBaseInput = document.createElement("input");
+
+                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, energyBaseInput];
+
+                const nameLabel = document.createElement("label");
+                const typeLabel = document.createElement("label");
+                const dietLabel = document.createElement("label");
+                const popSizeLabel = document.createElement("label");
+                const maxVelocityLabel = document.createElement("label");
+                const sizeLabel = document.createElement("label");
+                const detectRadiusLabel = document.createElement("label");
+                const energyBaseLabel = document.createElement("label");
 
                 homeInputClick.setAttribute("class", "btn btn-outline-secondary");
                 homeInputIcon.setAttribute("class", "fa-solid fa-house");
-                feedingInputClick.setAttribute("class", "btn btn-outline-secondary");
-                feedingInputIcon.setAttribute("class", "fa-solid fa-carrot");
+                huntingInputClick.setAttribute("class", "btn btn-outline-secondary");
+                huntingInputIcon.setAttribute("class", "fa-solid fa-carrot");
+                nameInput.setAttribute("class", "form-control");
+                typeInput.setAttribute("class", "form-control");
+                dietInput.setAttribute("class", "form-control");
+                popSizeInput.setAttribute("class", "form-control");
+                maxVelocityInput.setAttribute("class", "form-control");
+                sizeInput.setAttribute("class", "form-control");
+                detectRadiusInput.setAttribute("class", "form-control");
+                energyBaseInput.setAttribute("class", "form-control");
 
                 homeXInput.setAttribute("type", "number");
                 homeYInput.setAttribute("type", "number");
-                feedingXInput.setAttribute("type", "number");
-                feedingYInput.setAttribute("type", "number");
+                huntingXInput.setAttribute("type", "number");
+                huntingYInput.setAttribute("type", "number");
+                colorInput.setAttribute("type", "color");
+                nameInput.setAttribute("type", "text");
+                typeInput.setAttribute("type", "text");
+                dietInput.setAttribute("type", "text");
                 popSizeInput.setAttribute("type", "number");
-                orgMaxVelocityInput.setAttribute("type", "number");
-                orgSizeInput.setAttribute("type", "number");
-                orgDetectInput.setAttribute("type", "number");
-                orgBaseEnergyInput.setAttribute("type", "number");
+                maxVelocityInput.setAttribute("type", "number");
+                sizeInput.setAttribute("type", "number");
+                detectRadiusInput.setAttribute("type", "number");
+                energyBaseInput.setAttribute("type", "number");
 
                 homeXInput.setAttribute("placeholder", "X");
                 homeYInput.setAttribute("placeholder", "Y");
-                feedingXInput.setAttribute("placeholder", "X");
-                feedingYInput.setAttribute("placeholder", "Y");
-                popSizeInput.setAttribute("placeholder", "Pop size");
-                orgMaxVelocityInput.setAttribute("placeholder", "MaxVel");
-                orgSizeInput.setAttribute("placeholder", "Org size");
-                orgDetectInput.setAttribute("placeholder", "Detect");
-                orgBaseEnergyInput.setAttribute("placeholder", "Energy");
+                huntingXInput.setAttribute("placeholder", "X");
+                huntingYInput.setAttribute("placeholder", "Y");
+                nameInput.setAttribute("placeholder", "name");
+                typeInput.setAttribute("placeholder", "type");
+                dietInput.setAttribute("placeholder", "diet");
+                popSizeInput.setAttribute("placeholder", "pop size");
+                maxVelocityInput.setAttribute("placeholder", "max velocity");
+                sizeInput.setAttribute("placeholder", "size");
+                detectRadiusInput.setAttribute("placeholder", "detect radius");
+                energyBaseInput.setAttribute("placeholder", "base energy");
 
+                nameLabel.innerHTML = "Name";
+                typeLabel.innerHTML = "Type";
+                dietLabel.innerHTML = "Diet";
+                popSizeLabel.innerHTML = "Pop size";
+                maxVelocityLabel.innerHTML = "Max velocity";
+                sizeLabel.innerHTML = "Size";
+                detectRadiusLabel.innerHTML = "Detect radius";
+                energyBaseLabel.innerHTML = "Base energy";
 
-                popSizeInputLabel.innerHTML = "Pop size";
-                orgMaxVelocityInputLabel.innerHTML = "Max velocity";
-                orgSizeInputLabel.innerHTML = "Org Size";
-                orgDetectInputLabel.innerHTML = "Detect Range";
-                orgBaseEnergyInputLabel.innerHTML = "Base Energy";
-                dietInputLabel.innerHTML = "Diet";
-
-                homeXInput.value = orgGroup.conf.homePos.x;
-                homeYInput.value = orgGroup.conf.homePos.y;
-                feedingXInput.value = orgGroup.conf.feedingPos.x;
-                feedingYInput.value = orgGroup.conf.feedingPos.y;
-                popSizeInput.value = orgGroup.conf.initialPopSize;
-                orgMaxVelocityInput.value = orgGroup.conf.orgMaxVelocity;
-                orgSizeInput.value = orgGroup.conf.orgSize;
-                orgDetectInput.value = orgGroup.conf.detectRadius;
-                orgBaseEnergyInput.value = orgGroup.conf.baseEnergy;
-                dietInput.value = orgGroup.conf.diet;
+                homeXInput.value = orgGroup.homePos.x;
+                homeYInput.value = orgGroup.homePos.y;
+                huntingXInput.value = orgGroup.huntingPos.x;
+                huntingYInput.value = orgGroup.huntingPos.y;
+                colorInput.value = orgGroup.color;
+                nameInput.value = orgGroup.name;
+                typeInput.value = orgGroup.type;
+                dietInput.value = orgGroup.diet;
+                popSizeInput.value = orgGroup.initialPopSize;
+                maxVelocityInput.value = orgGroup.maxVelocity;
+                sizeInput.value = orgGroup.size;
+                detectRadiusInput.value = orgGroup.detectRadius;
+                energyBaseInput.value = orgGroup.energyBase;
 
                 header.addEventListener("click", () => {
                     if (body.style.display == "none" || body.style.display == "") {
@@ -188,13 +214,13 @@ class GuiLogic {
 
                     }, { once: true });
                 });
-                feedingInputClick.addEventListener("click", () => {
+                huntingInputClick.addEventListener("click", () => {
                     this.simCanvas_canvas.addEventListener("click", (e) => {
                         const rect = this.simCanvas_canvas.getBoundingClientRect()
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
-                        feedingXInput.value = x;
-                        feedingYInput.value = y;
+                        huntingXInput.value = x;
+                        huntingYInput.value = y;
 
                     }, { once: true });
                 });
@@ -206,59 +232,85 @@ class GuiLogic {
                         orgSize: orgSizeInput.value,
                         detectRadius: orgDetectInput.value,
                         baseEnergy: orgBaseEnergyInput.value,
-                        feedingPos: [parseInt(feedingXInput.value), parseInt(feedingYInput.value)],
+                        huntingPos: [parseInt(huntingXInput.value), parseInt(huntingYInput.value)],
                         homePos: [parseInt(homeXInput.value), parseInt(homeYInput.value)],
                         diet: dietInput.value
                     };
                 });
 
-                const firstRow = document.createElement("div");
-                const secondRow = document.createElement("div");
-                const thirdRow = document.createElement("div");
-                const forthRow = document.createElement("div");
-                const fifthRow = document.createElement("div");
-                const sixthRow = document.createElement("div");
-                const seventhRow = document.createElement("div");
+                const columns = document.createElement("div");
+                const firstColumn = document.createElement("div");
+                const secondColumn = document.createElement("div");
+
+                columns.setAttribute("class", "eco-elem-column-container");
+                firstColumn.setAttribute("class", "eco-elem-column");
+                secondColumn.setAttribute("class", "eco-elem-column");
+
+                let firstRow = document.createElement("div");
+                let secondRow = document.createElement("div");
+                let thirdRow = document.createElement("div");
+                let forthRow = document.createElement("div");
 
                 firstRow.setAttribute("class", "eco-elem-row");
-                secondRow.setAttribute("class", "eco-elem-row");
-                thirdRow.setAttribute("class", "eco-elem-row");
-                forthRow.setAttribute("class", "eco-elem-row");
-                fifthRow.setAttribute("class", "eco-elem-row");
-                sixthRow.setAttribute("class", "eco-elem-row");
-                seventhRow.setAttribute("class", "eco-elem-row");
+                secondRow.setAttribute("class", "form-floating eco-elem-row");
+                thirdRow.setAttribute("class", "form-floating eco-elem-row");
+                forthRow.setAttribute("class", "form-floating eco-elem-row");
+
+                firstRow.appendChild(homeInputClick);
+                firstRow.appendChild(homeXInput);
+                firstRow.appendChild(homeYInput);
+                firstRow.appendChild(huntingInputClick);
+                firstRow.appendChild(huntingXInput);
+                firstRow.appendChild(huntingYInput);
+                firstRow.appendChild(colorInput);
+                body.appendChild(firstRow);
+
+                firstRow = document.createElement("div");
+                firstRow.setAttribute("class", "form-floating eco-elem-row");
+                firstRow.appendChild(nameInput);
+                firstRow.appendChild(nameLabel);
+                secondRow.appendChild(dietInput);
+                secondRow.appendChild(dietLabel);
+                thirdRow.appendChild(maxVelocityInput);
+                thirdRow.appendChild(maxVelocityLabel);
+                forthRow.appendChild(detectRadiusInput);
+                forthRow.appendChild(detectRadiusLabel);
+                firstColumn.appendChild(firstRow);
+                firstColumn.appendChild(secondRow);
+                firstColumn.appendChild(thirdRow);
+                firstColumn.appendChild(forthRow);
+                columns.appendChild(firstColumn);
+
+                firstRow = document.createElement("div");
+                secondRow = document.createElement("div");
+                thirdRow = document.createElement("div");
+                forthRow = document.createElement("div");
+
+                firstRow.setAttribute("class", "form-floating eco-elem-row");
+                secondRow.setAttribute("class", "form-floating eco-elem-row");
+                thirdRow.setAttribute("class", "form-floating eco-elem-row");
+                forthRow.setAttribute("class", "form-floating eco-elem-row");
+
+                firstRow.appendChild(typeInput);
+                firstRow.appendChild(typeLabel);
+                secondRow.appendChild(popSizeInput);
+                secondRow.appendChild(popSizeLabel);
+                thirdRow.appendChild(sizeInput);
+                thirdRow.appendChild(sizeLabel);
+                forthRow.appendChild(energyBaseInput);
+                forthRow.appendChild(energyBaseLabel);
+                secondColumn.appendChild(firstRow);
+                secondColumn.appendChild(secondRow);
+                secondColumn.appendChild(thirdRow);
+                secondColumn.appendChild(forthRow);
+                columns.appendChild(secondColumn);
+                body.appendChild(columns);
 
                 header.appendChild(headerDisplayColor);
                 header.appendChild(headerText);
                 header.appendChild(headerDisplayPopSize);
                 homeInputClick.appendChild(homeInputIcon);
-                feedingInputClick.appendChild(feedingInputIcon);
-                firstRow.appendChild(homeInputClick);
-                firstRow.appendChild(homeXInput);
-                firstRow.appendChild(homeYInput);
-                firstRow.appendChild(feedingInputClick);
-                firstRow.appendChild(feedingXInput);
-                firstRow.appendChild(feedingYInput);
-                secondRow.appendChild(popSizeInputLabel);
-                secondRow.appendChild(popSizeInput);
-                thirdRow.appendChild(orgMaxVelocityInputLabel);
-                thirdRow.appendChild(orgMaxVelocityInput);
-                forthRow.appendChild(orgSizeInputLabel);
-                forthRow.appendChild(orgSizeInput);
-                fifthRow.appendChild(orgDetectInputLabel);
-                fifthRow.appendChild(orgDetectInput);
-                sixthRow.appendChild(orgBaseEnergyInputLabel);
-                sixthRow.appendChild(orgBaseEnergyInput);
-                seventhRow.appendChild(dietInputLabel);
-                seventhRow.appendChild(dietInput);
-                body.appendChild(firstRow);
-                body.appendChild(secondRow);
-                body.appendChild(thirdRow);
-                body.appendChild(forthRow);
-                body.appendChild(fifthRow);
-                body.appendChild(sixthRow);
-                body.appendChild(seventhRow);
-                body.appendChild(saveBtn);
+                huntingInputClick.appendChild(huntingInputIcon);
                 newEcoElem.appendChild(header);
                 newEcoElem.appendChild(body);
                 this.ecoElems_list.appendChild(newEcoElem);
@@ -282,7 +334,6 @@ class GuiLogic {
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
         if (this.ecoSystem === null) {
-
             const orgGroup01Conf = {
                 name: "insect01",
                 type: "insect",
@@ -291,6 +342,7 @@ class GuiLogic {
                 size: 3,
                 detectRadius: 40,
                 energyBase: 5000,
+                diet: "plants",
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -298,8 +350,7 @@ class GuiLogic {
                 huntingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                huntingRadius: 500,
-                diet: "plants"
+                huntingRadius: 500
             };
 
             const dateTimeTracker = new DateTimeTracker();
@@ -307,75 +358,11 @@ class GuiLogic {
             this.ecoSystem.addOrganismGroup(orgGroup01Conf, 50);
 
         }
-        this.run = false;
-        this.ecoSystem.dateTime.resetDate();
-
-        this.initCharts(infoCanvasConf);
-
-        if (this.frameRef != null) {
-            cancelAnimationFrame(this.frameRef);
-        }
-        this.startAnimation();
-    }
-    loadSimScenario02() {
-        const simCanvasConf = {
-            id: "simulation-canvas",
-            width: 1500,
-            height: 1500
-        };
-        const infoCanvasConf = {
-            id: "information-canvas",
-            width: 500,
-            height: 500
-        };
-        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         this.run = true;
-
-        const orgGroup01Conf = {
-            type: "insect",
-            orgColor: "#4C9900",
-            orgSize: 3,
-            orgMaxVelocity: 3,
-            detectRadius: 40,
-            baseEnergy: 50000,
-            diet: "plant",
-            homePos: {
-                x: 300, y: 300
-            },
-            feedingPos: {
-                x: 500, y: 500
-            },
-            feedingZoneRadius: 200,
-            initialPopSize: 10
-        };
-        const orgGroup02Conf = {
-            type: "bird",
-            orgColor: "#004C99",
-            orgSize: 6,
-            orgMaxVelocity: 3.5,
-            detectRadius: 40,
-            baseEnergy: 10000,
-            diet: "insect",
-            homePos: {
-                x: 700, y: 700
-            },
-            feedingPos: {
-                x: 500, y: 500
-            },
-            feedingZoneRadius: 200,
-            initialPopSize: 15
-        };
-
-        const dateTimeTracker = new DateTimeTracker();
-
-        let ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
-        ecoSystem.addOrganismGroup(orgGroup01Conf);
-        //ecoSystem.addOrganismGroup(orgGroup02Conf);
-
-        this.addEcoSystemToGui(ecoSystem);
         this.ecoSystem.dateTime.resetDate();
 
         this.initCharts(infoCanvasConf);
+
         if (this.frameRef != null) {
             cancelAnimationFrame(this.frameRef);
         }
@@ -397,56 +384,63 @@ class GuiLogic {
         if (this.ecoSystem === null) {
 
             const orgGroup01Conf = {
-                type: "plant",
-                orgColor: "#000000",
-                orgSize: 2,
-                orgMaxVelocity: 0,
-                detectRadius: 1,
-                baseEnergy: 10000,
-                diet: "none",
+                name: "insect01",
+                type: "insect",
+                color: "#4C9900",
+                maxVelocity: 3,
+                size: 3,
+                detectRadius: 40,
+                energyBase: 5000,
+                diet: "plants",
+                initialPopSize: 50,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingPos: {
+                homeRadius: 40,
+                huntingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 500,
-                initialPopSize: 100
+                huntingRadius: 500
             };
             const orgGroup02Conf = {
-                type: "insect",
-                orgColor: "#4C9900",
-                orgSize: 3,
-                orgMaxVelocity: 3,
-                detectRadius: 40,
-                baseEnergy: 5000,
-                diet: "all",
+                name: "plant01",
+                type: "plant",
+                color: "#000000",
+                maxVelocity: 0,
+                size: 3,
+                detectRadius: 1,
+                energyBase: 100000,
+                diet: "none",
+                initialPopSize: 100,
                 homePos: {
-                    x: 300, y: 300
-                },
-                feedingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 200,
-                initialPopSize: 100
+                homeRadius: 1000,
+                huntingPos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                huntingRadius: 500
             };
             const orgGroup03Conf = {
+                name: "bird01",
                 type: "bird",
-                orgColor: "#004C99",
-                orgSize: 6,
-                orgMaxVelocity: 3.5,
+                color: "#004C99",
+                maxVelocity: 3.5,
+                size: 6,
                 detectRadius: 40,
-                baseEnergy: 10000,
+                energyBase: 1000,
                 diet: "insect",
+                initialPopSize: 10,
                 homePos: {
-                    x: 700, y: 700
-                },
-                feedingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                feedingZoneRadius: 200,
-                initialPopSize: 15
+                homeRadius: 1000,
+                huntingPos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                huntingRadius: 500
             };
+
             const dateTimeTracker = new DateTimeTracker();
             this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
             this.ecoSystem.addOrganismGroup(orgGroup01Conf);
@@ -460,19 +454,27 @@ class GuiLogic {
         let ids = Object.keys(this.inputs);
         ids.forEach(id => {
             let config = {
-
-                initialPopSize: parseInt(this.inputs[id][0].value),
-                orgMaxVelocity: parseInt(this.inputs[id][5].value),
-                orgSize: parseInt(this.inputs[id][6].value),
-                detectRadius: parseInt(this.inputs[id][7].value),
-                baseEnergy: parseInt(this.inputs[id][8].value),
-                feedingPos: { x: parseInt(this.inputs[id][3].value), y: parseInt(this.inputs[id][4].value) },
-                homePos: { x: parseInt(this.inputs[id][1].value), y: parseInt(this.inputs[id][2].value) },
-                diet: this.inputs[id][9].value
+                name: this.inputs[id][5].value,
+                type: this.inputs[id][6].value,
+                color: this.inputs[id][4].value,
+                maxVelocity: parseInt(this.inputs[id][9].value),
+                size: parseInt(this.inputs[id][10].value),
+                detectRadius: parseInt(this.inputs[id][11].value),
+                energyBase: parseInt(this.inputs[id][12].value),
+                diet: this.inputs[id][7].value,
+                initialPopSize: parseInt(this.inputs[id][8].value),
+                homePos: {
+                    x: parseInt(this.inputs[id][0].value),
+                    y: parseInt(this.inputs[id][1].value)
+                },
+                huntingPos: {
+                    x: parseInt(this.inputs[id][2].value),
+                    y: parseInt(this.inputs[id][3].value)
+                }
             };
             this.ecoSystem.changeOrganismGroupConfiguration(id, config);
         });
-        this.initCharts(infoCanvasConf);
+        //this.initCharts(infoCanvasConf);
 
         if (this.frameRef != null) {
             cancelAnimationFrame(this.frameRef);
@@ -522,32 +524,15 @@ class GuiLogic {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
         let hour = this.ecoSystem.dateTime.getHours() - 1;
         let prevHour = hour;
-        let currStage = "resting";
         this.runAnimation(time => {
             if (this.run) {
                 let hour = this.ecoSystem.dateTime.getHours();
                 if (prevHour !== hour) {
                     prevHour = hour;
-                    this.state.updateOrganismGroups(this.ecoSystem.organismGroups);
-                    if (currStage == "feeding") {
-                        this.state.searchForFood();
-                    }
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
-
-                    if (hour > 4 && hour < 4.05) {
-                        this.state.startFeedingStage();
-                        currStage = "feeding";
-                    }
-                    else if (hour > 13 && hour < 13.05) {
-                        this.state.moveAllToFeedingZone();
-                    }
-                    else if (hour > 23 && hour < 23.05) {
-                        this.state.respawnPlants();
-                        this.state.startRestingStage();
-                        this.drawComponent.syncInfoData(this.state);
-                    }
+                    console.log(this.state);
                 }
 
             }

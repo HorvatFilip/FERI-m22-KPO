@@ -21,13 +21,13 @@ class DrawComponent {
     initChartPointVars() {
         this.infoPoints = {};
     }
-    clearSimCanvas() {
+    drawMap() {
         //this.simCtx.fillStyle = "rgb(50, 60, 70)";
         //this.simCtx.fillRect(0, 0, this.simCanvas.width, this.simCanvas.height);
         SIM_MAP.data.draw(this.simCtx, this.simCanvas.width, this.simCanvas.height, SIM_MAP.conf.style);
     }
     syncSimData(state) {
-        this.clearSimCanvas();
+        this.drawMap();
         this.drawAllOrganisms(state.organismGroups);
     }
     drawAllOrganisms(organismGroups) {
@@ -39,9 +39,9 @@ class DrawComponent {
     }
     drawOrganism(organism) {
         this.simCtx.beginPath();
-        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.orgSize, 0, Math.PI * 2);
+        this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
         this.simCtx.closePath();
-        this.simCtx.fillStyle = organism.orgColor;
+        this.simCtx.fillStyle = organism.color;
         this.simCtx.fill();
     }
     createNewInfoCanvas(conf, val) {

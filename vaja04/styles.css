@@ -138,6 +138,16 @@ canvas {
     padding: 5px;
 }
 
+.eco-elem-column-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.eco-elem-column {
+    display: flex;
+    flex-direction: column;
+}
+
 .eco-elem-row {
     display: flex;
     flex-direction: row;
@@ -147,7 +157,7 @@ canvas {
     min-width: 127px;
 } 
 
-.eco-elem-row:nth-child(1) > input{
+.eco-elem-body > .eco-elem-row:nth-child(1) > input{
     max-width: 35px;
 }
 
@@ -171,6 +181,16 @@ canvas {
     border: black 1px;
     border-style: dotted;
     margin: 1px;
+}
+
+.eco-elem-row > input:focus {
+    color: gray;
+    background-color: rgb(22 46 70 / 45%);
+    outline: 0;
+    box-shadow: none;
+    border-radius: 3px;
+    border: black 1px;
+    border-style: dotted;
 }
 
 .date-time-container input {
