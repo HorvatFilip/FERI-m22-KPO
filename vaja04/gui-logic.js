@@ -13,6 +13,17 @@ class GuiLogic {
         this.closeChartDisplay_btn = document.getElementById("close-chart-display");
         this.chartDisplay_menu = document.getElementById("chart-display");
         this.chartDisplayList = document.getElementById("chart-display-list");
+        this.toggleMapConfDisplay_btn = document.getElementById("open-map-config-display");
+        this.closeMapConfDisplay_btn = document.getElementById("close-map-config-display");
+        this.mapConfDisplay = document.getElementById("map-config-display");
+        this.mapConfDisplay_menu = document.getElementById("map-config-display-menu");
+        this.mapConf_inputs = {
+            seed: document.getElementById("map-seed-input"),
+            amp: document.getElementById("map-amp-input"),
+            freq: document.getElementById("map-freq-input"),
+            ampCoef: document.getElementById("map-amp-coef-input"),
+            freqCoef: document.getElementById("map-freq-coef-input"),
+        }
         this.simCanvas_canvas = document.getElementById("simulation-canvas");
         this.hourDisplay_display = document.getElementById("time-display-hours");
         this.chartDisplay_list = document.getElementById("chart-display-list");
@@ -55,8 +66,21 @@ class GuiLogic {
                 this.chartDisplay_menu.style.width = "0px";
             }
         });
+        this.toggleMapConfDisplay_btn.addEventListener("click", () => {
+            if (this.mapConfDisplay.style.width == "0px" || this.mapConfDisplay.style.width == "") {
+                this.mapConfDisplay.style.width = "375px";
+            } else {
+                this.mapConfDisplay.style.width = "0px";
+            }
+        });
         this.closeChartDisplay_btn.addEventListener("click", () => {
             this.chartDisplay_menu.style.width = "0px";
+        });
+        this.closeChartDisplay_btn.addEventListener("click", () => {
+            this.chartDisplay_menu.style.width = "0px";
+        });
+        this.closeMapConfDisplay_btn.addEventListener("click", () => {
+            this.mapConfDisplay.style.width = "0px";
         });
         this.timeControlPlus_btn.addEventListener("click", () => {
             if (this.timeSpeed < 5) {
@@ -227,14 +251,6 @@ class GuiLogic {
 
                 saveBtn.addEventListener("click", () => {
                     let config = {
-                        initialPopSize: popSizeInput.value,
-                        orgMaxVelocity: orgMaxVelocityInput.value,
-                        orgSize: orgSizeInput.value,
-                        detectRadius: orgDetectInput.value,
-                        baseEnergy: orgBaseEnergyInput.value,
-                        huntingPos: [parseInt(huntingXInput.value), parseInt(huntingYInput.value)],
-                        homePos: [parseInt(homeXInput.value), parseInt(homeYInput.value)],
-                        diet: dietInput.value
                     };
                 });
 
@@ -320,54 +336,6 @@ class GuiLogic {
     addNewOrganismGroupUI() {
 
     }
-    loadScenario01() {
-        const infoCanvasConf = {
-            width: 500,
-            height: 500
-        };
-        const simCanvasConf = {
-            id: "simulation-canvas",
-            width: 1700,
-            height: 1700
-        };
-        if (this.drawComponent === null) {
-            this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
-        }
-        if (this.ecoSystem === null) {
-            const orgGroup01Conf = {
-                name: "insect01",
-                type: "insect",
-                color: "#4C9900",
-                maxVelocity: 3,
-                size: 3,
-                detectRadius: 40,
-                energyBase: 5000,
-                diet: "plants",
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                homeRadius: 40,
-                huntingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                huntingRadius: 500
-            };
-
-            const dateTimeTracker = new DateTimeTracker();
-            this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
-            this.ecoSystem.addOrganismGroup(orgGroup01Conf, 50);
-
-        }
-        this.run = true;
-        this.ecoSystem.dateTime.resetDate();
-
-        this.initCharts(infoCanvasConf);
-
-        if (this.frameRef != null) {
-            cancelAnimationFrame(this.frameRef);
-        }
-        this.startAnimation();
-    }
     loadSimScenarioFromUI() {
         const infoCanvasConf = {
             width: 500,
@@ -378,10 +346,31 @@ class GuiLogic {
             width: 1700,
             height: 1700
         };
+        const mapDefaultConf = {
+            width: 100,
+            height: 100,
+            style: NoiseMap.STYLE.REALISTIC,
+            seed: 100001,
+            mapConf: {
+                amplitude: 1,
+                frequency: 0.5,
+                amplitudeCoef: 0.5,
+                frequencyCoef: 0.5,
+            }
+        };
+
         if (this.drawComponent === null) {
             this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
         }
         if (this.ecoSystem === null) {
+            SIM_MAP = new MapComponent();
+            SIM_MAP.setConfig(mapDefaultConf);
+
+            this.mapConf_inputs.seed.value = mapDefaultConf.seed;
+            this.mapConf_inputs.amp.value = mapDefaultConf.mapConf.amplitude;
+            this.mapConf_inputs.freq.value = mapDefaultConf.mapConf.frequency;
+            this.mapConf_inputs.ampCoef.value = mapDefaultConf.mapConf.amplitudeCoef;
+            this.mapConf_inputs.freqCoef.value = mapDefaultConf.mapConf.frequencyCoef;
 
             const orgGroup01Conf = {
                 name: "insect01",
@@ -447,35 +436,54 @@ class GuiLogic {
             this.ecoSystem.addOrganismGroup(orgGroup02Conf);
             this.ecoSystem.addOrganismGroup(orgGroup03Conf);
 
+        } else {
+            let ids = Object.keys(this.inputs);
+            ids.forEach(id => {
+                let config = {
+                    name: this.inputs[id][5].value,
+                    type: this.inputs[id][6].value,
+                    color: this.inputs[id][4].value,
+                    maxVelocity: parseInt(this.inputs[id][9].value),
+                    size: parseInt(this.inputs[id][10].value),
+                    detectRadius: parseInt(this.inputs[id][11].value),
+                    energyBase: parseInt(this.inputs[id][12].value),
+                    diet: this.inputs[id][7].value,
+                    initialPopSize: parseInt(this.inputs[id][8].value),
+                    homePos: {
+                        x: parseInt(this.inputs[id][0].value),
+                        y: parseInt(this.inputs[id][1].value)
+                    },
+                    huntingPos: {
+                        x: parseInt(this.inputs[id][2].value),
+                        y: parseInt(this.inputs[id][3].value)
+                    }
+                };
+                this.ecoSystem.changeOrganismGroupConfiguration(id, config);
+            });
 
-        }
-        this.run = true;
-        this.ecoSystem.dateTime.resetDate();
+            let seed = null;
+            if (this.mapConf_inputs.seed.value != "") {
+                seed = parseInt(this.mapConf_inputs.seed.value);
+            }
 
-        let ids = Object.keys(this.inputs);
-        ids.forEach(id => {
-            let config = {
-                name: this.inputs[id][5].value,
-                type: this.inputs[id][6].value,
-                color: this.inputs[id][4].value,
-                maxVelocity: parseInt(this.inputs[id][9].value),
-                size: parseInt(this.inputs[id][10].value),
-                detectRadius: parseInt(this.inputs[id][11].value),
-                energyBase: parseInt(this.inputs[id][12].value),
-                diet: this.inputs[id][7].value,
-                initialPopSize: parseInt(this.inputs[id][8].value),
-                homePos: {
-                    x: parseInt(this.inputs[id][0].value),
-                    y: parseInt(this.inputs[id][1].value)
-                },
-                huntingPos: {
-                    x: parseInt(this.inputs[id][2].value),
-                    y: parseInt(this.inputs[id][3].value)
+            let newMapConf = {
+                seed: seed,
+                mapConf: {
+                    amplitude: parseFloat(this.mapConf_inputs.amp.value),
+                    frequency: parseFloat(this.mapConf_inputs.freq.value),
+                    amplitudeCoef: parseFloat(this.mapConf_inputs.ampCoef.value),
+                    frequencyCoef: parseFloat(this.mapConf_inputs.freqCoef.value),
                 }
-            };
-            this.ecoSystem.changeOrganismGroupConfiguration(id, config);
-        });
-        //this.initCharts(infoCanvasConf);
+            }
+            newMapConf = Object.assign(mapDefaultConf, newMapConf);
+            SIM_MAP.setConfig(newMapConf);
+        }
+        this.run = false;
+        this.ecoSystem.dateTime.resetDate();
+        SIM_MAP.generate();
+        if (this.mapConf_inputs.seed.value == "") {
+            this.mapConf_inputs.seed.value = SIM_MAP.generator._seed;
+        }
 
         if (this.frameRef != null) {
             cancelAnimationFrame(this.frameRef);
@@ -525,6 +533,7 @@ class GuiLogic {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
         let hour = this.ecoSystem.dateTime.getHours() - 1;
         let prevHour = hour;
+        this.drawComponent.drawMap();
         this.runAnimation(time => {
             if (this.run) {
                 let hour = this.ecoSystem.dateTime.getHours();
@@ -533,7 +542,6 @@ class GuiLogic {
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
-                    console.log(this.state);
                 }
 
             }

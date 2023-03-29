@@ -29,7 +29,7 @@
       >
         X
       </button>
-      <div class="eco-elements-groups-stats">
+      <div class="side-menu-content-container">
         <div id="eco-elements-groups-list"></div>
         <div id="eco-elements-groups-add">
           <i class="fa-solid fa-plus"></i>
@@ -44,6 +44,60 @@
         X
       </button>
       <div id="chart-display-list"></div>
+    </div>
+    <div id="map-config-display">
+      <button
+        id="close-map-config-display"
+        class="btn btn-danger small-close-button"
+      >
+        X
+      </button>
+      <div class="side-menu-content-container">
+        <div id="map-config-menu">
+          <div class="form-floating eco-elem-row">
+            <input id="map-seed-input" class="form-control" placeholder="0" />
+            <label>Seed</label>
+          </div>
+          <div class="map-config-var-container">
+            <div class="eco-elem-column">
+              <div class="form-floating eco-elem-row">
+                <input
+                  id="map-amp-input"
+                  class="form-control"
+                  placeholder="1"
+                />
+                <label>Amp</label>
+              </div>
+              <div class="form-floating eco-elem-row">
+                <input
+                  id="map-freq-input"
+                  class="form-control"
+                  placeholder="1"
+                />
+                <label>Freq</label>
+              </div>
+            </div>
+            <div class="eco-elem-column">
+              <div class="form-floating eco-elem-row">
+                <input
+                  id="map-amp-coef-input"
+                  class="form-control"
+                  placeholder="1"
+                />
+                <label>Amp - Coef</label>
+              </div>
+              <div class="form-floating eco-elem-row">
+                <input
+                  id="map-freq-coef-input"
+                  class="form-control"
+                  placeholder="1"
+                />
+                <label>Freq - Coef</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="app-container">
@@ -63,6 +117,9 @@
             </div>
             <div id="open-chart-display" class="btn btn-outline-secondary">
               <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div id="open-map-config-display" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-earth-europe"></i>
             </div>
           </div>
         </div>

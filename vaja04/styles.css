@@ -81,14 +81,13 @@ canvas {
     flex-direction: column;
 }
 
-.eco-elements-groups-stats {
+.side-menu-content-container {
     display: flex;
     flex-direction: column;
     margin: 1em;
     background-color: rgb(33, 37, 41);
     padding: 0.5em;
     height: 100%;
-   
 }
 #eco-elements-groups-add{
     align-self: center;
@@ -173,7 +172,6 @@ canvas {
 
 .date-time-container input,
 .eco-elem-row > input {
-    max-width: 123px;
     background-color: rgb(22 46 70 / 45%);
     outline: 0 !important;
     color: gray;
@@ -191,6 +189,30 @@ canvas {
     border-radius: 3px;
     border: black 1px;
     border-style: dotted;
+}
+
+input[type="color"] {
+    height: 40px;
+}
+
+#map-config-menu {
+    min-width: 250px;
+    min-height: 20px;
+    background-color: rgb(59, 74, 88);
+    border: black 1px solid;
+    margin-bottom: 1px;
+    padding: 10px;
+}
+
+.map-config-var-container {
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+#map-config-menu > .eco-elem > input {
+
 }
 
 .date-time-container input {
@@ -230,6 +252,26 @@ canvas {
 
 .eco-elem-body > button {
     margin-top: 5px;
+}
+
+#map-config-display {
+    height: 100%;
+    position: fixed;
+    width: 0px;
+    z-index: 1;
+    background-color:  rgb(59, 74, 88);
+    border: black 1px solid;
+    overflow-x: hidden;
+    transition: 0.5s;
+    top: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#open-chart-display {
+    display: none !important;
 }
 
 #chart-display {

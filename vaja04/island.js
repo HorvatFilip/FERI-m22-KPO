@@ -246,7 +246,6 @@ class OrganismGroup {
             orgConf = {
                 id: orgId,
                 type: this.type,
-                color: this.color,
                 maxVelocity: maxVelocity,
                 size: size,
                 detectRadius: detectRadius,
@@ -259,10 +258,23 @@ class OrganismGroup {
         }
     }
     changeConfiguration(newConf) {
-        this.conf = Object.assign(this.conf, newConf);
+        this.name = newConf.name;
+        this.type = newConf.type;
+        this.color = newConf.color;
+        this.maxVelocity = newConf.maxVelocity;
+        this.size = newConf.size;
+        this.detectRadius = newConf.detectRadius;
+        this.energyBase = newConf.energyBase;
+        this.diet = newConf.diet;
+        this.initialPopSize = newConf.initialPopSize;
+        this.homePos = newConf.homePos;
+        this.huntingPos = newConf.huntingPos;
         this.population = [];
         this.popSize = 0;
-        this.addOrganisms(this.conf.initialPopSize);
+        this.popId = 0;
+        if (this.initialPopSize != 0) {
+            this.createInitialPopulation(this.initialPopSize);
+        }
     }
     addOrganisms(count) {
         let homePos;

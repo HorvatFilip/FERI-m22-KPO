@@ -33,15 +33,15 @@ class DrawComponent {
     drawAllOrganisms(organismGroups) {
         organismGroups.forEach(orgGroup => {
             orgGroup.population.forEach(org => {
-                this.drawOrganism(org)
+                this.drawOrganism(org, orgGroup.color)
             })
         });
     }
-    drawOrganism(organism) {
+    drawOrganism(organism, color) {
         this.simCtx.beginPath();
         this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
         this.simCtx.closePath();
-        this.simCtx.fillStyle = organism.color;
+        this.simCtx.fillStyle = color;
         this.simCtx.fill();
     }
     createNewInfoCanvas(conf, val) {
