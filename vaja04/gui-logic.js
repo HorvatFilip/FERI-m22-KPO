@@ -365,7 +365,7 @@ class GuiLogic {
         if (this.ecoSystem === null) {
             SIM_MAP = new MapComponent();
             SIM_MAP.setConfig(mapDefaultConf);
-
+            SIM_MAP.generate();
             this.mapConf_inputs.seed.value = mapDefaultConf.seed;
             this.mapConf_inputs.amp.value = mapDefaultConf.mapConf.amplitude;
             this.mapConf_inputs.freq.value = mapDefaultConf.mapConf.frequency;
@@ -423,7 +423,7 @@ class GuiLogic {
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                homeRadius: 1000,
+                homeRadius: 40,
                 huntingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -437,6 +437,24 @@ class GuiLogic {
             this.ecoSystem.addOrganismGroup(orgGroup03Conf);
 
         } else {
+            let seed = null;
+            if (this.mapConf_inputs.seed.value != "") {
+                seed = parseInt(this.mapConf_inputs.seed.value);
+            }
+
+            let newMapConf = {
+                seed: seed,
+                mapConf: {
+                    amplitude: parseFloat(this.mapConf_inputs.amp.value),
+                    frequency: parseFloat(this.mapConf_inputs.freq.value),
+                    amplitudeCoef: parseFloat(this.mapConf_inputs.ampCoef.value),
+                    frequencyCoef: parseFloat(this.mapConf_inputs.freqCoef.value),
+                }
+            }
+            newMapConf = Object.assign(mapDefaultConf, newMapConf);
+            SIM_MAP.setConfig(newMapConf);
+            SIM_MAP.generate();
+
             let ids = Object.keys(this.inputs);
             ids.forEach(id => {
                 let config = {
@@ -460,27 +478,9 @@ class GuiLogic {
                 };
                 this.ecoSystem.changeOrganismGroupConfiguration(id, config);
             });
-
-            let seed = null;
-            if (this.mapConf_inputs.seed.value != "") {
-                seed = parseInt(this.mapConf_inputs.seed.value);
-            }
-
-            let newMapConf = {
-                seed: seed,
-                mapConf: {
-                    amplitude: parseFloat(this.mapConf_inputs.amp.value),
-                    frequency: parseFloat(this.mapConf_inputs.freq.value),
-                    amplitudeCoef: parseFloat(this.mapConf_inputs.ampCoef.value),
-                    frequencyCoef: parseFloat(this.mapConf_inputs.freqCoef.value),
-                }
-            }
-            newMapConf = Object.assign(mapDefaultConf, newMapConf);
-            SIM_MAP.setConfig(newMapConf);
         }
         this.run = false;
         this.ecoSystem.dateTime.resetDate();
-        SIM_MAP.generate();
         if (this.mapConf_inputs.seed.value == "") {
             this.mapConf_inputs.seed.value = SIM_MAP.generator._seed;
         }

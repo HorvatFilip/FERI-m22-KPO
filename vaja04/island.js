@@ -28,8 +28,12 @@ class Organism {
     }
     updatePosition(state) {
         if (this.type !== "plant") {
-            if (this.stage == "feeding") {
-                this.trueEnergy = this.trueEnergy - this.orgSize - this.maxVelocity - this.detectRadius;
+
+            if (this.stage == "h") {
+                this.trueEnergy = this.trueEnergy - 10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius;
+            }
+            else if (this.stage == "d" || this.stage == "m") {
+                this.trueEnergy = this.trueEnergy - (10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius) / 2;
             }
             let newPos = null;
             if (this.checkBounds(state) == 0) {
@@ -231,18 +235,30 @@ class OrganismGroup {
         let energyBase;
         let spawnPos;
         let orgConf = {};
+        let loopCount = 0;
         for (let i = 0; i < initialPopSize; i++) {
             orgId = this.type + "-" + this.popId;
             maxVelocity = randomNumberRange(this.maxVelocity * 0.9, this.maxVelocity);
             size = randomNumberRange(this.size * 0.9, this.size);
             detectRadius = randomNumberRange(this.detectRadius * 0.9, this.detectRadius);
             energyBase = randomNumberRange(this.energyBase * 0.9, this.energyBase);
+
+            loopCount = 0;
             spawnPos = getRandomPointInsideCircle(this.homeRadius, this.homePos);
+            while (SIM_MAP.isTileDeepWater(spawnPos) && loopCount < 10000) {
+                spawnPos = getRandomPointInsideCircle(this.homeRadius, this.homePos);
+                loopCount++;
+            }
+            if (loopCount == 10000) {
+                continue;
+            }
+
             if (Math.random() > 0.5) {
                 gender = "m";
             } else {
                 gender = "f"
             }
+
             orgConf = {
                 id: orgId,
                 type: this.type,
@@ -252,6 +268,7 @@ class OrganismGroup {
                 energyBase: energyBase,
                 gender: gender
             }
+
             this.population.push(new Organism(spawnPos, orgConf));
             this.popId++;
             this.popSize++;
