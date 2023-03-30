@@ -6,6 +6,7 @@ class State {
     updateOrganismGroups(updatedOrganismGroups) {
         this.organismGroups = updatedOrganismGroups;
     }
+
     startFeedingStage() {
         this.stage = "feeding";
         this.organismGroups.forEach(orgGroup => {
@@ -18,10 +19,35 @@ class State {
             orgGroup.changeStage("resting");
         });
     }
-    moveAllToFeedingZone() {
+    moveAllToHuntingZone() {
+        let pathFindAlg = null;
         this.organismGroups.forEach(orgGroup => {
-            orgGroup.moveToFeedingZone();
+            if (orgGroup.type != "plant") {
+                orgGroup.population.forEach(org => {
+                    console.log(org);
+                    pathFindAlg = new PathFindingAlg(org.pos, org.huntPos);
+                    org.setPath(
+                        pathFindAlg.findPathToGoal()
+                    );
+                });
+            }
         });
+        console.log("done");
+    }
+    moveAllToHomeZone() {
+        let pathFindAlg = null;
+        this.organismGroups.forEach(orgGroup => {
+            if (orgGroup.type != "plant") {
+                orgGroup.population.forEach(org => {
+
+                    pathFindAlg = new PathFindingAlg(org.pos, org.homePos);
+                    org.setPath(
+                        pathFindAlg.findPathToGoal()
+                    );
+                });
+            }
+        });
+        console.log("done");
     }
     searchForFood() {
         let diet = null;

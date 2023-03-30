@@ -14,3 +14,8 @@ const getRandomPointOnCircle = (R, center) => {
 const randomNumberRange = (min, max) => {
     return Math.random() * (max - min) + min;
 }
+const euclidDistance = (node01, node02) => {
+    return Math.sqrt(
+        Math.pow(node01.x - node02.x, 2) + Math.pow(node01.y - node02.y, 2)
+    );
+}

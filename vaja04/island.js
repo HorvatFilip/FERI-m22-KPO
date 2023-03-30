@@ -14,11 +14,16 @@ class Organism {
             this.hydration = 100;
             this.matingInterval = 100;
             this.stage = "r";
+            this.homePos = orgNewPos;
+            this.huntPos = orgConf.huntPos;
             this.pos = orgNewPos;
             this.velocity = new Vector(0, 0);
             this.goalPos = null;
             this.path = [];
         }
+    }
+    setPath(path) {
+        this.path = path;
     }
     setGoalPos(newGoalPos) {
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
@@ -26,16 +31,62 @@ class Organism {
     moveToSpawnPoint() {
         this.goalPos = this.homePos;
     }
+    updateNeeds() {
+        if (this.stage == "h") {
+            this.trueEnergy -= 10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius;
+            this.hunger -= 1;
+            this.hydration -= 1;
+            this.matingInterval -= 0.5;
+
+        } else if (this.stage == "d" || this.stage == "m") {
+            this.trueEnergy = this.trueEnergy - (10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius) / 2;
+            this.hunger = this.hunger - 0.5;
+
+        } else if (this.stage == "r") {
+            this.hunger = this.hunger - 0.25;
+            this.hydration -= 0.25;
+            this.matingInterval -= 1;
+        }
+
+        if (this.trueEnergy < this.baseEnergy * 0.1) {
+            this.stage = "r";
+        }
+        if (this.hunger < 50) {
+            this.stage = "h";
+        }
+        if (this.hydration < 50) {
+            this.stage = "d";
+        }
+        if (this.matingInterval < 10) {
+            this.stage = "m";
+        }
+    }
     updatePosition(state) {
         if (this.type !== "plant") {
+            console.log(this);
+            if (this.goalPos != null || this.path.length > 0) {
+                if (this.goalPos == null) {
+                    this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
+                    this.path.shift();
+                    console.log(this.path);
+                    this.makeMoveToGoal();
+                } else if (this.pos.equals(this.goalPos)) {
+                    this.goalPos = null;
+                    this.makeRandomMove();
+                } else {
+                    this.makeMoveToGoal();
+                }
+            } else {
+                this.makeRandomMove();
+            }
+            let newPos = this.pos.add(this.velocity);
+            return new Organism({
+                ...this,
+                pos: newPos
+            });
+            this.updateNeeds();
 
-            if (this.stage == "h") {
-                this.trueEnergy = this.trueEnergy - 10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius;
-            }
-            else if (this.stage == "d" || this.stage == "m") {
-                this.trueEnergy = this.trueEnergy - (10 * this.orgSize - 10 * this.maxVelocity - this.detectRadius) / 2;
-            }
-            let newPos = null;
+            //let newPos = null;
             if (this.checkBounds(state) == 0) {
                 newPos = this.pos.add(this.velocity);
                 //return new Organism({
@@ -151,6 +202,7 @@ class Organism {
         this.velocity = new Vector(x, y);
     }
     makeRandomMove() {
+        console.log("makeRandommove")
         let count = 0;
         let newGoal = {};
         let badMove = true;
@@ -234,6 +286,7 @@ class OrganismGroup {
         let gender;
         let energyBase;
         let spawnPos;
+        let huntPos;
         let orgConf = {};
         let loopCount = 0;
         for (let i = 0; i < initialPopSize; i++) {
@@ -252,7 +305,15 @@ class OrganismGroup {
             if (loopCount == 10000) {
                 continue;
             }
-
+            loopCount = 0;
+            huntPos = getRandomPointInsideCircle(this.huntingRadius, this.huntingPos);
+            while (SIM_MAP.isTileDeepWater(huntPos) && loopCount < 10000) {
+                huntPos = getRandomPointInsideCircle(this.huntingRadius, this.huntingPos);
+                loopCount++;
+            }
+            if (loopCount == 10000) {
+                continue;
+            }
             if (Math.random() > 0.5) {
                 gender = "m";
             } else {
@@ -266,7 +327,8 @@ class OrganismGroup {
                 size: size,
                 detectRadius: detectRadius,
                 energyBase: energyBase,
-                gender: gender
+                gender: gender,
+                huntPos: huntPos
             }
 
             this.population.push(new Organism(spawnPos, orgConf));
@@ -348,6 +410,16 @@ class OrganismGroup {
             return organism.updatePosition(state, this.outsidePath);
         });
         return this;
+    }
+    goHunting() {
+        this.population.forEach(org => {
+            org.goHunting();
+        });
+    }
+    goHunting() {
+        this.population.forEach(org => {
+            org.goHunting();
+        });
     }
     moveToFeedingZone(resetFood = false) {
         this.population.forEach(org => {

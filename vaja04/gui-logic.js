@@ -381,7 +381,7 @@ class GuiLogic {
                 detectRadius: 40,
                 energyBase: 5000,
                 diet: "plants",
-                initialPopSize: 50,
+                initialPopSize: 3,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -419,7 +419,7 @@ class GuiLogic {
                 detectRadius: 40,
                 energyBase: 1000,
                 diet: "insect",
-                initialPopSize: 10,
+                initialPopSize: 1,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -534,14 +534,24 @@ class GuiLogic {
         let hour = this.ecoSystem.dateTime.getHours() - 1;
         let prevHour = hour;
         this.drawComponent.drawMap();
+
+        console.log(SIM_MAP);
+
         this.runAnimation(time => {
             if (this.run) {
-                let hour = this.ecoSystem.dateTime.getHours();
+                let hour = Math.floor(this.ecoSystem.dateTime.getHours());
                 if (prevHour !== hour) {
                     prevHour = hour;
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
+
+                    if (hour == 9) {
+                        this.state.moveAllToHomeZone();
+                    }
+                    else if (hour == 20) {
+                        this.state.moveAllToHomeZone();
+                    }
                 }
 
             }
