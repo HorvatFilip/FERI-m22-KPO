@@ -43,6 +43,21 @@ class DrawComponent {
         this.simCtx.closePath();
         this.simCtx.fillStyle = color;
         this.simCtx.fill();
+
+
+        this.simCtx.beginPath();
+        this.simCtx.arc(organism.homePos.x, organism.homePos.y, 2, 0, Math.PI * 2);
+        this.simCtx.closePath();
+        this.simCtx.fillStyle = color;
+        this.simCtx.fill();
+        if (organism.huntPos != null) {
+            this.simCtx.beginPath();
+            this.simCtx.arc(organism.huntPos.x, organism.huntPos.y, 2, 0, Math.PI * 2);
+            this.simCtx.closePath();
+            this.simCtx.fillStyle = "red";
+            this.simCtx.fill();
+        }
+
     }
     createNewInfoCanvas(conf, val) {
         const chartCanvas = document.createElement("canvas");

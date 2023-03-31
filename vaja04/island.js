@@ -14,7 +14,7 @@ class Organism {
             this.hydration = 100;
             this.matingInterval = 100;
             this.stage = "r";
-            this.homePos = orgNewPos;
+            this.homePos = new Vector(orgNewPos.x, orgNewPos.y);
             this.huntPos = orgConf.huntPos;
             this.pos = orgNewPos;
             this.velocity = new Vector(0, 0);
@@ -23,8 +23,9 @@ class Organism {
         }
     }
     setPath(path) {
-        this.path = path;
+        this.path = [...path];
     }
+
     setGoalPos(newGoalPos) {
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
     }
@@ -63,73 +64,37 @@ class Organism {
     }
     updatePosition(state) {
         if (this.type !== "plant") {
-            console.log(this);
-            if (this.goalPos != null || this.path.length > 0) {
-                if (this.goalPos == null) {
-                    this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
-                    this.path.shift();
-                    console.log(this.path);
-                    this.makeMoveToGoal();
-                } else if (this.pos.equals(this.goalPos)) {
-                    this.goalPos = null;
-                    this.makeRandomMove();
-                } else {
-                    this.makeMoveToGoal();
-                }
-            } else {
-                this.makeRandomMove();
+            if (this.pos.equals(this.homePos)) {
+
+                console.log(this.homePos);
+            } else if (this.pos.equals(this.huntPos)) {
+                console.log("hunt");
             }
+            if (this.goalPos != null) {
+                if (this.pos.equals(this.goalPos)) {
+                    if (this.path.length > 0) {
+                        this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
+                        this.path.shift();
+                    } else {
+                        this.goalPos = null;
+                    }
+                }
+
+            }
+            if (this.goalPos == null) {
+                this.makeRandomMove();
+                console.log("random move")
+            } else {
+                this.makeMoveToGoal();
+                console.log("move to goal")
+            }
+
             let newPos = this.pos.add(this.velocity);
             return new Organism({
                 ...this,
                 pos: newPos
             });
             this.updateNeeds();
-
-            //let newPos = null;
-            if (this.checkBounds(state) == 0) {
-                newPos = this.pos.add(this.velocity);
-                //return new Organism({
-                //    ...this,
-                //    pos: this.pos.add(this.velocity)
-                //});
-
-            } else {
-                if (this.goalPos == null || this.pos.equals(this.goalPos)) {
-                    this.goalPos = null;
-                    this.makeRandomMove();
-                } else if (this.goalPos != null) {
-                    this.makeMoveToGoal();
-                }
-                this.makeMoveToGoal();
-                newPos = this.pos.add(this.velocity);
-
-                //return new Organism({
-                //    ...this,
-                //    pos: this.pos.add(this.velocity)
-                //});
-            }
-            return new Organism({
-                ...this,
-                pos: newPos
-            });
-            let x = Math.floor(newPos.x / 17);
-            let y = Math.floor(newPos.y / 17);
-            let indx = 100 * y + x;
-
-            if (SIM_MAP.data.data[indx] < 0.4) {
-                this.velocity = new Vector(this.velocity.x * -1, this.velocity.y * -1);
-                return new Organism({
-                    ...this,
-                    velocity: this.velocity,
-                    pos: this.pos.add(this.velocity)
-                });
-            } else {
-                return new Organism({
-                    ...this,
-                    pos: newPos
-                });
-            }
         }
         return this;
 
@@ -202,7 +167,6 @@ class Organism {
         this.velocity = new Vector(x, y);
     }
     makeRandomMove() {
-        console.log("makeRandommove")
         let count = 0;
         let newGoal = {};
         let badMove = true;
@@ -216,8 +180,8 @@ class Organism {
             let vel = new Vector(maxVel, maxVel);
             let center = this.pos.add(vel);
 
-            newGoal.x = center.x + 50 * Math.cos(theta);
-            newGoal.y = center.y + 50 * Math.sin(theta);
+            newGoal.x = center.x + 30 * Math.cos(theta);
+            newGoal.y = center.y + 30 * Math.sin(theta);
             if (!SIM_MAP.isTileDeepWater(newGoal)) {
                 badMove = false;
             }
@@ -286,7 +250,7 @@ class OrganismGroup {
         let gender;
         let energyBase;
         let spawnPos;
-        let huntPos;
+        let huntPos = null;
         let orgConf = {};
         let loopCount = 0;
         for (let i = 0; i < initialPopSize; i++) {
@@ -305,14 +269,16 @@ class OrganismGroup {
             if (loopCount == 10000) {
                 continue;
             }
-            loopCount = 0;
-            huntPos = getRandomPointInsideCircle(this.huntingRadius, this.huntingPos);
-            while (SIM_MAP.isTileDeepWater(huntPos) && loopCount < 10000) {
+            if (this.type != "plant") {
+                loopCount = 0;
                 huntPos = getRandomPointInsideCircle(this.huntingRadius, this.huntingPos);
-                loopCount++;
-            }
-            if (loopCount == 10000) {
-                continue;
+                while (SIM_MAP.isTileDeepWater(huntPos) && loopCount < 10000) {
+                    huntPos = getRandomPointInsideCircle(this.huntingRadius, this.huntingPos);
+                    loopCount++;
+                }
+                if (loopCount == 10000) {
+                    continue;
+                }
             }
             if (Math.random() > 0.5) {
                 gender = "m";
@@ -537,14 +503,14 @@ class DateTimeTracker {
         this.date = startDate;
         this.interval = null;
         this.run = true;
-        this.timeSpeed = 40;
+        this.timeSpeed = 100;
     }
     setTimeSpeed(timeSpeed) {
         this.timeSpeed = 70 - timeSpeed * 10;
         clearInterval(this.interval);
         this.interval = setInterval(() => {
             if (this.run) {
-                this.addHours(0.05);
+                this.addHours(0.2);
             }
         }, this.timeSpeed);
     }
@@ -555,7 +521,7 @@ class DateTimeTracker {
         this.date = { year: 0, month: 0, day: 0, hour: 0 };
         this.interval = setInterval(() => {
             if (this.run) {
-                this.addHours(0.05);
+                this.addHours(0.2);
             }
         }, this.timeSpeed);
     }

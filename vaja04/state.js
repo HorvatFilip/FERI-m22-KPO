@@ -24,7 +24,6 @@ class State {
         this.organismGroups.forEach(orgGroup => {
             if (orgGroup.type != "plant") {
                 orgGroup.population.forEach(org => {
-                    console.log(org);
                     pathFindAlg = new PathFindingAlg(org.pos, org.huntPos);
                     org.setPath(
                         pathFindAlg.findPathToGoal()
@@ -39,7 +38,6 @@ class State {
         this.organismGroups.forEach(orgGroup => {
             if (orgGroup.type != "plant") {
                 orgGroup.population.forEach(org => {
-
                     pathFindAlg = new PathFindingAlg(org.pos, org.homePos);
                     org.setPath(
                         pathFindAlg.findPathToGoal()

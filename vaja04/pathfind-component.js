@@ -43,7 +43,7 @@ class PathFindingAlg {
 
             this.closedList.push(this.currentNode);
             if (this.currentNode.equals(this.goalNode)) {
-                return this.closedList;
+                return this.closedList.reverse();
             }
             for (let i = -1; i < 2; i++) {
                 if (this.currentNode.x + i < 0 || this.currentNode.x + i > SIM_MAP.data.width - 1) {
@@ -56,7 +56,7 @@ class PathFindingAlg {
                         mapIndx = SIM_MAP.data.width * (this.currentNode.y + j) + (this.currentNode.x + i);
                         mapTile = SIM_MAP.data.data[mapIndx];
                         //mapTile = grid[this.currentNode.x + i][this.currentNode.y + j];
-                        if (mapTile < 0.8 && mapTile > 0.4) {
+                        if (mapTile < 0.89 && mapTile > 0.4) {
                             bufferNode = new Node(this.currentNode.x + i, this.currentNode.y + j);
                             bufferNode.calcCost(this.currentNode, this.goalNode);
                             this.neighbors.push(bufferNode);
@@ -87,7 +87,7 @@ class PathFindingAlg {
                 }
             }
         }
-        return this.closedList;
+        return this.closedList.reverse();
     }
     getLowestCostNode() {
         this.currentNode = this.openList[0];

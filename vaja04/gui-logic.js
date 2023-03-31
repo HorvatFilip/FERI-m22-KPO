@@ -373,25 +373,6 @@ class GuiLogic {
             this.mapConf_inputs.freqCoef.value = mapDefaultConf.mapConf.frequencyCoef;
 
             const orgGroup01Conf = {
-                name: "insect01",
-                type: "insect",
-                color: "#4C9900",
-                maxVelocity: 3,
-                size: 3,
-                detectRadius: 40,
-                energyBase: 5000,
-                diet: "plants",
-                initialPopSize: 3,
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                homeRadius: 40,
-                huntingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                huntingRadius: 500
-            };
-            const orgGroup02Conf = {
                 name: "plant01",
                 type: "plant",
                 color: "#000000",
@@ -410,6 +391,25 @@ class GuiLogic {
                 },
                 huntingRadius: 500
             };
+            const orgGroup02Conf = {
+                name: "insect01",
+                type: "insect",
+                color: "#4C9900",
+                maxVelocity: 3,
+                size: 3,
+                detectRadius: 40,
+                energyBase: 5000,
+                diet: "plants",
+                initialPopSize: 3,
+                homePos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                homeRadius: 40,
+                huntingPos: {
+                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                },
+                huntingRadius: 40
+            };
             const orgGroup03Conf = {
                 name: "bird01",
                 type: "bird",
@@ -427,7 +427,7 @@ class GuiLogic {
                 huntingPos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
-                huntingRadius: 500
+                huntingRadius: 40
             };
 
             const dateTimeTracker = new DateTimeTracker();
@@ -532,28 +532,34 @@ class GuiLogic {
     startAnimation() {
         this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
         let hour = this.ecoSystem.dateTime.getHours() - 1;
+        let day = this.ecoSystem.dateTime.getDays() - 1;
         let prevHour = hour;
+        let prevDay = day;
         this.drawComponent.drawMap();
 
-        console.log(SIM_MAP);
+        console.log(SIM_MAP.data);
 
         this.runAnimation(time => {
             if (this.run) {
-                let hour = Math.floor(this.ecoSystem.dateTime.getHours());
+                hour = Math.floor(this.ecoSystem.dateTime.getHours());
                 if (prevHour !== hour) {
                     prevHour = hour;
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
-
-                    if (hour == 9) {
-                        this.state.moveAllToHomeZone();
-                    }
-                    else if (hour == 20) {
-                        this.state.moveAllToHomeZone();
+                    //if (hour == 20) {
+                    //    this.state.moveAllToHomeZone();
+                    //}
+                    day = Math.floor(this.ecoSystem.dateTime.getDays());
+                    if (prevDay !== day) {
+                        prevDay = day;
+                        if (day % 3 == 0) {
+                            this.state.moveAllToHomeZone();
+                        } else if (day % 4 == 0) {
+                            this.state.moveAllToHuntingZone();
+                        }
                     }
                 }
-
             }
         });
     }
