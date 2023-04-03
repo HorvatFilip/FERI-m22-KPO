@@ -6,91 +6,107 @@ class State {
     updateOrganismGroups(updatedOrganismGroups) {
         this.organismGroups = updatedOrganismGroups;
     }
-
-    startFeedingStage() {
-        this.stage = "feeding";
+    setAllGroupsToHuntStage() {
         this.organismGroups.forEach(orgGroup => {
-            orgGroup.changeStage("feeding");
+            orgGroup.population.forEach(org => {
+                org.stage = "h";
+            })
         });
     }
-    startRestingStage() {
-        this.stage = "resting";
+    setAllGroupsToMateStage() {
         this.organismGroups.forEach(orgGroup => {
-            orgGroup.changeStage("resting");
-        });
-    }
-    moveAllToHuntingZone() {
-        let pathFindAlg = null;
-        this.organismGroups.forEach(orgGroup => {
-            if (orgGroup.type != "plant") {
-                orgGroup.population.forEach(org => {
-                    pathFindAlg = new PathFindingAlg(org.pos, org.huntPos);
-                    org.setPath(
-                        pathFindAlg.findPathToGoal()
-                    );
-                });
-            }
-        });
-        console.log("done");
-    }
-    moveAllToHomeZone() {
-        let pathFindAlg = null;
-        this.organismGroups.forEach(orgGroup => {
-            if (orgGroup.type != "plant") {
-                orgGroup.population.forEach(org => {
-                    pathFindAlg = new PathFindingAlg(org.pos, org.homePos);
-                    org.setPath(
-                        pathFindAlg.findPathToGoal()
-                    );
-                });
-            }
-        });
-        console.log("done");
-    }
-    searchForFood() {
-        let diet = null;
-        let range = null;
-        this.organismGroups.forEach(orgGroup => {
-            diet = orgGroup.conf.diet;
-            this.organismGroups.forEach(orgGroup2 => {
-                if (diet == "all" || orgGroup2.conf.type == diet) {
-                    orgGroup.population.forEach(org => {
-                        orgGroup2.population.forEach(org2 => {
-                            if (org.id != org2.id) {
-                                if (org.eatenFood < 2) {
-                                    range = org.inRangeOfInteraction(org2);
-                                    if (range == 1) {
-                                        orgGroup2.removeById(org2.id);
-                                    } else if (range == 2) {
-                                        org.setGoalPos(org2.pos.add(org2.velocity));
-                                    }
-                                }
-                                range = org2.inRangeOfInteraction(org);
-                                if (range == 3) {
-                                    let diff = org.pos.subtract(org2.pos);
-                                    diff = diff.multiply(-4);
-                                    let newGoal = org2.pos.add(diff);
-                                    org2.setGoalPos(newGoal);
-                                }
-                            }
-                        });
-                    });
-                }
-            });
+            orgGroup.population.forEach(org => {
+                org.stage = "m";
+            })
         });
     }
     update() {
-        let organismGroups = this.organismGroups.map(orgGroup => {
-            return orgGroup.updatePosition(this);
+        let currentOrg = null;
+        let closestOrg = null;
+        let organismGroups = this.organismGroups.map(orgGroup01 => {
+            if (orgGroup01.type != "plant") {
+                orgGroup01.updateNeeds();
+                this.organismGroups.forEach(orgGroup02 => {
+
+                    orgGroup01.population.forEach(org01 => {
+                        currentOrg = null;
+                        closestOrg = null;
+
+                        if (orgGroup02.diet == "all" || orgGroup01.type == orgGroup02.diet) {
+                            orgGroup02.population.forEach(org02 => {
+                                if (org02.stage == "h") {
+                                    currentOrg = org02.interaction(org01);
+                                    if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.d < closestOrg.d)) {
+                                        closestOrg = {
+                                            org: org02,
+                                            d: currentOrg.d
+                                        }
+                                    }
+                                }
+                            });
+                            if (closestOrg != null) {
+                                if (closestOrg.d <= org01.detectRadius) {
+                                    let diff = closestOrg.org.pos.subtract(org01.pos);
+                                    diff = diff.multiply(-4);
+                                    let newGoal = org01.pos.add(diff);
+                                    org01.setGoalPos(newGoal);
+                                }
+                            }
+                        } else {
+                            if (org01.stage == "h" && orgGroup01.diet == orgGroup02.type) {
+                                orgGroup02.population.forEach(org02 => {
+                                    currentOrg = org01.interaction(org02);
+                                    if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.d < closestOrg.d)) {
+                                        closestOrg = {
+                                            org: org02,
+                                            d: currentOrg.d
+                                        };
+                                    }
+                                });
+                                if (closestOrg != null) {
+                                    if (closestOrg.d < org01.size) {
+                                        org01.hunger = 100;
+                                        orgGroup02.removeById(closestOrg.id);
+                                    } else if (closestOrg.d <= org01.detectRadius) {
+                                        org01.setGoalPos(
+                                            org01.pos.add(closestOrg.org.velocity)
+                                        );
+                                    }
+                                }
+
+                            } else if (org01.stage == "m" && orgGroup01.type == orgGroup02.type) {
+                                orgGroup02.population.forEach(org02 => {
+                                    if (org01.gender != org02.gender) {
+                                        currentOrg = org01.interaction(org02);
+                                        if (closestOrg == null || (currentOrg.rating > closestOrg.rating && currentOrg.d < closestOrg.d)) {
+                                            closestOrg = {
+                                                org: org02,
+                                                d: currentOrg.d,
+                                                rating: currentOrg.rating
+                                            };
+                                        }
+                                    }
+                                });
+                                if (closestOrg != null) {
+                                    if (closestOrg.d < org01.size) {
+                                        org01.matingInterval = 100;
+                                        closestOrg.org.matingInterval = 100;
+                                        orgGroup01.spawnChild(org01, closestOrg.org);
+                                    } else if (closestOrg.d <= org01.detectRadius) {
+                                        org01.setGoalPos(
+                                            org01.pos.add(closestOrg.org.velocity)
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
+                    });
+                });
+            }
+
+            return orgGroup01.updatePosition(this);
         });
         return new State(this.display, organismGroups);
-    }
-    respawnPlants() {
-        for (let i = 0; i < this.organismGroups.length; i++) {
-            if (this.organismGroups[i].conf.type == "plant") {
-                this.organismGroups[i] = this.organismGroups[i].respawn();
-                return;
-            }
-        }
     }
 }

@@ -57,6 +57,7 @@ class GuiLogic {
         });
         this.resetSim_btn.addEventListener("click", () => {
             this.drawComponent.clearChartCanvas();
+            this.hourDisplay_display.value = "00";
             this.loadSimScenarioFromUI();
         });
         this.toggleChartDisplay_btn.addEventListener("click", () => {
@@ -143,9 +144,9 @@ class GuiLogic {
                 const maxVelocityInput = document.createElement("input");
                 const sizeInput = document.createElement("input");
                 const detectRadiusInput = document.createElement("input");
-                const energyBaseInput = document.createElement("input");
+                const baseEnergyInput = document.createElement("input");
 
-                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, energyBaseInput];
+                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, baseEnergyInput];
 
                 const nameLabel = document.createElement("label");
                 const typeLabel = document.createElement("label");
@@ -154,7 +155,7 @@ class GuiLogic {
                 const maxVelocityLabel = document.createElement("label");
                 const sizeLabel = document.createElement("label");
                 const detectRadiusLabel = document.createElement("label");
-                const energyBaseLabel = document.createElement("label");
+                const baseEnergyLabel = document.createElement("label");
 
                 homeInputClick.setAttribute("class", "btn btn-outline-secondary");
                 homeInputIcon.setAttribute("class", "fa-solid fa-house");
@@ -167,7 +168,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("class", "form-control");
                 sizeInput.setAttribute("class", "form-control");
                 detectRadiusInput.setAttribute("class", "form-control");
-                energyBaseInput.setAttribute("class", "form-control");
+                baseEnergyInput.setAttribute("class", "form-control");
 
                 homeXInput.setAttribute("type", "number");
                 homeYInput.setAttribute("type", "number");
@@ -181,7 +182,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("type", "number");
                 sizeInput.setAttribute("type", "number");
                 detectRadiusInput.setAttribute("type", "number");
-                energyBaseInput.setAttribute("type", "number");
+                baseEnergyInput.setAttribute("type", "number");
 
                 homeXInput.setAttribute("placeholder", "X");
                 homeYInput.setAttribute("placeholder", "Y");
@@ -194,7 +195,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("placeholder", "max velocity");
                 sizeInput.setAttribute("placeholder", "size");
                 detectRadiusInput.setAttribute("placeholder", "detect radius");
-                energyBaseInput.setAttribute("placeholder", "base energy");
+                baseEnergyInput.setAttribute("placeholder", "base energy");
 
                 nameLabel.innerHTML = "Name";
                 typeLabel.innerHTML = "Type";
@@ -203,7 +204,7 @@ class GuiLogic {
                 maxVelocityLabel.innerHTML = "Max velocity";
                 sizeLabel.innerHTML = "Size";
                 detectRadiusLabel.innerHTML = "Detect radius";
-                energyBaseLabel.innerHTML = "Base energy";
+                baseEnergyLabel.innerHTML = "Base energy";
 
                 homeXInput.value = orgGroup.homePos.x;
                 homeYInput.value = orgGroup.homePos.y;
@@ -217,7 +218,7 @@ class GuiLogic {
                 maxVelocityInput.value = orgGroup.maxVelocity;
                 sizeInput.value = orgGroup.size;
                 detectRadiusInput.value = orgGroup.detectRadius;
-                energyBaseInput.value = orgGroup.energyBase;
+                baseEnergyInput.value = orgGroup.baseEnergy;
 
                 header.addEventListener("click", () => {
                     if (body.style.display == "none" || body.style.display == "") {
@@ -313,8 +314,8 @@ class GuiLogic {
                 secondRow.appendChild(popSizeLabel);
                 thirdRow.appendChild(sizeInput);
                 thirdRow.appendChild(sizeLabel);
-                forthRow.appendChild(energyBaseInput);
-                forthRow.appendChild(energyBaseLabel);
+                forthRow.appendChild(baseEnergyInput);
+                forthRow.appendChild(baseEnergyLabel);
                 secondColumn.appendChild(firstRow);
                 secondColumn.appendChild(secondRow);
                 secondColumn.appendChild(thirdRow);
@@ -379,7 +380,7 @@ class GuiLogic {
                 maxVelocity: 0,
                 size: 3,
                 detectRadius: 1,
-                energyBase: 100000,
+                baseEnergy: 100000,
                 diet: "none",
                 initialPopSize: 100,
                 homePos: {
@@ -398,7 +399,7 @@ class GuiLogic {
                 maxVelocity: 3,
                 size: 3,
                 detectRadius: 40,
-                energyBase: 5000,
+                baseEnergy: 5000,
                 diet: "plants",
                 initialPopSize: 3,
                 homePos: {
@@ -417,7 +418,7 @@ class GuiLogic {
                 maxVelocity: 3.5,
                 size: 6,
                 detectRadius: 40,
-                energyBase: 1000,
+                baseEnergy: 1000,
                 diet: "insect",
                 initialPopSize: 1,
                 homePos: {
@@ -464,7 +465,7 @@ class GuiLogic {
                     maxVelocity: parseInt(this.inputs[id][9].value),
                     size: parseInt(this.inputs[id][10].value),
                     detectRadius: parseInt(this.inputs[id][11].value),
-                    energyBase: parseInt(this.inputs[id][12].value),
+                    baseEnergy: parseInt(this.inputs[id][12].value),
                     diet: this.inputs[id][7].value,
                     initialPopSize: parseInt(this.inputs[id][8].value),
                     homePos: {
@@ -535,28 +536,29 @@ class GuiLogic {
         let day = this.ecoSystem.dateTime.getDays() - 1;
         let prevHour = hour;
         let prevDay = day;
+        let firstRun = true;
         this.drawComponent.drawMap();
 
-        console.log(SIM_MAP.data);
+        console.log(SIM_MAP);
 
         this.runAnimation(time => {
             if (this.run) {
+                if (firstRun) {
+                    this.ecoSystem.dateTime.resetDate();
+                    firstRun = false;
+                }
                 hour = Math.floor(this.ecoSystem.dateTime.getHours());
                 if (prevHour !== hour) {
                     prevHour = hour;
+
                     this.state = this.state.update();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
-                    //if (hour == 20) {
-                    //    this.state.moveAllToHomeZone();
-                    //}
                     day = Math.floor(this.ecoSystem.dateTime.getDays());
                     if (prevDay !== day) {
                         prevDay = day;
-                        if (day % 3 == 0) {
-                            this.state.moveAllToHomeZone();
-                        } else if (day % 4 == 0) {
-                            this.state.moveAllToHuntingZone();
+                        if (day == 1) {
+                            this.state.setAllGroupsToHuntStage();
                         }
                     }
                 }
