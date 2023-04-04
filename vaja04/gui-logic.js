@@ -557,11 +557,11 @@ class GuiLogic {
                     day = Math.floor(this.ecoSystem.dateTime.getDays());
                     if (prevDay !== day) {
                         prevDay = day;
-                        this.state.respawnPlants();
-                        //if (day == 1) {
-                        //    //this.state.setAllGroupsToMateStage();
-                        //    this.state.setAllGroupsToHuntStage();
-                        //}
+                        if (day % 4 == 0) {
+                            //this.state.setAllGroupsToMateStage();
+                            //this.state.setAllGroupsToHuntStage();
+                            this.state.respawnPlants();
+                        }
                     }
                 }
             }

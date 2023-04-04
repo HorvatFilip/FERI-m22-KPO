@@ -24,8 +24,8 @@ class State {
         this.organismGroups.forEach(orgGroup => {
             if (orgGroup.type == "plant") {
                 orgGroup.removeAll();
+                orgGroup.createInitialPopulation(orgGroup.initialPopSize);
             }
-            orgGroup.createInitialPopulation(orgGroup.initialPopSize);
         })
     }
     update() {
@@ -66,7 +66,31 @@ class State {
                                 org01.stage = "r";
                             }
                         } else {
-                            if (org01.stage == "t") {
+
+                            if (org01.hunger < 0 && orgGroup01.diet == orgGroup02.type) {
+                                orgGroup02.population.forEach(org02 => {
+                                    currentOrg = org01.interaction(org02);
+                                    if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.d < closestOrg.d)) {
+                                        closestOrg = {
+                                            org: org02,
+                                            d: currentOrg.d
+                                        };
+                                    }
+                                });
+                                if (closestOrg != null) {
+                                    if (closestOrg.d < org01.size) {
+                                        orgGroup02.removeById(closestOrg.org.id);
+                                        org01.hunger = 100;
+                                        org01.stage = "r";
+
+                                    } else if (closestOrg.d <= org01.detectRadius) {
+                                        org01.setGoalPos(
+                                            closestOrg.org.pos.add(closestOrg.org.velocity)
+                                        );
+                                    }
+                                }
+                            }
+                            if (org01.hydration < 0) {
 
                                 let waterTile = new Vector(org01.pos.x, org01.pos.y);
                                 if (!SIM_MAP.isTileDeepWater(waterTile)) {
@@ -96,29 +120,8 @@ class State {
                                     org01.setGoalPos(waterTile);
                                 }
 
-                            } else if (org01.stage == "h" && orgGroup01.diet == orgGroup02.type) {
-                                orgGroup02.population.forEach(org02 => {
-                                    currentOrg = org01.interaction(org02);
-                                    if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.d < closestOrg.d)) {
-                                        closestOrg = {
-                                            org: org02,
-                                            d: currentOrg.d
-                                        };
-                                    }
-                                });
-                                if (closestOrg != null) {
-                                    if (closestOrg.d < org01.size) {
-                                        orgGroup02.removeById(closestOrg.org.id);
-                                        org01.hunger = 100;
-                                        org01.stage = "r";
-
-                                    } else if (closestOrg.d <= org01.detectRadius) {
-                                        org01.setGoalPos(
-                                            closestOrg.org.pos.add(closestOrg.org.velocity)
-                                        );
-                                    }
-                                }
-                            } else if (org01.stage == "m" && orgGroup01.type == orgGroup02.type) {
+                            }
+                            if (org01.matingInterval < 0 && orgGroup01.type == orgGroup02.type) {
                                 orgGroup02.population.forEach(org02 => {
                                     if (org01.gender != org02.gender && org02.matingInterval < 30) {
                                         org02.matingInterval = 0;
@@ -161,32 +164,6 @@ class State {
             }
             return orgGroup01.updatePosition(this);
         });
-
-
-        /*
-        if (1 == 2 && (orgGroup02.diet == "all" || orgGroup01.type == orgGroup02.diet)) {
-        orgGroup02.population.forEach(org02 => {
-            if (org02.stage == "h") {
-                currentOrg = org02.interaction(org01);
-                if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.d < closestOrg.d)) {
-                    closestOrg = {
-                        org: org02,
-                        d: currentOrg.d
-                    }
-                }
-            }
-        });
-        if (closestOrg != null) {
-            if (closestOrg.d <= org01.detectRadius) {
-                let diff = closestOrg.org.pos.subtract(org01.pos);
-                diff = diff.multiply(-4);
-                let newGoal = org01.pos.add(diff);
-                org01.setGoalPos(newGoal);
-            }
-        }
-        } else {
-        */
-
 
         return new State(this.display, organismGroups);
     }

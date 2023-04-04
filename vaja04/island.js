@@ -11,7 +11,7 @@ class Organism {
             this.detectRadius = orgConf.detectRadius;
             this.gender = orgConf.gender;
             this.hunger = 100;
-            this.hydration = 50;
+            this.hydration = 100;
             this.matingInterval = 100;
             this.stage = "r";
             this.homePos = new Vector(orgNewPos.x, orgNewPos.y);
@@ -106,7 +106,7 @@ class Organism {
     }
     makeRandomMove() {
         let newGoal = this.pos.add(this.velocity);
-        newGoal = getRandomPointOnCircle(50, newGoal);
+        newGoal = getRandomPointOnCircle(30, newGoal);
         this.setGoalPos(newGoal);
     }
     getRating() {
@@ -237,8 +237,6 @@ class OrganismGroup {
     }
     spawnChild(org01, org02) {
 
-        //console.log(org01, org02);
-
         let avgMaxVel = (org01.maxVelocity + org02.maxVelocity) / 2;
         let avgSize = (org01.size + org02.size) / 2;
         let avgDetRad = (org01.detectRadius + org02.detectRadius) / 2;
@@ -310,26 +308,29 @@ class OrganismGroup {
     updateNeeds() {
         this.population.forEach(org => {
 
-            if (org.stage == "h") {
-                org.hunger -= 1;
-                org.hydration -= 1;
-                org.matingInterval -= 1;
-
-            } else if (org.stage == "t") {
-                org.hunger -= 1;
-                org.hydration -= 1;
-                org.matingInterval -= 1;
-
-            } else if (org.stage == "r") {
-                org.hunger -= 1;
-                org.hydration -= 1;
-                org.matingInterval -= 1;
-
-            } else if (org.stage == "m") {
-                org.hunger -= 1;
-                org.hydration -= 1;
-                org.matingInterval -= 1;
-            }
+            org.hunger -= (1 + org.size / 100);
+            org.hydration -= (1 + org.maxVelocity / 100);
+            org.matingInterval -= 1;
+            //if (org.stage == "h") {
+            //    org.hunger -= (1 + org.size / 100);
+            //    org.hydration -= (1 + org.maxVelocity / 100);
+            //    org.matingInterval -= 1;
+            //
+            //} else if (org.stage == "t") {
+            //    org.hunger -= (1 + org.size / 100);
+            //    org.hydration -= (1 + org.maxVelocity / 100);
+            //    org.matingInterval -= 1;
+            //
+            //} else if (org.stage == "r") {
+            //    org.hunger -= (1 + org.size / 100);
+            //    org.hydration -= (1 + org.maxVelocity / 100);
+            //    org.matingInterval -= 1;
+            //
+            //} else if (org.stage == "m") {
+            //    org.hunger -= (1 + org.size / 100);
+            //    org.hydration -= (1 + org.maxVelocity / 100);
+            //    org.matingInterval -= 1;
+            //}
 
             org.stage = "r";
             if (org.hunger < 0) {
