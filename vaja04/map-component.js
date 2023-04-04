@@ -27,5 +27,17 @@ class MapComponent {
             return false;
         }
     }
+    terrainPenalty(tile) {
+        let penalty = 0;
+        let x = Math.floor(tile.x / 17);
+        let y = Math.floor(tile.y / 17);
+        let indx = 100 * y + x;
+        if (SIM_MAP.data.data[indx] < 0.5) {
+            penalty = 1 - SIM_MAP.data.data[indx];
+        } else if (SIM_MAP.data.data[indx] > 0.65) {
+            penalty = SIM_MAP.data.data[indx] - 0.4;
+        }
+        return penalty;
+    }
 }
 let SIM_MAP = null;

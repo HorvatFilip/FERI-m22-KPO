@@ -10,15 +10,14 @@ class Organism {
             this.eatingSize = orgConf.size * 0.8;
             this.detectRadius = orgConf.detectRadius;
             this.gender = orgConf.gender;
-            this.baseEnergy = orgConf.baseEnergy;
-            this.trueEnergy = this.baseEnergy;
             this.hunger = 100;
-            this.hydration = 100;
+            this.hydration = 50;
             this.matingInterval = 100;
             this.stage = "r";
             this.homePos = new Vector(orgNewPos.x, orgNewPos.y);
             this.huntPos = orgConf.huntPos;
             this.pos = orgNewPos;
+            let rndStarVel = getRandomPointOnCircle(this.size, this.pos);
             this.velocity = new Vector(0, 0);
             this.goalPos = null;
             this.path = [];
@@ -29,6 +28,20 @@ class Organism {
     }
 
     setGoalPos(newGoalPos) {
+        let loopCount = 0;
+        let radius = 1;
+        newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
+        while (SIM_MAP.isTileDeepWater(newGoalPos)) {
+            newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
+            loopCount++;
+            if (loopCount > 1000000) {
+                radius += 1;
+                loopCount = 0;
+                if (radius > 30) {
+                    newGoalPos = this.pos;
+                }
+            }
+        }
         this.goalPos = new Vector(newGoalPos.x, newGoalPos.y);
     }
     moveToSpawnPoint() {
@@ -36,44 +49,42 @@ class Organism {
     }
     updatePosition(state) {
         if (this.type !== "plant") {
-            if (this.goalPos != null) {
-                if (this.pos.equals(this.goalPos)) {
-                    if (this.stage == "h") {
-                        this.hunger = 100;
-                    } else if (this.stage == "d") {
-                        this.hydration = 100;
-                    } else if (this.stage == "m") {
-                        this.matingInterval = 100;
-                    }
+            if (this.stage == "x") {
+                this.velocity = new Vector(0, 0);
+            } else {
+                if (this.goalPos != null) {
+                    if (this.pos.equals(this.goalPos)) {
 
-                    if (this.path.length > 0) {
-                        this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
-                        this.path.shift();
-                    } else {
-                        this.goalPos = null;
+                        if (this.path.length > 0) {
+                            this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
+                            this.path.shift();
+                        } else {
+                            this.goalPos = null;
+                        }
                     }
                 }
-            }
-            if (this.goalPos == null) {
-                this.makeRandomMove();
-            } else {
-                this.makeMoveToGoal();
-            }
+                if (this.goalPos == null) {
+                    this.makeRandomMove();
+                } else {
+                    this.makeMoveToGoal();
+                }
 
-            let newPos = this.pos.add(this.velocity);
-            return new Organism({
-                ...this,
-                pos: newPos
-            });
+                let newPos = this.pos.add(this.velocity);
+
+                if (SIM_MAP.isTileDeepWater(newPos)) {
+                    this.setGoalPos(newPos);
+                }
+                return new Organism({
+                    ...this,
+                    pos: newPos
+                });
+            }
         }
         return this;
 
     }
     makeMoveToGoal() {
-        let maxVel = this.maxVelocity;
-        if (this.trueEnergy < 1) {
-            maxVel = maxVel / 2;
-        }
+        let maxVel = this.maxVelocity * (1 - SIM_MAP.terrainPenalty(this.pos));
 
         let x = (this.goalPos.x - this.pos.x) / maxVel;
         if (x >= 1) {
@@ -94,25 +105,8 @@ class Organism {
         this.velocity = new Vector(x, y);
     }
     makeRandomMove() {
-        let count = 0;
-        let newGoal = {};
-        let badMove = true;
-        while (badMove && count < 100) {
-            count++;
-            let theta = Math.random() * 2 * Math.PI;
-            let maxVel = this.maxVelocity;
-            if (this.trueEnergy < 1) {
-                maxVel = maxVel / 2;
-            }
-            let vel = new Vector(maxVel, maxVel);
-            let center = this.pos.add(vel);
-
-            newGoal.x = center.x + 30 * Math.cos(theta);
-            newGoal.y = center.y + 30 * Math.sin(theta);
-            if (!SIM_MAP.isTileDeepWater(newGoal)) {
-                badMove = false;
-            }
-        }
+        let newGoal = this.pos.add(this.velocity);
+        newGoal = getRandomPointOnCircle(50, newGoal);
         this.setGoalPos(newGoal);
     }
     getRating() {
@@ -153,7 +147,7 @@ class Organism {
         }
     }
     canEat(org2) {
-        if (this.eatingSize >= org2.orgSize) {
+        if (this.eatingSize >= org2.size) {
             return true;
         } else {
             return false;
@@ -170,7 +164,7 @@ class OrganismGroup {
         this.maxVelocity = conf.maxVelocity;
         this.size = conf.size;
         this.detectRadius = conf.detectRadius;
-        this.baseEnergy = conf.baseEnergy;
+        this.mutationChance = conf.mutationChance;
         this.diet = conf.diet;
         this.initialPopSize = conf.initialPopSize;
         this.homePos = conf.homePos;
@@ -190,17 +184,15 @@ class OrganismGroup {
         let size;
         let detectRadius;
         let gender;
-        let baseEnergy;
         let spawnPos;
         let huntPos = null;
         let orgConf = {};
         let loopCount = 0;
         for (let i = 0; i < initialPopSize; i++) {
             orgId = this.type + "-" + this.popId;
-            maxVelocity = randomNumberRange(this.maxVelocity * 0.9, this.maxVelocity);
-            size = randomNumberRange(this.size * 0.9, this.size);
-            detectRadius = randomNumberRange(this.detectRadius * 0.9, this.detectRadius);
-            baseEnergy = randomNumberRange(this.baseEnergy * 0.9, this.baseEnergy);
+            maxVelocity = randomNumberRange(this.maxVelocity * 0.65, this.maxVelocity);
+            size = randomNumberRange(this.size * 0.65, this.size);
+            detectRadius = randomNumberRange(this.detectRadius * 0.65, this.detectRadius);
 
             loopCount = 0;
             spawnPos = getRandomPointInsideCircle(this.homeRadius, this.homePos);
@@ -234,7 +226,6 @@ class OrganismGroup {
                 maxVelocity: maxVelocity,
                 size: size,
                 detectRadius: detectRadius,
-                baseEnergy: baseEnergy,
                 gender: gender,
                 huntPos: huntPos
             }
@@ -246,6 +237,48 @@ class OrganismGroup {
     }
     spawnChild(org01, org02) {
 
+        //console.log(org01, org02);
+
+        let avgMaxVel = (org01.maxVelocity + org02.maxVelocity) / 2;
+        let avgSize = (org01.size + org02.size) / 2;
+        let avgDetRad = (org01.detectRadius + org02.detectRadius) / 2;
+
+        let orgId = this.type + "-" + this.popId;
+        let maxVelocity = randomNumberRange(avgMaxVel * 0.9, avgMaxVel + avgMaxVel * 0.2);
+        if (Math.random() * 100 < this.mutationChance) {
+            maxVelocity = randomNumberRange(maxVelocity * 0.9, maxVelocity + maxVelocity * 0.4);
+        }
+        let size = randomNumberRange(avgSize * 0.9, avgSize + avgSize * 0.2);
+        if (Math.random() * 100 < this.mutationChance) {
+            size = randomNumberRange(size * 0.9, size + size * 0.4);
+        }
+        let detectRadius = randomNumberRange(avgDetRad * 0.9, avgDetRad + avgDetRad * 0.2);
+        if (Math.random() * 100 < this.mutationChance) {
+            detectRadius = randomNumberRange(detectRadius * 0.9, detectRadius + detectRadius * 0.4);
+        }
+
+        let gender = null;
+        if (Math.random() > 0.5) {
+            gender = "m";
+        } else {
+            gender = "f"
+        }
+
+        let orgConf = {
+            id: orgId,
+            type: this.type,
+            maxVelocity: maxVelocity,
+            size: size,
+            detectRadius: detectRadius,
+            gender: gender,
+        }
+
+        let spawnPos = getRandomPointInsideCircle(5, org01.pos)
+        let newOrg = new Organism(spawnPos, orgConf);
+        console.log(newOrg);
+        this.population.push(newOrg);
+        this.popId++;
+        this.popSize++;
     }
     changeConfiguration(newConf) {
         this.name = newConf.name;
@@ -254,7 +287,7 @@ class OrganismGroup {
         this.maxVelocity = newConf.maxVelocity;
         this.size = newConf.size;
         this.detectRadius = newConf.detectRadius;
-        this.baseEnergy = newConf.baseEnergy;
+        this.mutationChance = newConf.mutationChance;
         this.diet = newConf.diet;
         this.initialPopSize = newConf.initialPopSize;
         this.homePos = newConf.homePos;
@@ -270,46 +303,56 @@ class OrganismGroup {
         this.population = this.population.filter(org => org.id != id);
         this.popSize--;
     }
+    removeAll() {
+        this.population = [];
+        this.popSize = 0;
+    }
     updateNeeds() {
         this.population.forEach(org => {
-            if (org.stage == "h") {
-                this.trueEnergy -= this.maxVelocity * 3 + this.size * 2 + this.detectRadius;
-                this.hunger -= 0.3;
-                this.hydration -= 0.3;
-                this.matingInterval -= 0.3;
 
-            } else if (org.stage == "d") {
-                this.trueEnergy -= this.maxVelocity * 3 + this.size * 2 + this.detectRadius;
-                this.hunger -= 0.2;
-                this.hydration -= 0.2;
-                this.matingInterval -= 0.2;
+            if (org.stage == "h") {
+                org.hunger -= 1;
+                org.hydration -= 1;
+                org.matingInterval -= 1;
+
+            } else if (org.stage == "t") {
+                org.hunger -= 1;
+                org.hydration -= 1;
+                org.matingInterval -= 1;
 
             } else if (org.stage == "r") {
-                if (this.trueEnergy != this.baseEnergy) {
-                    this.trueEnergy += this.baseEnergy * 0.05;
-                }
-                this.hunger -= 0.1;
-                this.hydration -= 0.1;
-                this.matingInterval -= 0.1;
+                org.hunger -= 1;
+                org.hydration -= 1;
+                org.matingInterval -= 1;
 
             } else if (org.stage == "m") {
-                this.trueEnergy -= this.maxVelocity * 3 + this.size * 2 + this.detectRadius;
-                this.hunger -= 0.1;
-                this.hydration -= 0.1;
-                this.matingInterval -= 0.1;
+                org.hunger -= 1;
+                org.hydration -= 1;
+                org.matingInterval -= 1;
             }
-            if (this.trueEnergy < 0) {
-                org.stage = "r";
-            }
-            if (this.hunger < 0) {
+
+            org.stage = "r";
+            if (org.hunger < 0) {
                 org.stage = "h";
+                if (org.hunger < -300) {
+                    this.removeById(org.id);
+                }
             }
-            if (this.hydration < 0) {
-                org.stage = "d";
+            if (org.hydration < 0) {
+                org.stage = "t";
+                if (org.hydration < -300) {
+                    this.removeById(org.id);
+                }
             }
-            if (this.matingInterval < 0) {
+            if (org.matingInterval < 0) {
                 org.stage = "m";
             }
+            if (org.id == "bird-1") {
+                console.log(org.stage);
+                console.log(org.hunger, org.hydration, org.matingInterval);
+            }
+
+
         });
     }
     updatePosition(state) {
@@ -325,51 +368,6 @@ class OrganismGroup {
             }
         });
         return false;
-    }
-    spawnChild(org, count) {
-        let homePos = null;
-        let orgSize = org.orgSize + Math.random() * 1.5 - 0.6;
-        let maxVelocity = org.maxVelocity + Math.random() * 1.1 - 0.4;
-        let detectRadius = org.detectRadius + Math.random() * 2 - 0.8;
-        let baseEnergy = org.baseEnergy + Math.random() * 1.5 - 0.5;
-        if (orgSize < 0) {
-            orgSize = 0.2;
-        }
-        if (maxVelocity < 0) {
-            maxVelocity = 0.2;
-        }
-        if (detectRadius < 0) {
-            detectRadius = 0.2;
-        }
-
-        this.popSize += count;
-
-        for (let i = 0; i < count; i++) {
-            this.popId++;
-            homePos = getRandomPointOnCircle(this.conf.feedingZoneRadius, this.conf.feedingPos);
-            const orgStats =
-            {
-                id: this.conf.type + "-" + this.popId,
-                type: this.conf.type,
-                orgColor: this.conf.orgColor,
-                orgSize: orgSize,
-                eatingSize: orgSize * 0.8,
-                maxVelocity: maxVelocity,
-                detectRadius: detectRadius,
-                baseEnergy: baseEnergy,
-                trueEnergy: baseEnergy,
-                stage: "resting",
-                diet: this.conf.diet,
-                eatenFood: 0,
-                velocity: org.velocity,
-                homePos: homePos,
-                pos: org.pos,
-                goalPos: homePos
-            }
-            this.population.push(
-                new Organism(orgStats)
-            );
-        }
     }
 }
 

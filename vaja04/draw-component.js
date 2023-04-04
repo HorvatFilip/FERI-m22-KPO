@@ -41,22 +41,20 @@ class DrawComponent {
         this.simCtx.beginPath();
         this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size, 0, Math.PI * 2);
         this.simCtx.closePath();
-        this.simCtx.fillStyle = color;
-        this.simCtx.fill();
-
-
-        this.simCtx.beginPath();
-        this.simCtx.arc(organism.homePos.x, organism.homePos.y, 2, 0, Math.PI * 2);
-        this.simCtx.closePath();
-        this.simCtx.fillStyle = color;
-        this.simCtx.fill();
-        if (organism.huntPos != null) {
-            this.simCtx.beginPath();
-            this.simCtx.arc(organism.huntPos.x, organism.huntPos.y, 2, 0, Math.PI * 2);
-            this.simCtx.closePath();
-            this.simCtx.fillStyle = "red";
-            this.simCtx.fill();
+        if (organism.id == "bird-1") {
+            color = "red";
         }
+        this.simCtx.fillStyle = color;
+        this.simCtx.fill();
+        this.simCtx.beginPath();
+        if (organism.gender == "m") {
+            this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size / 3, 0, Math.PI * 2);
+        } else if (organism.gender == "f") {
+            //this.simCtx.arc(organism.pos.x, organism.pos.y, organism.size / 2, 0, Math.PI * 2);
+        }
+        this.simCtx.closePath();
+        this.simCtx.fillStyle = "#202020";
+        this.simCtx.fill();
 
     }
     createNewInfoCanvas(conf, val) {

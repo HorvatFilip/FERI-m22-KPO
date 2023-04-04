@@ -144,9 +144,9 @@ class GuiLogic {
                 const maxVelocityInput = document.createElement("input");
                 const sizeInput = document.createElement("input");
                 const detectRadiusInput = document.createElement("input");
-                const baseEnergyInput = document.createElement("input");
+                const mutationChanceInput = document.createElement("input");
 
-                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, baseEnergyInput];
+                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, mutationChanceInput];
 
                 const nameLabel = document.createElement("label");
                 const typeLabel = document.createElement("label");
@@ -155,7 +155,7 @@ class GuiLogic {
                 const maxVelocityLabel = document.createElement("label");
                 const sizeLabel = document.createElement("label");
                 const detectRadiusLabel = document.createElement("label");
-                const baseEnergyLabel = document.createElement("label");
+                const mutationChanceLabel = document.createElement("label");
 
                 homeInputClick.setAttribute("class", "btn btn-outline-secondary");
                 homeInputIcon.setAttribute("class", "fa-solid fa-house");
@@ -168,7 +168,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("class", "form-control");
                 sizeInput.setAttribute("class", "form-control");
                 detectRadiusInput.setAttribute("class", "form-control");
-                baseEnergyInput.setAttribute("class", "form-control");
+                mutationChanceInput.setAttribute("class", "form-control");
 
                 homeXInput.setAttribute("type", "number");
                 homeYInput.setAttribute("type", "number");
@@ -182,7 +182,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("type", "number");
                 sizeInput.setAttribute("type", "number");
                 detectRadiusInput.setAttribute("type", "number");
-                baseEnergyInput.setAttribute("type", "number");
+                mutationChanceInput.setAttribute("type", "number");
 
                 homeXInput.setAttribute("placeholder", "X");
                 homeYInput.setAttribute("placeholder", "Y");
@@ -195,7 +195,7 @@ class GuiLogic {
                 maxVelocityInput.setAttribute("placeholder", "max velocity");
                 sizeInput.setAttribute("placeholder", "size");
                 detectRadiusInput.setAttribute("placeholder", "detect radius");
-                baseEnergyInput.setAttribute("placeholder", "base energy");
+                mutationChanceInput.setAttribute("placeholder", "mutation chance");
 
                 nameLabel.innerHTML = "Name";
                 typeLabel.innerHTML = "Type";
@@ -204,7 +204,7 @@ class GuiLogic {
                 maxVelocityLabel.innerHTML = "Max velocity";
                 sizeLabel.innerHTML = "Size";
                 detectRadiusLabel.innerHTML = "Detect radius";
-                baseEnergyLabel.innerHTML = "Base energy";
+                mutationChanceLabel.innerHTML = "Mutation(%)";
 
                 homeXInput.value = orgGroup.homePos.x;
                 homeYInput.value = orgGroup.homePos.y;
@@ -218,7 +218,7 @@ class GuiLogic {
                 maxVelocityInput.value = orgGroup.maxVelocity;
                 sizeInput.value = orgGroup.size;
                 detectRadiusInput.value = orgGroup.detectRadius;
-                baseEnergyInput.value = orgGroup.baseEnergy;
+                mutationChanceInput.value = orgGroup.mutationChance;
 
                 header.addEventListener("click", () => {
                     if (body.style.display == "none" || body.style.display == "") {
@@ -314,8 +314,8 @@ class GuiLogic {
                 secondRow.appendChild(popSizeLabel);
                 thirdRow.appendChild(sizeInput);
                 thirdRow.appendChild(sizeLabel);
-                forthRow.appendChild(baseEnergyInput);
-                forthRow.appendChild(baseEnergyLabel);
+                forthRow.appendChild(mutationChanceInput);
+                forthRow.appendChild(mutationChanceLabel);
                 secondColumn.appendChild(firstRow);
                 secondColumn.appendChild(secondRow);
                 secondColumn.appendChild(thirdRow);
@@ -376,11 +376,11 @@ class GuiLogic {
             const orgGroup01Conf = {
                 name: "plant01",
                 type: "plant",
-                color: "#000000",
+                color: "#994C00",
                 maxVelocity: 0,
-                size: 3,
+                size: 4,
                 detectRadius: 1,
-                baseEnergy: 100000,
+                mutationChance: 10,
                 diet: "none",
                 initialPopSize: 100,
                 homePos: {
@@ -395,13 +395,13 @@ class GuiLogic {
             const orgGroup02Conf = {
                 name: "insect01",
                 type: "insect",
-                color: "#4C9900",
+                color: "#00994C",
                 maxVelocity: 3,
-                size: 3,
-                detectRadius: 40,
-                baseEnergy: 5000,
-                diet: "plants",
-                initialPopSize: 3,
+                size: 6,
+                detectRadius: 70,
+                mutationChance: 10,
+                diet: "plant",
+                initialPopSize: 12,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -416,11 +416,11 @@ class GuiLogic {
                 type: "bird",
                 color: "#004C99",
                 maxVelocity: 3.5,
-                size: 6,
-                detectRadius: 40,
-                baseEnergy: 1000,
+                size: 9,
+                detectRadius: 100,
+                mutationChance: 10,
                 diet: "insect",
-                initialPopSize: 1,
+                initialPopSize: 3,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -465,7 +465,7 @@ class GuiLogic {
                     maxVelocity: parseInt(this.inputs[id][9].value),
                     size: parseInt(this.inputs[id][10].value),
                     detectRadius: parseInt(this.inputs[id][11].value),
-                    baseEnergy: parseInt(this.inputs[id][12].value),
+                    mutationChance: parseInt(this.inputs[id][12].value),
                     diet: this.inputs[id][7].value,
                     initialPopSize: parseInt(this.inputs[id][8].value),
                     homePos: {
@@ -557,9 +557,11 @@ class GuiLogic {
                     day = Math.floor(this.ecoSystem.dateTime.getDays());
                     if (prevDay !== day) {
                         prevDay = day;
-                        if (day == 1) {
-                            this.state.setAllGroupsToHuntStage();
-                        }
+                        this.state.respawnPlants();
+                        //if (day == 1) {
+                        //    //this.state.setAllGroupsToMateStage();
+                        //    this.state.setAllGroupsToHuntStage();
+                        //}
                     }
                 }
             }
