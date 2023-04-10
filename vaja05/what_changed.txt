@@ -1,0 +1,26 @@
+draw-component.js:
+ raname:
+  - infoCtx -> infoCtxList
+  - chartOffset -> chartOffset_gui
+  - updateData -> updateChartPoints
+ comment:
+  - simCtx
+  - infoCtxList
+ removed:
+  - drawOrganism() removed else for gender specific drawing
+  - updateData
+  - drawChart() removed else
+ refactor:
+  - drawChart now only draws on chart, updateChartPoints updates infoPoints
+  - updateChartPoints 
+ 
+gui-logic.js
+index.html
+island.js
+main.js
+map-component.js
+pathfind-component.js
+state.js
+style.js
+util.js
+vector.js
