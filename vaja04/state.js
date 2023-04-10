@@ -26,7 +26,14 @@ class State {
                 orgGroup.removeAll();
                 orgGroup.createInitialPopulation(orgGroup.initialPopSize);
             }
-        })
+        });
+    }
+    updateAge() {
+        this.organismGroups.forEach(orgGroup => {
+            if (orgGroup.type != "plant") {
+                orgGroup.addDayToAge();
+            }
+        });
     }
     update() {
         let currentOrg = null;
@@ -58,6 +65,7 @@ class State {
                                 let newGoal = org01.pos.add(diff);
                                 newGoal = getRandomPointOnCircle(10, newGoal);
                                 org01.setGoalPos(newGoal);
+                                org01.stage = "r";
                             }
                         }
                         if (org01.stage == "d") {
@@ -90,7 +98,7 @@ class State {
                                     }
                                 }
                             }
-                            if (org01.hydration < 0) {
+                            if (org01.hydration < 0 && org01.hunger > -200) {
 
                                 let waterTile = new Vector(org01.pos.x, org01.pos.y);
                                 if (!SIM_MAP.isTileDeepWater(waterTile)) {
@@ -121,7 +129,7 @@ class State {
                                 }
 
                             }
-                            if (org01.matingInterval < 0 && orgGroup01.type == orgGroup02.type) {
+                            if (org01.hunger > -200 && (org01.matingInterval < 0 && orgGroup01.type == orgGroup02.type)) {
                                 orgGroup02.population.forEach(org02 => {
                                     if (org01.gender != org02.gender && org02.matingInterval < 30) {
                                         org02.matingInterval = 0;

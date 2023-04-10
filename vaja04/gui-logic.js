@@ -401,7 +401,7 @@ class GuiLogic {
                 detectRadius: 70,
                 mutationChance: 10,
                 diet: "plant",
-                initialPopSize: 12,
+                initialPopSize: 25,
                 homePos: {
                     x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
                 },
@@ -415,7 +415,7 @@ class GuiLogic {
                 name: "bird01",
                 type: "bird",
                 color: "#004C99",
-                maxVelocity: 3.5,
+                maxVelocity: 5,
                 size: 9,
                 detectRadius: 100,
                 mutationChance: 10,
@@ -557,6 +557,7 @@ class GuiLogic {
                     day = Math.floor(this.ecoSystem.dateTime.getDays());
                     if (prevDay !== day) {
                         prevDay = day;
+                        this.state.updateAge();
                         if (day % 4 == 0) {
                             //this.state.setAllGroupsToMateStage();
                             //this.state.setAllGroupsToHuntStage();

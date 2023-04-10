@@ -13,6 +13,7 @@ class Organism {
             this.hunger = 100;
             this.hydration = 100;
             this.matingInterval = 100;
+            this.age = 0;
             this.stage = "r";
             this.homePos = new Vector(orgNewPos.x, orgNewPos.y);
             this.huntPos = orgConf.huntPos;
@@ -28,17 +29,20 @@ class Organism {
     }
 
     setGoalPos(newGoalPos) {
-        let loopCount = 0;
-        let radius = 1;
-        newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
-        while (SIM_MAP.isTileDeepWater(newGoalPos)) {
+
+        if (this.stage != "h") {
+            let loopCount = 0;
+            let radius = 1;
             newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
-            loopCount++;
-            if (loopCount > 1000000) {
-                radius += 1;
-                loopCount = 0;
-                if (radius > 30) {
-                    newGoalPos = this.pos;
+            while (SIM_MAP.isTileDeepWater(newGoalPos)) {
+                newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
+                loopCount++;
+                if (loopCount > 1000000) {
+                    radius += 1;
+                    loopCount = 0;
+                    if (radius > 30) {
+                        newGoalPos = this.pos;
+                    }
                 }
             }
         }
@@ -305,34 +309,18 @@ class OrganismGroup {
         this.population = [];
         this.popSize = 0;
     }
+    addDayToAge() {
+        this.population.forEach(org => {
+            org.age++;
+        });
+    }
     updateNeeds() {
         this.population.forEach(org => {
-
             org.hunger -= (1 + org.size / 100);
             org.hydration -= (1 + org.maxVelocity / 100);
             org.matingInterval -= 1;
-            //if (org.stage == "h") {
-            //    org.hunger -= (1 + org.size / 100);
-            //    org.hydration -= (1 + org.maxVelocity / 100);
-            //    org.matingInterval -= 1;
-            //
-            //} else if (org.stage == "t") {
-            //    org.hunger -= (1 + org.size / 100);
-            //    org.hydration -= (1 + org.maxVelocity / 100);
-            //    org.matingInterval -= 1;
-            //
-            //} else if (org.stage == "r") {
-            //    org.hunger -= (1 + org.size / 100);
-            //    org.hydration -= (1 + org.maxVelocity / 100);
-            //    org.matingInterval -= 1;
-            //
-            //} else if (org.stage == "m") {
-            //    org.hunger -= (1 + org.size / 100);
-            //    org.hydration -= (1 + org.maxVelocity / 100);
-            //    org.matingInterval -= 1;
-            //}
-
             org.stage = "r";
+
             if (org.hunger < 0) {
                 org.stage = "h";
                 if (org.hunger < -300) {
@@ -352,8 +340,6 @@ class OrganismGroup {
                 console.log(org.stage);
                 console.log(org.hunger, org.hydration, org.matingInterval);
             }
-
-
         });
     }
     updatePosition(state) {
