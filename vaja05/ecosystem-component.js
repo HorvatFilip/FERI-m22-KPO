@@ -18,22 +18,16 @@ class Organism {
             this.homePos = new Vector(orgNewPos.x, orgNewPos.y);
             this.huntPos = orgConf.huntPos;
             this.pos = orgNewPos;
-            let rndStarVel = getRandomPointOnCircle(this.size, this.pos);
             this.velocity = new Vector(0, 0);
             this.goalPos = null;
-            this.path = [];
         }
     }
-    setPath(path) {
-        this.path = [...path];
-    }
-
     setGoalPos(newGoalPos) {
-
         if (this.stage != "h") {
             let loopCount = 0;
             let radius = 1;
             newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
+            // simple alg for finding non water tiles, with increasing radius of search
             while (SIM_MAP.isTileDeepWater(newGoalPos)) {
                 newGoalPos = getRandomPointInsideCircle(radius, newGoalPos);
                 loopCount++;
@@ -51,38 +45,24 @@ class Organism {
     moveToSpawnPoint() {
         this.goalPos = this.homePos;
     }
-    updatePosition(state) {
+    updatePosition() {
         if (this.type !== "plant") {
-            if (this.stage == "x") {
-                this.velocity = new Vector(0, 0);
-            } else {
-                if (this.goalPos != null) {
-                    if (this.pos.equals(this.goalPos)) {
-
-                        if (this.path.length > 0) {
-                            this.setGoalPos({ x: this.path[0].x * 17, y: this.path[0].y * 17 });
-                            this.path.shift();
-                        } else {
-                            this.goalPos = null;
-                        }
-                    }
+            if (this.goalPos != null) {
+                if (this.pos.equals(this.goalPos)) {
+                    this.goalPos = null;
                 }
-                if (this.goalPos == null) {
-                    this.makeRandomMove();
-                } else {
-                    this.makeMoveToGoal();
-                }
-
-                let newPos = this.pos.add(this.velocity);
-
-                if (SIM_MAP.isTileDeepWater(newPos)) {
-                    this.setGoalPos(newPos);
-                }
-                return new Organism({
-                    ...this,
-                    pos: newPos
-                });
             }
+            if (this.goalPos == null) {
+                this.makeRandomMove();
+            } else {
+                this.makeMoveToGoal();
+            }
+
+            let newPos = this.pos.add(this.velocity);
+            return new Organism({
+                ...this,
+                pos: newPos
+            });
         }
         return this;
 
@@ -117,7 +97,7 @@ class Organism {
         return this.maxVelocity * 15 + this.size * 10 + this.detectRadius;
     }
     interaction(org2) {
-        let d = Math.sqrt(
+        let distance = Math.sqrt(
             Math.pow(this.pos.x - org2.pos.x, 2) + Math.pow(this.pos.y - org2.pos.y, 2)
         );
         let canEatOrg2 = null;
@@ -131,24 +111,10 @@ class Organism {
         }
 
         return {
-            d: d,
+            distance: distance,
             canBeEaten: canEatOrg2,
             rating: rating
         };
-
-        //let canBeEaten = org2.canEat(this);
-        if (d <= this.orgSize && canEatOrg2) {
-            this.eatenFood++;
-            return 1;
-        } else if (d <= this.detectRadius) {
-            if (canEatOrg2) {
-                return 2;
-            } else if (canBeEaten) {
-                return 3;
-            }
-        } else {
-            return 4;
-        }
     }
     canEat(org2) {
         if (this.eatingSize >= org2.size) {
@@ -182,6 +148,11 @@ class OrganismGroup {
             this.createInitialPopulation(this.initialPopSize);
         }
     }
+    /*
+    *Creates initial population
+    * organism traits values in range: 65% - 100%
+    * gender m - 50%, f - 50% 
+    */
     createInitialPopulation(initialPopSize) {
         let orgId;
         let maxVelocity;
@@ -239,6 +210,11 @@ class OrganismGroup {
             this.popSize++;
         }
     }
+    /*
+    *Spawns child from 2 organisms
+    * organism traits values in range: 90% of average(parents) - 120%/140%(mutation) of average(parents)
+    * gender m - 50%, f - 50% 
+    */
     spawnChild(org01, org02) {
 
         let avgMaxVel = (org01.maxVelocity + org02.maxVelocity) / 2;
@@ -246,17 +222,17 @@ class OrganismGroup {
         let avgDetRad = (org01.detectRadius + org02.detectRadius) / 2;
 
         let orgId = this.type + "-" + this.popId;
-        let maxVelocity = randomNumberRange(avgMaxVel * 0.9, avgMaxVel + avgMaxVel * 0.2);
+        let maxVelocity = randomNumberRange(avgMaxVel * 0.9, avgMaxVel * 1.2);
         if (Math.random() * 100 < this.mutationChance) {
-            maxVelocity = randomNumberRange(maxVelocity * 0.9, maxVelocity + maxVelocity * 0.4);
+            maxVelocity = randomNumberRange(maxVelocity * 0.9, maxVelocity * 1.4);
         }
-        let size = randomNumberRange(avgSize * 0.9, avgSize + avgSize * 0.2);
+        let size = randomNumberRange(avgSize * 0.9, avgSize * 1.2);
         if (Math.random() * 100 < this.mutationChance) {
-            size = randomNumberRange(size * 0.9, size + size * 0.4);
+            size = randomNumberRange(size * 0.9, size * 1.4);
         }
-        let detectRadius = randomNumberRange(avgDetRad * 0.9, avgDetRad + avgDetRad * 0.2);
+        let detectRadius = randomNumberRange(avgDetRad * 0.9, avgDetRad * 1.2);
         if (Math.random() * 100 < this.mutationChance) {
-            detectRadius = randomNumberRange(detectRadius * 0.9, detectRadius + detectRadius * 0.4);
+            detectRadius = randomNumberRange(detectRadius * 0.9, detectRadius * 1.4);
         }
 
         let gender = null;
@@ -314,6 +290,13 @@ class OrganismGroup {
             org.age++;
         });
     }
+    /*
+    *Updates needs of organisms
+    * hunger level decrease proportional to size
+    * hydration level decrease proportional to maxVelocity
+    * matingInterval level decrease by 1 
+    *
+    */
     updateNeeds() {
         this.population.forEach(org => {
             org.hunger -= (1 + org.size / 100);
@@ -336,6 +319,7 @@ class OrganismGroup {
             if (org.matingInterval < 0) {
                 org.stage = "m";
             }
+            //DEBUG - red organism needs logs
             if (org.id == "bird-1") {
                 console.log(org.stage);
                 console.log(org.hunger, org.hydration, org.matingInterval);

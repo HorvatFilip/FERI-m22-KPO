@@ -1,4 +1,4 @@
-class GuiLogic {
+class GuiComponent {
     constructor() {
         this.drawComponent = null;
         this.ecoSystem = null;
@@ -12,7 +12,7 @@ class GuiLogic {
         this.toggleChartDisplay_btn = document.getElementById("open-chart-display");
         this.closeChartDisplay_btn = document.getElementById("close-chart-display");
         this.chartDisplay_menu = document.getElementById("chart-display");
-        this.chartDisplayList = document.getElementById("chart-display-list");
+        this.chartDisplay_list = document.getElementById("chart-display-list");
         this.toggleMapConfDisplay_btn = document.getElementById("open-map-config-display");
         this.closeMapConfDisplay_btn = document.getElementById("close-map-config-display");
         this.mapConfDisplay = document.getElementById("map-config-display");
@@ -34,7 +34,7 @@ class GuiLogic {
         this.timeSpeed = 3;
         this.timeControl_display.style.width = this.timeSpeed * 20 + "%";
         this.frameRef = null;
-        this.inputs = {};
+        this.ecoElems_inputs = {};
     }
     addEventListeners() {
         this.openEcoElems_btn.addEventListener("click", () => {
@@ -146,7 +146,7 @@ class GuiLogic {
                 const detectRadiusInput = document.createElement("input");
                 const mutationChanceInput = document.createElement("input");
 
-                this.inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, mutationChanceInput];
+                this.ecoElems_inputs[orgGroup.id] = [homeXInput, homeYInput, huntingXInput, huntingYInput, colorInput, nameInput, typeInput, dietInput, popSizeInput, maxVelocityInput, sizeInput, detectRadiusInput, mutationChanceInput];
 
                 const nameLabel = document.createElement("label");
                 const typeLabel = document.createElement("label");
@@ -250,11 +250,6 @@ class GuiLogic {
                     }, { once: true });
                 });
 
-                saveBtn.addEventListener("click", () => {
-                    let config = {
-                    };
-                });
-
                 const columns = document.createElement("div");
                 const firstColumn = document.createElement("div");
                 const secondColumn = document.createElement("div");
@@ -334,10 +329,7 @@ class GuiLogic {
             }
         });
     }
-    addNewOrganismGroupUI() {
-
-    }
-    loadSimScenarioFromUI() {
+    loadDefaultScenario() {
         const infoCanvasConf = {
             width: 500,
             height: 500
@@ -347,7 +339,7 @@ class GuiLogic {
             width: 1700,
             height: 1700
         };
-        const mapDefaultConf = {
+        this.mapDefaultConf = {
             width: 100,
             height: 100,
             style: NoiseMap.STYLE.REALISTIC,
@@ -359,127 +351,134 @@ class GuiLogic {
                 frequencyCoef: 0.5,
             }
         };
+        this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
 
-        if (this.drawComponent === null) {
-            this.drawComponent = new DrawComponent(simCanvasConf, infoCanvasConf);
+        SIM_MAP = new MapComponent();
+        SIM_MAP.setConfig(this.mapDefaultConf);
+        SIM_MAP.generate();
+        this.mapConf_inputs.seed.value = this.mapDefaultConf.seed;
+        this.mapConf_inputs.amp.value = this.mapDefaultConf.mapConf.amplitude;
+        this.mapConf_inputs.freq.value = this.mapDefaultConf.mapConf.frequency;
+        this.mapConf_inputs.ampCoef.value = this.mapDefaultConf.mapConf.amplitudeCoef;
+        this.mapConf_inputs.freqCoef.value = this.mapDefaultConf.mapConf.frequencyCoef;
+        this.defaultOrgGroupConfigs = [];
+
+        this.defaultOrgGroupConfigs.push({
+            name: "plant01",
+            type: "plant",
+            color: "#994C00",
+            maxVelocity: 0,
+            size: 3,
+            detectRadius: 1,
+            mutationChance: 10,
+            diet: "none",
+            initialPopSize: 100,
+            homePos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            homeRadius: 1000,
+            huntingPos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            huntingRadius: 500
+        });
+        this.defaultOrgGroupConfigs.push({
+            name: "insect01",
+            type: "insect",
+            color: "#00994C",
+            maxVelocity: 3,
+            size: 6,
+            detectRadius: 100,
+            mutationChance: 10,
+            diet: "plant",
+            initialPopSize: 25,
+            homePos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            homeRadius: 40,
+            huntingPos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            huntingRadius: 40
+        });
+        this.defaultOrgGroupConfigs.push({
+            name: "bird01",
+            type: "bird",
+            color: "#004C99",
+            maxVelocity: 5,
+            size: 9,
+            detectRadius: 150,
+            mutationChance: 10,
+            diet: "insect",
+            initialPopSize: 3,
+            homePos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            homeRadius: 40,
+            huntingPos: {
+                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+            },
+            huntingRadius: 40
+        });
+
+        const dateTimeTracker = new DateTimeTracker();
+        this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
+        this.defaultOrgGroupConfigs.forEach(defOrgGroupConf => {
+            this.ecoSystem.addOrganismGroup(defOrgGroupConf);
+
+        });
+        this.run = false;
+        this.ecoSystem.dateTime.resetDate();
+        if (this.mapConf_inputs.seed.value == "") {
+            this.mapConf_inputs.seed.value = SIM_MAP.generator._seed;
         }
-        if (this.ecoSystem === null) {
-            SIM_MAP = new MapComponent();
-            SIM_MAP.setConfig(mapDefaultConf);
-            SIM_MAP.generate();
-            this.mapConf_inputs.seed.value = mapDefaultConf.seed;
-            this.mapConf_inputs.amp.value = mapDefaultConf.mapConf.amplitude;
-            this.mapConf_inputs.freq.value = mapDefaultConf.mapConf.frequency;
-            this.mapConf_inputs.ampCoef.value = mapDefaultConf.mapConf.amplitudeCoef;
-            this.mapConf_inputs.freqCoef.value = mapDefaultConf.mapConf.frequencyCoef;
 
-            const orgGroup01Conf = {
-                name: "plant01",
-                type: "plant",
-                color: "#994C00",
-                maxVelocity: 0,
-                size: 4,
-                detectRadius: 1,
-                mutationChance: 10,
-                diet: "none",
-                initialPopSize: 100,
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                homeRadius: 1000,
-                huntingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                huntingRadius: 500
-            };
-            const orgGroup02Conf = {
-                name: "insect01",
-                type: "insect",
-                color: "#00994C",
-                maxVelocity: 3,
-                size: 6,
-                detectRadius: 70,
-                mutationChance: 10,
-                diet: "plant",
-                initialPopSize: 25,
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                homeRadius: 40,
-                huntingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                huntingRadius: 40
-            };
-            const orgGroup03Conf = {
-                name: "bird01",
-                type: "bird",
-                color: "#004C99",
-                maxVelocity: 5,
-                size: 9,
-                detectRadius: 100,
-                mutationChance: 10,
-                diet: "insect",
-                initialPopSize: 3,
-                homePos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                homeRadius: 40,
-                huntingPos: {
-                    x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
-                },
-                huntingRadius: 40
-            };
+        this.startAnimation();
 
-            const dateTimeTracker = new DateTimeTracker();
-            this.ecoSystem = new EcoSystem("eco01", "normal", dateTimeTracker);
-            this.ecoSystem.addOrganismGroup(orgGroup01Conf);
-            this.ecoSystem.addOrganismGroup(orgGroup02Conf);
-            this.ecoSystem.addOrganismGroup(orgGroup03Conf);
+    }
+    loadSimScenarioFromUI() {
+        let mapSeed = null;
+        if (this.mapConf_inputs.seed.value != "") {
+            mapSeed = parseInt(this.mapConf_inputs.seed.value);
+        }
 
-        } else {
-            let seed = null;
-            if (this.mapConf_inputs.seed.value != "") {
-                seed = parseInt(this.mapConf_inputs.seed.value);
+        let newMapConf = {
+            seed: mapSeed,
+            mapConf: {
+                amplitude: parseFloat(this.mapConf_inputs.amp.value),
+                frequency: parseFloat(this.mapConf_inputs.freq.value),
+                amplitudeCoef: parseFloat(this.mapConf_inputs.ampCoef.value),
+                frequencyCoef: parseFloat(this.mapConf_inputs.freqCoef.value),
             }
+        }
+        newMapConf = Object.assign(this.mapDefaultConf, newMapConf);
+        SIM_MAP.setConfig(newMapConf);
+        SIM_MAP.generate();
 
-            let newMapConf = {
-                seed: seed,
-                mapConf: {
-                    amplitude: parseFloat(this.mapConf_inputs.amp.value),
-                    frequency: parseFloat(this.mapConf_inputs.freq.value),
-                    amplitudeCoef: parseFloat(this.mapConf_inputs.ampCoef.value),
-                    frequencyCoef: parseFloat(this.mapConf_inputs.freqCoef.value),
+        let orgGroupIds = Object.keys(this.ecoElems_inputs);
+        orgGroupIds.forEach(orgGroupId => {
+            let orgGroupConf = {
+                name: this.ecoElems_inputs[orgGroupId][5].value,
+                type: this.ecoElems_inputs[orgGroupId][6].value,
+                color: this.ecoElems_inputs[orgGroupId][4].value,
+                maxVelocity: parseInt(this.ecoElems_inputs[orgGroupId][9].value),
+                size: parseInt(this.ecoElems_inputs[orgGroupId][10].value),
+                detectRadius: parseInt(this.ecoElems_inputs[orgGroupId][11].value),
+                mutationChance: parseInt(this.ecoElems_inputs[orgGroupId][12].value),
+                diet: this.ecoElems_inputs[orgGroupId][7].value,
+                initialPopSize: parseInt(this.ecoElems_inputs[orgGroupId][8].value),
+                homePos: {
+                    x: parseInt(this.ecoElems_inputs[orgGroupId][0].value),
+                    y: parseInt(this.ecoElems_inputs[orgGroupId][1].value)
+                },
+                huntingPos: {
+                    x: parseInt(this.ecoElems_inputs[orgGroupId][2].value),
+                    y: parseInt(this.ecoElems_inputs[orgGroupId][3].value)
                 }
-            }
-            newMapConf = Object.assign(mapDefaultConf, newMapConf);
-            SIM_MAP.setConfig(newMapConf);
-            SIM_MAP.generate();
+            };
+            this.ecoSystem.changeOrganismGroupConfiguration(orgGroupId, orgGroupConf);
+        });
 
-            let ids = Object.keys(this.inputs);
-            ids.forEach(id => {
-                let config = {
-                    name: this.inputs[id][5].value,
-                    type: this.inputs[id][6].value,
-                    color: this.inputs[id][4].value,
-                    maxVelocity: parseInt(this.inputs[id][9].value),
-                    size: parseInt(this.inputs[id][10].value),
-                    detectRadius: parseInt(this.inputs[id][11].value),
-                    mutationChance: parseInt(this.inputs[id][12].value),
-                    diet: this.inputs[id][7].value,
-                    initialPopSize: parseInt(this.inputs[id][8].value),
-                    homePos: {
-                        x: parseInt(this.inputs[id][0].value),
-                        y: parseInt(this.inputs[id][1].value)
-                    },
-                    huntingPos: {
-                        x: parseInt(this.inputs[id][2].value),
-                        y: parseInt(this.inputs[id][3].value)
-                    }
-                };
-                this.ecoSystem.changeOrganismGroupConfiguration(id, config);
-            });
-        }
         this.run = false;
         this.ecoSystem.dateTime.resetDate();
         if (this.mapConf_inputs.seed.value == "") {
@@ -490,16 +489,6 @@ class GuiLogic {
             cancelAnimationFrame(this.frameRef);
         }
         this.startAnimation();
-    }
-    initCharts(conf) {
-        ["popSize", "orgSize", "maxVelocity", "detectRadius"].forEach(val => {
-            if (this.chartDisplay_list.querySelectorAll("#" + val + "-info-canvas").length === 0) {
-                this.chartDisplay_list.appendChild(
-                    this.drawComponent.createNewInfoCanvas(conf, val)
-                );
-            }
-        });
-        this.drawComponent.drawChartAxis();
     }
     updateDisplayUI() {
         this.updateOrganismPopSizeUI();
@@ -531,27 +520,22 @@ class GuiLogic {
         this.frameRef = requestAnimationFrame(frame);
     }
     startAnimation() {
-        this.state = new State(this.drawComponent, this.ecoSystem.organismGroups);
+        this.state = new State(this.ecoSystem.organismGroups);
         let hour = this.ecoSystem.dateTime.getHours() - 1;
         let day = this.ecoSystem.dateTime.getDays() - 1;
         let prevHour = hour;
         let prevDay = day;
-        let firstRun = true;
         this.drawComponent.drawMap();
 
         console.log(SIM_MAP);
 
         this.runAnimation(time => {
             if (this.run) {
-                if (firstRun) {
-                    this.ecoSystem.dateTime.resetDate();
-                    firstRun = false;
-                }
                 hour = Math.floor(this.ecoSystem.dateTime.getHours());
                 if (prevHour !== hour) {
                     prevHour = hour;
 
-                    this.state = this.state.update();
+                    this.state = this.state.updateOrganismGroupsInteractions();
                     this.drawComponent.syncSimData(this.state);
                     this.updateDisplayUI();
                     day = Math.floor(this.ecoSystem.dateTime.getDays());
@@ -559,8 +543,6 @@ class GuiLogic {
                         prevDay = day;
                         this.state.updateAge();
                         if (day % 4 == 0) {
-                            //this.state.setAllGroupsToMateStage();
-                            //this.state.setAllGroupsToHuntStage();
                             this.state.respawnPlants();
                         }
                     }

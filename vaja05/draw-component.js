@@ -74,15 +74,15 @@ class DrawComponent {
                 this.infoPoints[orgGroup.id] = {
                     orgColor: orgGroup.conf.orgColor,
                 };
-                for(let i=0;i<values.length;i++){
+                for (let i = 0; i < values.length; i++) {
                     this.infoPoints[orgGroup.id].i = [values[i]]
                 }
             } else { //if group is in infoPoints
-                for(let i=0;i<values.length;i++){
+                for (let i = 0; i < values.length; i++) {
                     this.infoPoints[orgGroup.id].i.push(values[i]);
                 }
                 if (this.infoPoints[orgGroup.id][0].length * 24 > this.infoCanvasWidth - this.chartOffset_gui) {
-                    for(let i=0;i<values.length;i++){
+                    for (let i = 0; i < values.length; i++) {
                         this.infoPoints[orgGroup.id].i.shift();
                     }
                 }

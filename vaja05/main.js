@@ -1,5 +1,4 @@
 
-const gui = new GuiLogic();
+const gui = new GuiComponent();
 gui.addEventListeners();
-gui.loadSimScenarioFromUI();
-//gui.loadScenario01();
+gui.loadDefaultScenario();
