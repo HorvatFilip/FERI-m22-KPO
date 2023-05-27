@@ -14,11 +14,29 @@ const getRandomPointOnCircle = (R, center) => {
 const randomNumberRange = (min, max) => {
     return Math.random() * (max - min) + min;
 }
+const randomIntRange = (min, max) => {
+    return Math.round(Math.random() * (max - min) + min);
+}
 const euclidDistance = (node01, node02) => {
     return Math.sqrt(
         Math.pow(node01.x - node02.x, 2) + Math.pow(node01.y - node02.y, 2)
     );
 }
+const darkenColor = (hexColor, darkeningFactor) => {
+    hexColor = hexColor.replace("#", "");
+    darkeningFactor = darkeningFactor < 0 ? 0 : darkeningFactor > 1 ? 1 : darkeningFactor;
+    let darkenedColor = "";
+    for (let i = 0; i < 3; i++) {
+        let pair = hexColor.substr(i * 2, 2);
+        let decimalValue = parseInt(pair, 16);
+        decimalValue = Math.round(decimalValue * (1 - darkeningFactor));
+        let hexValue = decimalValue.toString(16).padStart(2, "0");
+        darkenedColor += hexValue;
+    }
+    darkenedColor = "#" + darkenedColor;
+    return darkenedColor;
+}
+
 const DEBUG = false;
 
 const downloadFile = (content, filename) => {
@@ -32,3 +50,5 @@ const downloadFile = (content, filename) => {
         URL.revokeObjectURL(link.href);
     }
 };
+
+

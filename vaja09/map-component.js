@@ -21,7 +21,27 @@ class MapComponent {
         let x = Math.floor(tile.x / 17);
         let y = Math.floor(tile.y / 17);
         let tileIndx = 100 * y + x;
-        if (SIM_MAP.data.data[tileIndx] < 0.5) {
+        if (SIM_MAP.data.data[tileIndx] < 0.58) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    isTileDeeperWater(tile) {
+        let x = Math.floor(tile.x / 17);
+        let y = Math.floor(tile.y / 17);
+        let tileIndx = 100 * y + x;
+        if (SIM_MAP.data.data[tileIndx] < 0.45) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    isTileShallowWaterORBeach(tile) {
+        let x = Math.floor(tile.x / 17);
+        let y = Math.floor(tile.y / 17);
+        let tileIndx = 100 * y + x;
+        if (SIM_MAP.data.data[tileIndx] > 0.45 && SIM_MAP.data.data[tileIndx] < 0.50) {
             return true;
         } else {
             return false;
@@ -45,7 +65,7 @@ class MapComponent {
         let y = Math.floor(tile.y / 17);
         let tileIndx = 100 * y + x;
         if (SIM_MAP.data.data[tileIndx] > 0.5) {
-            penalty = 1 - SIM_MAP.data.data[tileIndx];
+            penalty = SIM_MAP.data.data[tileIndx];
         }
         return penalty;
     }

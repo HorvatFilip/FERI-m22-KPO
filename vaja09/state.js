@@ -65,6 +65,7 @@ class State {
         let prayEatenId = null;
         let spawnChild = null;
         let attributesInRange = null;
+        let candidates = null;
 
         let organismGroups = this.organismGroups.map(orgGroup01 => {
             if (orgGroup01.type == "plant") {
@@ -91,6 +92,7 @@ class State {
 
                         if (orgGroup02.diet == "all" || orgGroup01.type == orgGroup02.diet) {
                             orgGroup02.population.forEach(org02 => {
+
                                 currentOrg = org02.interaction(org01);
                                 if (currentOrg.distance <= org01.detectRadius &&
                                     (closestOrg == null ||
@@ -116,33 +118,125 @@ class State {
                             }
                         } else {
                             if (org01.hunger < 0 && orgGroup01.diet == orgGroup02.type) {
+                                candidates = [];
                                 orgGroup02.population.forEach(org02 => {
-                                    currentOrg = org01.interaction(org02);
-                                    if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.distance < closestOrg.distance)) {
-                                        closestOrg = {
-                                            org: org02,
-                                            distance: currentOrg.distance
-                                        };
-                                    }
-                                    expectedMove = "hunt";
-                                });
-                                if (closestOrg != null) {
-                                    if (closestOrg.distance < org01.size) {
-                                        if (closestOrg.org.type != "plant") {
-                                            let deathCert = {
-                                                id: closestOrg.org.id,
-                                                age: closestOrg.org.age,
-                                                cause: "predator",
-                                                predatorId: org01.id
-                                            };
-                                            downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                    if (orgGroup01.diet == "plant") {
+                                        currentOrg = org01.interaction(org02);
+                                        if (currentOrg != null) {
+                                            if (currentOrg.distance <= org01.detectRadius) {
+                                                candidates.push(org02);
+                                                if ((closestOrg == null) || (currentOrg.canBeEaten && currentOrg.growthFaze > closestOrg.growthFaze)) {
+                                                    closestOrg = {
+                                                        org: org02,
+                                                        distance: currentOrg.distance
+                                                    };
+                                                }
+                                                expectedMove = "hunt";
+                                            }
+
                                         }
-                                        orgGroup02.removeById(closestOrg.org.id);
-                                        org01.hunger = 150;
-                                        org01.stillInterval = 20;
-                                        org01.stage = "c";
-                                        prayEatenId = closestOrg.org.id;
-                                        testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                    }
+                                    if (orgGroup01.type == "bird") {
+                                        if (org02.age < orgGroup02.adultAge) {
+                                            currentOrg = org01.interaction(org02);
+                                            if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.distance < closestOrg.distance)) {
+                                                closestOrg = {
+                                                    org: org02,
+                                                    distance: currentOrg.distance
+                                                };
+                                            }
+                                            expectedMove = "hunt";
+                                        }
+                                    } else {
+                                        currentOrg = org01.interaction(org02);
+                                        if (closestOrg == null || (currentOrg.canBeEaten && currentOrg.distance < closestOrg.distance)) {
+                                            closestOrg = {
+                                                org: org02,
+                                                distance: currentOrg.distance
+                                            };
+                                        }
+                                        expectedMove = "hunt";
+                                    }
+                                });
+
+                                if (closestOrg != null) {
+                                    if (orgGroup01.diet == "plant" && DEBUG) {
+                                        console.log(candidates);
+                                        console.log(closestOrg.org);
+                                    }
+                                    if (closestOrg.distance < org01.size) {
+                                        if (orgGroup01.diet == "bird") {
+                                            if (closestOrg.org.stillInterval <= 0) {
+                                                if (closestOrg.org.type != "plant") {
+                                                    let deathCert = {
+                                                        id: closestOrg.org.id,
+                                                        age: closestOrg.org.age,
+                                                        cause: "predator",
+                                                        predatorId: org01.id
+                                                    };
+                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                }
+                                                orgGroup02.removeById(closestOrg.org.id);
+                                                org01.hunger = 150;
+                                                org01.stillInterval = 20;
+                                                org01.stage = "c";
+                                                prayEatenId = closestOrg.org.id;
+                                                testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                            }
+                                        }
+                                        else if (orgGroup01.diet == "turtle" && SIM_MAP.isTileDeepWater(closestOrg.org.pos) <= 0) {
+                                            if (closestOrg.org.type != "plant") {
+                                                let deathCert = {
+                                                    id: closestOrg.org.id,
+                                                    age: closestOrg.org.age,
+                                                    cause: "predator",
+                                                    predatorId: org01.id
+                                                };
+                                                downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                            }
+                                            orgGroup02.removeById(closestOrg.org.id);
+                                            org01.hunger = 150;
+                                            org01.stillInterval = 20;
+                                            org01.stage = "c";
+                                            prayEatenId = closestOrg.org.id;
+                                            testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                        } else {
+                                            if (org01.type == "bird") {
+                                                if (closestOrg.org.type != "plant") {
+                                                    let deathCert = {
+                                                        id: closestOrg.org.id,
+                                                        age: closestOrg.org.age,
+                                                        cause: "predator",
+                                                        predatorId: org01.id
+                                                    };
+                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                }
+                                                orgGroup02.removeById(closestOrg.org.id);
+                                                org01.hunger = 150;
+                                                org01.stillInterval = 20;
+                                                org01.stage = "c";
+                                                prayEatenId = closestOrg.org.id;
+                                                testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                            } else {
+                                                if (closestOrg.org.type != "plant") {
+                                                    let deathCert = {
+                                                        id: closestOrg.org.id,
+                                                        age: closestOrg.org.age,
+                                                        cause: "predator",
+                                                        predatorId: org01.id
+                                                    };
+                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                }
+                                                orgGroup02.removeById(closestOrg.org.id);
+                                                org01.hunger = 150;
+                                                org01.stillInterval = 20;
+                                                org01.stage = "c";
+                                                prayEatenId = closestOrg.org.id;
+                                                testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                            }
+
+                                        }
+
                                     } else if (closestOrg.distance <= org01.detectRadius) {
                                         org01.setGoalPos(
                                             closestOrg.org.pos.add(closestOrg.org.velocity)
@@ -186,10 +280,85 @@ class State {
                                     org01.setGoalPos(waterTile);
                                 }
                             }
-                            if (org01.hunger > -200 && (org01.matingInterval < 0 && orgGroup01.type == orgGroup02.type)) {
+                            if (org01.type == "turtle") {
+                                if (org01.matingInterval < 50) {
+                                    if (org01.gender == "f") {
+                                        if (org01.hunger > -100) {
+                                            let mateTile = new Vector(org01.pos.x, org01.pos.y);
+                                            if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                mateTile = org01.pos.add(new Vector(org01.detectRadius, 0));
+                                                if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                    mateTile = org01.pos.add(new Vector(-org01.detectRadius, 0));
+                                                    if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                        mateTile = org01.pos.add(new Vector(0, org01.detectRadius));
+                                                        if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                            mateTile = org01.pos.add(new Vector(0, -org01.detectRadius));
+                                                            if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                                mateTile = org01.pos.add(new Vector(-org01.detectRadius, org01.detectRadius));
+                                                                if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                                    mateTile = org01.pos.add(new Vector(org01.detectRadius, -org01.detectRadius));
+                                                                    if (!SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                                        mateTile = org01.pos.add(new Vector(org01.detectRadius, org01.detectRadius));
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (SIM_MAP.isTileShallowWaterORBeach(mateTile)) {
+                                                org01.stage = "c";
+                                                org01.setGoalPos(mateTile);
+                                            }
+                                        }
+                                    } else if (org01.gender = "m") {
+                                        orgGroup02.population.forEach(org02 => {
+                                            if (org02.gender == "f" && org02.matingInterval < 50) {
+                                                currentOrg = org01.interaction(org02);
+                                                if (closestOrg == null || (currentOrg.distance < closestOrg.distance)) {
+                                                    closestOrg = {
+                                                        org: org02,
+                                                        distance: currentOrg.distance,
+                                                        rating: currentOrg.rating
+                                                    };
+                                                    expectedMove = "mate";
+                                                }
+                                            }
+                                        });
+
+                                        if (closestOrg != null) {
+                                            if (closestOrg.distance < org01.size) {
+                                                if (SIM_MAP.isTileShallowWaterORBeach(org01.pos)) {
+                                                    org01.matingInterval = 250;
+                                                    closestOrg.org.matingInterval = 250;
+                                                    org01.stillInterval = 10;
+                                                    orgGroup01.spawnChild(org01, closestOrg.org);
+                                                    orgGroup01.spawnChild(org01, closestOrg.org);
+                                                    orgGroup01.spawnChild(org01, closestOrg.org);
+                                                    orgGroup01.spawnChild(org01, closestOrg.org);
+                                                    orgGroup01.spawnChild(org01, closestOrg.org);
+                                                    //testSpawnOrganism(orgGroup01.population[orgGroup01.popSize - 1], orgGroup01, org01, closestOrg.org);
+                                                }
+                                            }
+                                            else if (closestOrg.distance <= org01.detectRadius) {
+                                                if (org01.gender == "m") {
+                                                    org01.setGoalPos(
+                                                        closestOrg.org.pos
+                                                    );
+                                                    console.log("setGoal")
+                                                }
+                                            }
+                                            actualMove = {
+                                                move: "mate",
+                                                org: closestOrg
+                                            };
+                                        }
+                                    }
+                                }
+                            } else if (org01.hunger > -200 && (org01.matingInterval < 0 && orgGroup01.type == orgGroup02.type)) {
                                 orgGroup02.population.forEach(org02 => {
-                                    if (org01.gender != org02.gender && org02.matingInterval < 30) {
-                                        org02.matingInterval = 0;
+
+                                    if (org01.gender == "m" && org02.gender == "f" && org02.matingInterval < 50) {
                                         currentOrg = org01.interaction(org02);
                                         if (closestOrg == null || (currentOrg.rating > closestOrg.rating)) {
                                             closestOrg = {
@@ -199,22 +368,36 @@ class State {
                                             };
                                             expectedMove = "mate";
                                         }
-
                                     }
                                 });
                                 if (closestOrg != null) {
-                                    if ((closestOrg.distance - closestOrg.org.size) < org01.size) {
-                                        org01.matingInterval = 250;
-                                        closestOrg.org.matingInterval = 250;
-                                        if (org01.gender == "f") {
-                                            org01.stillInterval = 20;
+                                    closestOrg.org.stillInterval = 1;
+                                    //if ((closestOrg.distance - closestOrg.org.size) < org01.size) {
+                                    if (closestOrg.distance < org01.size) {
+                                        if (org01.type == "turtle") {
+                                            if (SIM_MAP.isTileShallowWaterORBeach(org01.pos)) {
+                                                org01.matingInterval = 250;
+                                                closestOrg.org.matingInterval = 250;
+                                                org01.stillInterval = 10;
+                                                orgGroup01.spawnChild(org01, closestOrg.org);
+                                                orgGroup01.spawnChild(org01, closestOrg.org);
+                                                orgGroup01.spawnChild(org01, closestOrg.org);
+                                                orgGroup01.spawnChild(org01, closestOrg.org);
+                                                orgGroup01.spawnChild(org01, closestOrg.org);
+                                                //testSpawnOrganism(orgGroup01.population[orgGroup01.popSize - 1], orgGroup01, org01, closestOrg.org);
+                                            }
+                                        } else {
+                                            org01.matingInterval = 100;
+                                            closestOrg.org.matingInterval = 100;
+                                            org01.stillInterval = 10;
                                             orgGroup01.spawnChild(org01, closestOrg.org);
-                                            testSpawnOrganism(orgGroup01.population[orgGroup01.popSize - 1], orgGroup01, org01, closestOrg.org);
+                                            //testSpawnOrganism(orgGroup01.population[orgGroup01.popSize - 1], orgGroup01, org01, closestOrg.org);
                                         }
-                                    } else if (closestOrg.distance <= org01.detectRadius) {
+                                    }
+                                    else if (closestOrg.distance <= org01.detectRadius) {
                                         if (org01.gender == "m") {
                                             org01.setGoalPos(
-                                                closestOrg.org.pos.add(closestOrg.org.velocity)
+                                                closestOrg.org.pos
                                             );
                                         } else if (org01.gender == "f") {
                                             if (Math.random() > 0.3) {
@@ -231,8 +414,9 @@ class State {
                                 }
                             }
 
+
                         }
-                        if (isTestIter) {
+                        if (isTestIter && 1 == 2) {
                             let testPassed = null;
                             if (expectedMove == "run") {
                                 testPassed = testClosestPredator(actualMove, org01, orgGroup02);

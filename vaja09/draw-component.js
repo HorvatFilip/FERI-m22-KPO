@@ -21,7 +21,11 @@ class DrawComponent {
     drawAllOrganisms(organismGroups) {
         organismGroups.forEach(orgGroup => {
             orgGroup.population.forEach(org => {
-                this.drawOrganism(org, orgGroup.color)
+                if (org.age >= orgGroup.adultAge) {
+                    this.drawOrganism(org, orgGroup.adultColor);
+                } else {
+                    this.drawOrganism(org, orgGroup.color);
+                }
             })
         });
     }
@@ -32,6 +36,7 @@ class DrawComponent {
         if (organism.id == "bird-1") {
             color = "red";
         }
+
         this.simCtx.fillStyle = color;
         this.simCtx.fill();
         this.simCtx.beginPath();

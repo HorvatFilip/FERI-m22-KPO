@@ -423,6 +423,8 @@ class GuiComponent {
             type: "plant",
             terrainPreference: "land",
             color: "#994C00",
+            adultColor: darkenColor("#994C00", 0.3),
+            adultAge: 5,
             size: 3,
             nutrients: 50,
             growthSpeed: 0.1,
@@ -440,6 +442,8 @@ class GuiComponent {
             type: "plant",
             terrainPreference: "water",
             color: "#660066",
+            adultColor: darkenColor("#660066", 0.3),
+            adultAge: 5,
             size: 3,
             nutrients: 50,
             growthSpeed: 0.1,
@@ -457,6 +461,8 @@ class GuiComponent {
             type: "insect",
             terrainPreference: "land",
             color: "#00994C",
+            adultColor: darkenColor("#00994C", 0.3),
+            adultAge: 10,
             maxVelocity: 3,
             size: 6,
             detectRadius: 100,
@@ -464,15 +470,17 @@ class GuiComponent {
             diet: "plant",
             initialPopSize: 25,
             homePos: {
-                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                x: 599.375, y: 1353
             },
-            homeRadius: 40,
+            homeRadius: 200,
         });
         this.defaultOrgGroupConfigs.push({
             name: "bird01",
             type: "bird",
             terrainPreference: "land",
             color: "#004C99",
+            adultColor: darkenColor("#004C99", 0.3),
+            adultAge: 10,
             maxVelocity: 5,
             size: 9,
             detectRadius: 150,
@@ -480,7 +488,7 @@ class GuiComponent {
             diet: "insect",
             initialPopSize: 3,
             homePos: {
-                x: simCanvasConf.width / 2, y: simCanvasConf.height / 2
+                x: 614.375, y: 1331
             },
             homeRadius: 40,
         });
@@ -489,6 +497,8 @@ class GuiComponent {
             type: "turtle",
             terrainPreference: "water",
             color: "#707070",
+            adultColor: darkenColor("#707070", 0.3),
+            adultAge: 5,
             maxVelocity: 3,
             size: 4,
             detectRadius: 100,
@@ -496,7 +506,7 @@ class GuiComponent {
             diet: "plant",
             initialPopSize: 10,
             homePos: {
-                x: 122, y: 868
+                x: 1048.375, y: 1175
             },
             homeRadius: 40,
         });
@@ -578,6 +588,8 @@ class GuiComponent {
         if (this.mapConf_inputs.seed.value == "") {
             this.mapConf_inputs.seed.value = SIM_MAP.generator._seed;
         }
+
+        console.log(this.ecoSystem);
 
         if (this.frameRef != null) {
             cancelAnimationFrame(this.frameRef);
