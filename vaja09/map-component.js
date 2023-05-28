@@ -47,6 +47,16 @@ class MapComponent {
             return false;
         }
     }
+    isTileLand(tile) {
+        let x = Math.floor(tile.x / 17);
+        let y = Math.floor(tile.y / 17);
+        let tileIndx = 100 * y + x;
+        if (SIM_MAP.data.data[tileIndx] > 0.5 && SIM_MAP.data.data[tileIndx] < 0.6) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     terrainPenaltyLand(tile) {
         let penalty = 0;
         let x = Math.floor(tile.x / 17);

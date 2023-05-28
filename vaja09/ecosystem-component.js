@@ -20,6 +20,9 @@ class Organism {
                 this.stillInterval = 0;
                 if (this.type == "bird") {
                     this.energy = randomNumberRange(200 * 0.65, 200);
+                } else if (this.type == "turtle") {
+                    this.hasGottenToWater = false;
+                    this.noWaterTimer = 100;
                 }
             } else {
                 this.growthFaze = orgConf.growthFaze;
@@ -229,8 +232,8 @@ class OrganismGroup {
             orgId = this.type + "-" + this.popId;
 
             age = randomIntRange(0, 2);
-            if (Math.random() > 0.7) {
-                age += 5;
+            if (Math.random() > 0.8) {
+                age = this.adultAge;
             }
             size = randomNumberRange(this.size * 0.65, this.size);
             loopCount = 0;
@@ -416,21 +419,48 @@ class OrganismGroup {
     updateNeeds() {
         this.population.forEach(org => {
             if (this.type == "bird") {
-                if (org.energy <= 0 && org.stage != "t") {
+                if (org.energy <= 0) {
                     if (SIM_MAP.isTileDeepWater(org.pos)) {
-                        let deathCert = {
-                            id: org.id,
-                            age: org.age,
-                            cause: "drowned"
-                        };
-                        downloadFile(deathCert, org.id + "-dc");
+                        if (DEBUG_BIRD) {
+                            let deathCert = {
+                                id: org.id,
+                                age: org.age,
+                                cause: "drowned",
+                                tile: "DeepWater"
+                            };
+                            console.log(deathCert);
+                            downloadFile(deathCert, org.id + "-dc");
+                        }
                         this.removeById(org.id);
                     } else {
                         org.stillInterval = 20;
-                        console.log("resting");
+                        if (DEBUG_BIRD) {
+                            console.log(org);
+                            console.log("resting");
+                        }
                     }
                 } else {
                     org.energy -= (1 + org.size / 100);
+                }
+            } else if (this.type == "turtle") {
+                if (!org.hasGottenToWater) {
+                    if (!SIM_MAP.isTileDeeperWater(org.pos)) {
+                        org.noWaterTimer--;
+                        if (org.noWaterTimer < 0) {
+                            if (DEBUG_TURTLE) {
+                                let deathCert = {
+                                    id: org.id,
+                                    age: org.age,
+                                    cause: "noWater"
+                                };
+                                console.log(deathCert);
+                                downloadFile(deathCert, org.id + "-dc");
+                            }
+                            this.removeById(org.id);
+                        }
+                    } else {
+                        org.hasGottenToWater = true;
+                    }
                 }
             }
 

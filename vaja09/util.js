@@ -38,6 +38,9 @@ const darkenColor = (hexColor, darkeningFactor) => {
 }
 
 const DEBUG = false;
+const DEBUG_BIRD = true;
+const DEBUG_TURTLE = true;
+const DEBUG_PLANT_CHOICE = false;
 
 const downloadFile = (content, filename) => {
     if (DEBUG) {

@@ -498,7 +498,7 @@ class GuiComponent {
             terrainPreference: "water",
             color: "#707070",
             adultColor: darkenColor("#707070", 0.3),
-            adultAge: 5,
+            adultAge: 20,
             maxVelocity: 3,
             size: 4,
             detectRadius: 100,

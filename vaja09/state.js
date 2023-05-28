@@ -160,21 +160,24 @@ class State {
                                 });
 
                                 if (closestOrg != null) {
-                                    if (orgGroup01.diet == "plant" && DEBUG) {
+                                    if (orgGroup01.diet == "plant" && DEBUG_PLANT_CHOICE) {
                                         console.log(candidates);
                                         console.log(closestOrg.org);
                                     }
                                     if (closestOrg.distance < org01.size) {
                                         if (orgGroup01.diet == "bird") {
-                                            if (closestOrg.org.stillInterval <= 0) {
+                                            if (closestOrg.org.stillInterval > 0) {
                                                 if (closestOrg.org.type != "plant") {
-                                                    let deathCert = {
-                                                        id: closestOrg.org.id,
-                                                        age: closestOrg.org.age,
-                                                        cause: "predator",
-                                                        predatorId: org01.id
-                                                    };
-                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                    if (DEBUG_BIRD) {
+                                                        let deathCert = {
+                                                            id: closestOrg.org.id,
+                                                            age: closestOrg.org.age,
+                                                            cause: "predator",
+                                                            predatorId: org01.id
+                                                        };
+                                                        downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                        console.log(deathCert);
+                                                    }
                                                 }
                                                 orgGroup02.removeById(closestOrg.org.id);
                                                 org01.hunger = 150;
@@ -184,7 +187,25 @@ class State {
                                                 testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
                                             }
                                         }
-                                        else if (orgGroup01.diet == "turtle" && SIM_MAP.isTileDeepWater(closestOrg.org.pos) <= 0) {
+                                        else if (orgGroup01.diet == "turtle" && SIM_MAP.isTileShallowWaterORBeach(closestOrg.org.pos)) {
+                                            if (closestOrg.org.type != "plant") {
+                                                let deathCert = {
+                                                    id: closestOrg.org.id,
+                                                    age: closestOrg.org.age,
+                                                    cause: "predator",
+                                                    predatorId: org01.id,
+                                                    tile: "Land"
+                                                };
+                                                downloadFile(deathCert, closestOrg.org.id + "-dc");
+                                                console.log(deathCert);
+                                            }
+                                            orgGroup02.removeById(closestOrg.org.id);
+                                            org01.hunger = 150;
+                                            org01.stillInterval = 20;
+                                            org01.stage = "c";
+                                            prayEatenId = closestOrg.org.id;
+                                            testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
+                                        } else {
                                             if (closestOrg.org.type != "plant") {
                                                 let deathCert = {
                                                     id: closestOrg.org.id,
@@ -199,45 +220,13 @@ class State {
                                             org01.stillInterval = 20;
                                             org01.stage = "c";
                                             prayEatenId = closestOrg.org.id;
-                                            testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
-                                        } else {
-                                            if (org01.type == "bird") {
-                                                if (closestOrg.org.type != "plant") {
-                                                    let deathCert = {
-                                                        id: closestOrg.org.id,
-                                                        age: closestOrg.org.age,
-                                                        cause: "predator",
-                                                        predatorId: org01.id
-                                                    };
-                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
-                                                }
-                                                orgGroup02.removeById(closestOrg.org.id);
-                                                org01.hunger = 150;
-                                                org01.stillInterval = 20;
-                                                org01.stage = "c";
-                                                prayEatenId = closestOrg.org.id;
-                                                testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
-                                            } else {
-                                                if (closestOrg.org.type != "plant") {
-                                                    let deathCert = {
-                                                        id: closestOrg.org.id,
-                                                        age: closestOrg.org.age,
-                                                        cause: "predator",
-                                                        predatorId: org01.id
-                                                    };
-                                                    downloadFile(deathCert, closestOrg.org.id + "-dc");
-                                                }
-                                                orgGroup02.removeById(closestOrg.org.id);
-                                                org01.hunger = 150;
-                                                org01.stillInterval = 20;
-                                                org01.stage = "c";
-                                                prayEatenId = closestOrg.org.id;
-                                                testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
-                                            }
-
+                                            //testDeathByPredator(prayEatenId, orgGroup02, org01.id, orgGroup02);
                                         }
 
                                     } else if (closestOrg.distance <= org01.detectRadius) {
+                                        if (closestOrg.org.stillInterval >= 0) {
+
+                                        }
                                         org01.setGoalPos(
                                             closestOrg.org.pos.add(closestOrg.org.velocity)
                                         );
@@ -345,7 +334,6 @@ class State {
                                                     org01.setGoalPos(
                                                         closestOrg.org.pos
                                                     );
-                                                    console.log("setGoal")
                                                 }
                                             }
                                             actualMove = {
